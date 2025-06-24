@@ -1,14 +1,8 @@
-<!DOCTYPE html>
+<!DOCTYPE html>Add commentMore actions
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#ffeb3b">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="쫑글쫑글 파닉스">
-<link rel="apple-touch-icon" sizes="192x192" href="icon-192.png">
     <title>쫑글쫑글 파닉스</title>
     <style>
         * {
@@ -1070,18 +1064,5 @@
         // 전역 접근을 위한 window 객체에 할당
         window.app = app;
     </script>
-    <script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('service-worker.js')
-        .then((registration) => {
-          console.log('Service Worker 등록 성공:', registration.scope);
-        })
-        .catch((error) => {
-          console.log('Service Worker 등록 실패:', error);
-        });
-    });
-  }
-</script>
 </body>
 </html>
