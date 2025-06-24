@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>쫑글쫑글 파닉스</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #ffeb3b;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 25px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 30px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            transform: rotate(45deg);
+            animation: shine 3s infinite;
+        }
+
+        @keyframes shine {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+
+        .title {
+            font-size: 28px;
+            font-weight: bold;
+            color: #4a5568;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .subtitle {
+            font-size: 16px;
+            color: #718096;
+            margin-bottom: 30px;
+        }
+
+        .voice-section {
+            margin-bottom: 30px;
+        }
+
+        .mic-button {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
+            color: white;
+            font-size: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 16px rgba(255, 107, 107, 0.3);
+            position: relative;
+            overflow: hidden;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+            user-select: none;
+        }
+
+        .mic-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(255, 107, 107, 0.4);
+        }
+
+        .mic-button.recording {
+            background: linear-gradient(135deg, #48bb78, #68d391);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .voice-status {
+            margin-top: 15px;
+            font-size: 14px;
+            color: #666;
+            min-height: 20px;
+        }
+
+        .result-section {
+            margin: 30px 0;
+        }
+
+        .original-text {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #1565c0;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .phonics-container {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .phonics-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .syllable-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 10px;
+            padding: 10px;
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.5);
+            border: 2px dashed #ccc;
+        }
+
+        .syllable-label {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+            padding: 5px 10px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .syllable-phonics {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .phonics-item {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 70px;
+            position: relative;
+            border: 2px solid transparent;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+            user-select: none;
+        }
+
+        .phonics-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+            background: #f8f9ff;
+        }
+
+        .phonics-item.playing {
+            background: linear-gradient(135deg, #fff59d, #ffeb3b);
+            transform: scale(1.05);
+        }
+
+        /* 자음, 모음, 받침별 색상 구분 */
+        .phonics-item.consonant {
+            border-color: #ff6b6b;
+            background: linear-gradient(135deg, #fff5f5, #fed7d7);
+        }
+
+        .phonics-item.vowel {
+            border-color: #4299e1;
+            background: linear-gradient(135deg, #f0f8ff, #bee3f8);
+        }
+
+        .phonics-item.final {
+            border-color: #38a169;
+            background: linear-gradient(135deg, #f0fff4, #c6f6d5);
+        }
+
+        .jamo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2d3748;
+            margin-bottom: 8px;
+            font-family: 'Malgun Gothic', Arial, sans-serif;
+        }
+
+        .pronunciation {
+            font-size: 14px;
+            color: #4a5568;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .jamo-type {
+            font-size: 10px;
+            color: #718096;
+            font-style: italic;
+            padding: 2px 6px;
+            border-radius: 8px;
+            display: inline-block;
+        }
+
+        .jamo-type.consonant {
+            background: #fed7d7;
+            color: #c53030;
+        }
+
+        .jamo-type.vowel {
+            background: #bee3f8;
+            color: #2b6cb0;
+        }
+
+        .jamo-type.final {
+            background: #c6f6d5;
+            color: #276749;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .control-button {
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            border: none;
+            border-radius: 50px;
+            color: white;
+            padding: 12px 20px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(79, 172, 254, 0.3);
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+            user-select: none;
+        }
+
+        .control-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(79, 172, 254, 0.4);
+        }
+
+        .control-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .speed-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: white;
+            padding: 10px 15px;
+            border-radius: 25px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .speed-slider {
+            width: 100px;
+            height: 6px;
+            border-radius: 3px;
+            background: #ddd;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .speed-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #4facfe;
+            cursor: pointer;
+        }
+
+        .reset-button {
+            background: linear-gradient(135deg, #ffeaa7, #fdcb6e);
+            border: none;
+            border-radius: 50px;
+            color: #d63031;
+            padding: 12px 20px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(253, 203, 110, 0.3);
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+            user-select: none;
+        }
+
+        .reset-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(253, 203, 110, 0.4);
+        }
+
+        .loading {
+            display: none;
+            margin: 20px 0;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4facfe;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .emoji {
+            font-size: 24px;
+            margin: 0 5px;
+        }
+
+        .demo-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 15px;
+        }
+
+        .demo-button {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            border: none;
+            border-radius: 25px;
+            color: white;
+            padding: 10px 16px;
+            font-size: 14px;
+            cursor: pointer;
+            margin: 5px;
+            transition: all 0.3s ease;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+            user-select: none;
+        }
+
+        .demo-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+        }
+
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+        }
+
+        .legend-color.consonant {
+            background: #fed7d7;
+        }
+
+        .legend-color.vowel {
+            background: #bee3f8;
+        }
+
+        .legend-color.final {
+            background: #c6f6d5;
+        }
+
+        /* iOS Safari 음성인식 개선 */
+        @supports (-webkit-touch-callout: none) {
+            .mic-button {
+                -webkit-touch-callout: none;
+                -webkit-user-select: none;
+            }
+        }
+
+        /* 모바일 반응형 */
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            .title {
+                font-size: 24px;
+            }
+            
+            .mic-button {
+                width: 70px;
+                height: 70px;
+                font-size: 25px;
+            }
+            
+            .phonics-grid {
+                gap: 8px;
+            }
+            
+            .phonics-item {
+                min-width: 60px;
+                padding: 12px;
+            }
+            
+            .controls {
+                gap: 10px;
+            }
+            
+            .speed-control {
+                padding: 8px 12px;
+            }
+
+            .legend {
+                gap: 10px;
+            }
+
+            .syllable-group {
+                margin: 5px;
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">🎵 쫑글쫑글 파닉스</h1>
+        <p class="subtitle">단어를 말하면 자음과 모음, 받침으로 나누어 들려줄게요!</p>
+
+        <div class="demo-section">
+            <p style="margin-bottom: 10px; font-size: 14px; color: #666;">예시 단어로 테스트해보세요:</p>
+            <button class="demo-button" onclick="app.testWord('사과')">사과</button>
+            <button class="demo-button" onclick="app.testWord('딸기')">딸기</button>
+            <button class="demo-button" onclick="app.testWord('쭈꾸미')">쭈꾸미</button>
+            <button class="demo-button" onclick="app.testWord('뽀뽀')">뽀뽀</button>
+            <button class="demo-button" onclick="app.testWord('학교')">학교</button>
+            <button class="demo-button" onclick="app.testWord('안녕')">안녕</button>
+        </div>
+
+        <div class="voice-section">
+            <button class="mic-button" id="micButton">
+                🎤
+            </button>
+            <div class="voice-status" id="voiceStatus">마이크 버튼을 눌러 단어를 말해보세요</div>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>분석중이에요... 잠시만 기다려주세요!</p>
+        </div>
+
+        <div class="result-section hidden" id="resultSection">
+            <div class="original-text" id="originalText">
+                <span class="emoji">💬</span>
+                여기에 인식된 단어가 나타나요
+                <span class="emoji">💬</span>
+            </div>
+
+            <div class="phonics-container">
+                <h3 style="margin-bottom: 15px; color: #f57c00;">자음과 모음, 받침으로 나누어보기</h3>
+                
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color consonant"></div>
+                        <span>자음</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color vowel"></div>
+                        <span>모음</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color final"></div>
+                        <span>받침</span>
+                    </div>
+                </div>
+
+                <div class="phonics-grid" id="phonicsGrid">
+                    <!-- 음절별 자음/모음/받침 그룹들이 여기에 생성됩니다 -->
+                </div>
+
+                <div class="controls">
+                    <button class="control-button" id="playAllButton">
+                        ▶️ 전체 재생
+                    </button>
+                    
+                    <div class="speed-control">
+                        <span>🐌</span>
+                        <input type="range" class="speed-slider" id="speedSlider" min="0.5" max="2.0" step="0.1" value="0.6">
+                        <span>🐰</span>
+                        <span id="speedDisplay">0.6x</span>
+                    </div>
+                </div>
+            </div>
+
+            <button class="reset-button" id="resetButton">
+                🔄 다시하기
+            </button>
+        </div>
+    </div>
+
+    <script>
+        class HangulPhonicsApp {
+            constructor() {
+                this.recognition = null;
+                this.speechSynthesis = window.speechSynthesis;
+                this.currentSpeed = 0.6;
+                this.isPlaying = false;
+                this.currentData = null;
+                this.syllableGroups = [];
+                this.playingIndex = -1;
+                
+                this.initializeElements();
+                this.initializeEventListeners();
+                this.initializeSpeechRecognition();
+                this.checkMicrophonePermission();
+                
+                // 한글 자모 분해 관련 상수
+                this.initializeHangulConstants();
+            }
+
+            initializeHangulConstants() {
+                // 한글 자모 분해를 위한 상수들
+                this.HANGUL_BASE = 0xAC00;
+                this.CONSONANT_COUNT = 19;
+                this.VOWEL_COUNT = 21;
+                this.FINAL_CONSONANT_COUNT = 28;
+                
+                // 초성 (자음)
+                this.INITIAL_CONSONANTS = [
+                    'ㄱ', 'ㄲ', 'ㄴ', 'ㄷ', 'ㄸ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅃ', 'ㅅ',
+                    'ㅆ', 'ㅇ', 'ㅈ', 'ㅉ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ'
+                ];
+                
+                // 중성 (모음)
+                this.VOWELS = [
+                    'ㅏ', 'ㅐ', 'ㅑ', 'ㅒ', 'ㅓ', 'ㅔ', 'ㅕ', 'ㅖ', 'ㅗ', 'ㅘ',
+                    'ㅙ', 'ㅚ', 'ㅛ', 'ㅜ', 'ㅝ', 'ㅞ', 'ㅟ', 'ㅠ', 'ㅡ', 'ㅢ', 'ㅣ'
+                ];
+                
+                // 종성 (받침)
+                this.FINAL_CONSONANTS = [
+                    '', 'ㄱ', 'ㄲ', 'ㄳ', 'ㄴ', 'ㄵ', 'ㄶ', 'ㄷ', 'ㄹ', 'ㄺ', 'ㄻ', 'ㄼ', 'ㄽ', 'ㄾ', 'ㄿ', 'ㅀ', 'ㅁ',
+                    'ㅂ', 'ㅄ', 'ㅅ', 'ㅆ', 'ㅇ', 'ㅈ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ'
+                ];
+
+                // 초성 발음 매핑 (자음)
+                this.INITIAL_PRONUNCIATION_MAP = {
+                    'ㄱ': '그', 'ㄲ': '끄', 'ㄴ': '느', 'ㄷ': '드', 'ㄸ': '뜨',
+                    'ㄹ': '르', 'ㅁ': '므', 'ㅂ': '브', 'ㅃ': '쁘', 'ㅅ': '스',
+                    'ㅆ': '쓰', 'ㅇ': '으', 'ㅈ': '즈', 'ㅉ': '쯔', 'ㅊ': '츠',
+                    'ㅋ': '크', 'ㅌ': '트', 'ㅍ': '프', 'ㅎ': '흐'
+                };
+                
+                // 모음 발음 매핑
+                this.VOWEL_PRONUNCIATION_MAP = {
+                    'ㅏ': '아', 'ㅐ': '애', 'ㅑ': '야', 'ㅒ': '얘', 'ㅓ': '어',
+                    'ㅔ': '에', 'ㅕ': '여', 'ㅖ': '예', 'ㅗ': '오', 'ㅘ': '와',
+                    'ㅙ': '왜', 'ㅚ': '외', 'ㅛ': '요', 'ㅜ': '우', 'ㅝ': '워',
+                    'ㅞ': '웨', 'ㅟ': '위', 'ㅠ': '유', 'ㅡ': '으', 'ㅢ': '의', 'ㅣ': '이'
+                };
+                
+                // 받침 발음 매핑 (종성) - 더 명확하게 구분되도록 수정
+                this.FINAL_PRONUNCIATION_MAP = {
+                    // ㄱ계열 - '윽' 소리 (목 뒤쪽에서 나는 소리)
+                    'ㄱ': '윽', 'ㄲ': '윽', 'ㄳ': '윽', 'ㅋ': '윽',
+                    
+                    // ㄴ계열 - '은' 소리 (혀끝이 잇몸에 닿는 소리)
+                    'ㄴ': '은', 'ㄵ': '은', 'ㄶ': '은',
+                    
+                    // ㄷ계열 - '읏' 소리 (혀끝이 잇몸을 막는 소리)
+                    'ㄷ': '읏', 'ㅅ': '읏', 'ㅆ': '읏', 'ㅈ': '읏', 
+                    'ㅊ': '읏', 'ㅌ': '읏', 'ㅎ': '읏',
+                    
+                    // ㄹ계열 - '을' 소리 (혀끝이 굴러가는 소리)
+                    'ㄹ': '을', 'ㄺ': '윽', 'ㄻ': '음', 'ㄼ': '을', 
+                    'ㄽ': '을', 'ㄾ': '을', 'ㄿ': '읍', 'ㅀ': '을',
+                    
+                    // ㅁ계열 - '음' 소리 (입술을 다무는 소리)
+                    'ㅁ': '음',
+                    
+                    // ㅂ계열 - '읍' 소리 (입술을 막는 소리)
+                    'ㅂ': '읍', 'ㅄ': '읍', 'ㅍ': '읍',
+                    
+                    // ㅇ - '앙' 소리 (코로 나는 소리)
+                    'ㅇ': '응'
+                };
+            }
+
+            initializeElements() {
+                this.micButton = document.getElementById('micButton');
+                this.voiceStatus = document.getElementById('voiceStatus');
+                this.loading = document.getElementById('loading');
+                this.resultSection = document.getElementById('resultSection');
+                this.originalText = document.getElementById('originalText');
+                this.phonicsGrid = document.getElementById('phonicsGrid');
+                this.playAllButton = document.getElementById('playAllButton');
+                this.speedSlider = document.getElementById('speedSlider');
+                this.speedDisplay = document.getElementById('speedDisplay');
+                this.resetButton = document.getElementById('resetButton');
+            }
+
+            initializeEventListeners() {
+                this.micButton.addEventListener('click', () => this.toggleRecording());
+                this.playAllButton.addEventListener('click', () => this.playAll());
+                this.speedSlider.addEventListener('input', (e) => this.updateSpeed(e.target.value));
+                this.resetButton.addEventListener('click', () => this.resetApp());
+            }
+
+            initializeSpeechRecognition() {
+                // 더 광범위한 브라우저 지원 확인
+                const SpeechRecognition = window.SpeechRecognition || 
+                                        window.webkitSpeechRecognition || 
+                                        window.mozSpeechRecognition ||
+                                        window.msSpeechRecognition;
+
+                if (!SpeechRecognition) {
+                    this.voiceStatus.textContent = '죄송해요, 이 브라우저는 음성인식을 지원하지 않아요';
+                    this.micButton.disabled = true;
+                    return;
+                }
+
+                this.recognition = new SpeechRecognition();
+                
+                // 모바일 최적화 설정
+                this.recognition.lang = 'ko-KR';
+                this.recognition.continuous = false;
+                this.recognition.interimResults = false;
+                this.recognition.maxAlternatives = 1;
+                
+                // 모바일에서 중요한 설정들
+                if (this.recognition.serviceURI !== undefined) {
+                    this.recognition.serviceURI = 'wss://api.speechmatics.com/v2';
+                }
+
+                this.recognition.onstart = () => {
+                    console.log('음성 인식 시작됨');
+                    this.micButton.classList.add('recording');
+                    this.voiceStatus.textContent = '듣고 있어요... 단어를 말해보세요!';
+                };
+
+                this.recognition.onresult = (event) => {
+                    console.log('음성 인식 결과:', event);
+                    if (event.results && event.results.length > 0) {
+                        const text = event.results[0][0].transcript.trim();
+                        console.log('인식된 텍스트:', text);
+                        if (text) {
+                            this.processVoiceInput(text);
+                        }
+                    }
+                };
+
+                this.recognition.onerror = (event) => {
+                    console.error('음성 인식 오류:', event.error);
+                    this.micButton.classList.remove('recording');
+                    
+                    let errorMessage = '음성인식에 실패했어요. ';
+                    switch(event.error) {
+                        case 'not-allowed':
+                            errorMessage += '마이크 권한을 허용해주세요.';
+                            break;
+                        case 'no-speech':
+                            errorMessage += '음성이 감지되지 않았어요.';
+                            break;
+                        case 'audio-capture':
+                            errorMessage += '오디오 캡처에 실패했어요.';
+                            break;
+                        case 'network':
+                            errorMessage += '네트워크 연결을 확인해주세요.';
+                            break;
+                        default:
+                            errorMessage += '다시 시도해주세요.';
+                    }
+                    
+                    this.voiceStatus.textContent = errorMessage;
+                    
+                    // 3초 후 초기 메시지로 복원
+                    setTimeout(() => {
+                        if (!this.micButton.classList.contains('recording')) {
+                            this.voiceStatus.textContent = '마이크 버튼을 눌러 단어를 말해보세요';
+                        }
+                       }, 3000);
+                };
+
+                this.recognition.onend = () => {
+                    console.log('음성 인식 종료됨');
+                    this.micButton.classList.remove('recording');
+                    if (this.voiceStatus.textContent.includes('듣고 있어요')) {
+                        this.voiceStatus.textContent = '마이크 버튼을 눌러 단어를 말해보세요';
+                    }
+                };
+            }
+
+            async checkMicrophonePermission() {
+                try {
+                    if (navigator.permissions) {
+                        const result = await navigator.permissions.query({ name: 'microphone' });
+                        if (result.state === 'denied') {
+                            this.voiceStatus.textContent = '마이크 권한이 필요해요. 브라우저 설정에서 마이크를 허용해주세요.';
+                        }
+                    }
+                } catch (error) {
+                    console.log('권한 확인 중 오류:', error);
+                }
+            }
+
+            toggleRecording() {
+                if (!this.recognition) {
+                    alert('음성인식을 사용할 수 없습니다.');
+                    return;
+                }
+
+                if (this.micButton.classList.contains('recording')) {
+                    this.recognition.stop();
+                } else {
+                    try {
+                        this.recognition.start();
+                    } catch (error) {
+                        console.error('음성인식 시작 오류:', error);
+                        this.voiceStatus.textContent = '음성인식을 시작할 수 없어요. 다시 시도해주세요.';
+                    }
+                }
+            }
+
+            processVoiceInput(text) {
+                console.log('처리할 텍스트:', text);
+                this.voiceStatus.textContent = `"${text}"를 분석중이에요...`;
+                this.loading.style.display = 'block';
+
+                // 약간의 지연을 두어 자연스러운 UX 제공
+                setTimeout(() => {
+                    this.analyzeHangul(text);
+                    this.loading.style.display = 'none';
+                }, 500);
+            }
+
+            testWord(word) {
+                console.log('테스트 단어:', word);
+                this.voiceStatus.textContent = `"${word}"를 분석중이에요...`;
+                this.loading.style.display = 'block';
+
+                setTimeout(() => {
+                    this.analyzeHangul(word);
+                    this.loading.style.display = 'none';
+                }, 300);
+            }
+
+            analyzeHangul(text) {
+                // 한글만 추출
+                const hangulOnly = text.replace(/[^가-힣]/g, '');
+                
+                if (!hangulOnly) {
+                    this.voiceStatus.textContent = '한글 단어를 말해주세요!';
+                    return;
+                }
+
+                this.originalText.innerHTML = `<span class="emoji">💬</span> ${hangulOnly} <span class="emoji">💬</span>`;
+                
+                // 각 글자를 자모로 분해
+                const syllableData = [];
+                
+                for (let i = 0; i < hangulOnly.length; i++) {
+                    const char = hangulOnly[i];
+                    const decomposed = this.decompose(char);
+                    if (decomposed) {
+                        syllableData.push({
+                            original: char,
+                            ...decomposed
+                        });
+                    }
+                }
+
+                this.currentData = {
+                    original: hangulOnly,
+                    syllables: syllableData
+                };
+
+                this.displayPhonics(syllableData);
+                this.resultSection.classList.remove('hidden');
+                this.voiceStatus.textContent = '완성! 각 소리를 클릭해보세요 🎵';
+            }
+
+            decompose(char) {
+                const code = char.charCodeAt(0) - this.HANGUL_BASE;
+                
+                if (code < 0 || code > 11171) {
+                    return null; // 한글이 아님
+                }
+
+                const initialIndex = Math.floor(code / (this.VOWEL_COUNT * this.FINAL_CONSONANT_COUNT));
+                const vowelIndex = Math.floor((code % (this.VOWEL_COUNT * this.FINAL_CONSONANT_COUNT)) / this.FINAL_CONSONANT_COUNT);
+                const finalIndex = code % this.FINAL_CONSONANT_COUNT;
+
+                return {
+                    initial: this.INITIAL_CONSONANTS[initialIndex],
+                    vowel: this.VOWELS[vowelIndex],
+                    final: finalIndex > 0 ? this.FINAL_CONSONANTS[finalIndex] : null
+                };
+            }
+
+            displayPhonics(syllableData) {
+                this.phonicsGrid.innerHTML = '';
+                this.syllableGroups = [];
+
+                syllableData.forEach((syllable, syllableIndex) => {
+                    const syllableGroup = document.createElement('div');
+                    syllableGroup.className = 'syllable-group';
+                    
+                    const label = document.createElement('div');
+                    label.className = 'syllable-label';
+                    label.textContent = syllable.original;
+                    syllableGroup.appendChild(label);
+
+                    const phonicsContainer = document.createElement('div');
+                    phonicsContainer.className = 'syllable-phonics';
+
+                    const phonicsItems = [];
+
+                    // 초성 (자음)
+                    if (syllable.initial) {
+                        const initialItem = this.createPhonicsItem(
+                            syllable.initial, 
+                            this.INITIAL_PRONUNCIATION_MAP[syllable.initial] || syllable.initial,
+                            'consonant',
+                            '자음'
+                        );
+                        phonicsContainer.appendChild(initialItem);
+                        phonicsItems.push(initialItem);
+                    }
+
+                    // 중성 (모음)
+                    if (syllable.vowel) {
+                        const vowelItem = this.createPhonicsItem(
+                            syllable.vowel,
+                            this.VOWEL_PRONUNCIATION_MAP[syllable.vowel] || syllable.vowel,
+                            'vowel',
+                            '모음'
+                        );
+                        phonicsContainer.appendChild(vowelItem);
+                        phonicsItems.push(vowelItem);
+                    }
+
+                    // 종성 (받침)
+                    if (syllable.final) {
+                        const finalItem = this.createPhonicsItem(
+                            syllable.final,
+                            this.FINAL_PRONUNCIATION_MAP[syllable.final] || syllable.final,
+                            'final',
+                            '받침'
+                        );
+                        phonicsContainer.appendChild(finalItem);
+                        phonicsItems.push(finalItem);
+                    }
+
+                    syllableGroup.appendChild(phonicsContainer);
+                    this.phonicsGrid.appendChild(syllableGroup);
+                    
+                    this.syllableGroups.push({
+                        element: syllableGroup,
+                        items: phonicsItems
+                    });
+                });
+            }
+
+            createPhonicsItem(jamo, pronunciation, type, typeLabel) {
+                const item = document.createElement('div');
+                item.className = `phonics-item ${type}`;
+                
+                item.innerHTML = `
+                    <div class="jamo">${jamo}</div>
+                    <div class="pronunciation">${pronunciation}</div>
+                    <div class="jamo-type ${type}">${typeLabel}</div>
+                `;
+
+                item.addEventListener('click', () => {
+                    this.playSound(pronunciation, item);
+                });
+
+                return item;
+            }
+
+            playSound(text, element = null) {
+                if (this.speechSynthesis.speaking) {
+                    this.speechSynthesis.cancel();
+                }
+
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'ko-KR';
+                utterance.rate = this.currentSpeed;
+                utterance.pitch = 1.2;
+                utterance.volume = 1.0;
+
+                if (element) {
+                    element.classList.add('playing');
+                    utterance.onend = () => {
+                        element.classList.remove('playing');
+                    };
+                }
+
+                this.speechSynthesis.speak(utterance);
+            }
+
+            async playAll() {
+                if (this.isPlaying || !this.currentData) return;
+
+                this.isPlaying = true;
+                this.playAllButton.disabled = true;
+                this.playAllButton.textContent = '🎵 재생중...';
+
+                try {
+                    // 전체 단어 먼저 재생
+                    await this.playWithDelay(this.currentData.original, null, 800);
+
+                    // 각 음절별로 재생
+                    for (let i = 0; i < this.syllableGroups.length; i++) {
+                        const group = this.syllableGroups[i];
+                        
+                        // 음절 전체 재생
+                        await this.playWithDelay(this.currentData.syllables[i].original, null, 600);
+                        
+                        // 각 자모 재생
+                        for (let j = 0; j < group.items.length; j++) {
+                            const item = group.items[j];
+                            const pronunciation = item.querySelector('.pronunciation').textContent;
+                            await this.playWithDelay(pronunciation, item, 400);
+                        }
+                        
+                        // 음절 간 간격
+                        if (i < this.syllableGroups.length - 1) {
+                            await this.delay(300);
+                        }
+                    }
+
+                    // 마지막에 전체 단어 다시 재생
+                    await this.playWithDelay(this.currentData.original, null, 0);
+
+                } catch (error) {
+                    console.error('재생 중 오류:', error);
+                } finally {
+                    this.isPlaying = false;
+                    this.playAllButton.disabled = false;
+                    this.playAllButton.textContent = '▶️ 전체 재생';
+                }
+            }
+
+            playWithDelay(text, element, delayMs) {
+                return new Promise((resolve) => {
+                    if (this.speechSynthesis.speaking) {
+                        this.speechSynthesis.cancel();
+                    }
+
+                    const utterance = new SpeechSynthesisUtterance(text);
+                    utterance.lang = 'ko-KR';
+                    utterance.rate = this.currentSpeed;
+                    utterance.pitch = 1.2;
+                    utterance.volume = 1.0;
+
+                    if (element) {
+                        element.classList.add('playing');
+                    }
+
+                    utterance.onend = () => {
+                        if (element) {
+                            element.classList.remove('playing');
+                        }
+                        setTimeout(resolve, delayMs);
+                    };
+
+                    utterance.onerror = () => {
+                        if (element) {
+                            element.classList.remove('playing');
+                        }
+                        setTimeout(resolve, delayMs);
+                    };
+
+                    this.speechSynthesis.speak(utterance);
+                });
+            }
+
+            delay(ms) {
+                return new Promise(resolve => setTimeout(resolve, ms));
+            }
+
+            updateSpeed(value) {
+                this.currentSpeed = parseFloat(value);
+                this.speedDisplay.textContent = `${value}x`;
+            }
+
+            resetApp() {
+                this.resultSection.classList.add('hidden');
+                this.voiceStatus.textContent = '마이크 버튼을 눌러 단어를 말해보세요';
+                this.currentData = null;
+                this.syllableGroups = [];
+                
+                if (this.speechSynthesis.speaking) {
+                    this.speechSynthesis.cancel();
+                }
+                
+                this.isPlaying = false;
+                this.playAllButton.disabled = false;
+                this.playAllButton.textContent = '▶️ 전체 재생';
+            }
+        }
+
+        // 앱 초기화
+        const app = new HangulPhonicsApp();
+        
+        // 전역 접근을 위한 window 객체에 할당
+        window.app = app;
+    </script>
+</body>
+</html>
