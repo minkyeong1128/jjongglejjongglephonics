@@ -936,102 +936,145 @@
             }
 
             playSound(text, element = null) {
-                if (this.speechSynthesis.speaking) {
-                    this.speechSynthesis.cancel();
-                }
+    // 기존 재생 중단
+    if (this.speechSynthesis.speaking) {
+        this.speechSynthesis.cancel();
+    }
 
-                const utterance = new SpeechSynthesisUtterance(text);
-                utterance.lang = 'ko-KR';
-                utterance.rate = this.currentSpeed;
-                utterance.pitch = 1.2;
-                utterance.volume = 1.0;
+    // 모바일에서 안정성을 위한 짧은 대기
+    setTimeout(() => {
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'ko-KR';
+        utterance.rate = this.currentSpeed;
+        utterance.pitch = 1.2;
+        utterance.volume = 1.0;
 
-                if (element) {
-                    element.classList.add('playing');
-                    utterance.onend = () => {
-                        element.classList.remove('playing');
-                    };
-                }
+        if (element) {
+            element.classList.add('playing');
+            
+            const cleanup = () => {
+                element.classList.remove('playing');
+            };
+            
+            utterance.onend = cleanup;
+            utterance.onerror = cleanup;
+            
+            // 타임아웃 안전장치
+            setTimeout(cleanup, 3000);
+        }
 
-                this.speechSynthesis.speak(utterance);
+        this.speechSynthesis.speak(utterance);
+    }, 50);
+}
+           async playAll() {
+    if (this.isPlaying || !this.currentData) return;
+
+    this.isPlaying = true;
+    this.playAllButton.disabled = true;
+    this.playAllButton.textContent = '🎵 재생중...';
+
+    try {
+        // 모바일에서 TTS 엔진 준비 시간
+        await this.delay(100);
+        
+        // 전체 단어 먼저 재생
+        await this.playWithDelay(this.currentData.original, null, 800);
+
+        // 각 음절별로 재생
+        for (let i = 0; i < this.syllableGroups.length; i++) {
+            // 재생 중단 체크 (사용자가 리셋을 누른 경우)
+            if (!this.isPlaying) break;
+            
+            const group = this.syllableGroups[i];
+            
+            // 음절 전체 재생
+            await this.playWithDelay(this.currentData.syllables[i].original, null, 600);
+            
+            // 각 자모 재생
+            for (let j = 0; j < group.items.length; j++) {
+                if (!this.isPlaying) break; // 재생 중단 체크
+                
+                const item = group.items[j];
+                const pronunciation = item.querySelector('.pronunciation').textContent;
+                await this.playWithDelay(pronunciation, item, 400);
             }
-
-            async playAll() {
-                if (this.isPlaying || !this.currentData) return;
-
-                this.isPlaying = true;
-                this.playAllButton.disabled = true;
-                this.playAllButton.textContent = '🎵 재생중...';
-
-                try {
-                    // 전체 단어 먼저 재생
-                    await this.playWithDelay(this.currentData.original, null, 800);
-
-                    // 각 음절별로 재생
-                    for (let i = 0; i < this.syllableGroups.length; i++) {
-                        const group = this.syllableGroups[i];
-                        
-                        // 음절 전체 재생
-                        await this.playWithDelay(this.currentData.syllables[i].original, null, 600);
-                        
-                        // 각 자모 재생
-                        for (let j = 0; j < group.items.length; j++) {
-                            const item = group.items[j];
-                            const pronunciation = item.querySelector('.pronunciation').textContent;
-                            await this.playWithDelay(pronunciation, item, 400);
-                        }
-                        
-                        // 음절 간 간격
-                        if (i < this.syllableGroups.length - 1) {
-                            await this.delay(300);
-                        }
-                    }
-
-                    // 마지막에 전체 단어 다시 재생
-                    await this.playWithDelay(this.currentData.original, null, 0);
-
-                } catch (error) {
-                    console.error('재생 중 오류:', error);
-                } finally {
-                    this.isPlaying = false;
-                    this.playAllButton.disabled = false;
-                    this.playAllButton.textContent = '▶️ 전체 재생';
-                }
+            
+            // 음절 간 간격
+            if (i < this.syllableGroups.length - 1) {
+                await this.delay(300);
             }
+        }
+
+        // 마지막에 전체 단어 다시 재생 (재생이 중단되지 않은 경우에만)
+        if (this.isPlaying) {
+            await this.playWithDelay(this.currentData.original, null, 0);
+        }
+
+    } catch (error) {
+        console.error('재생 중 오류:', error);
+    } finally {
+        this.isPlaying = false;
+        this.playAllButton.disabled = false;
+        this.playAllButton.textContent = '▶️ 전체 재생';
+        
+        // 모든 playing 클래스 제거
+        document.querySelectorAll('.phonics-item.playing').forEach(item => {
+            item.classList.remove('playing');
+        });
+    }
+}
 
             playWithDelay(text, element, delayMs) {
-                return new Promise((resolve) => {
-                    if (this.speechSynthesis.speaking) {
-                        this.speechSynthesis.cancel();
-                    }
+    return new Promise((resolve) => {
+        // 모바일에서 안정성을 위해 이전 발화 완전히 정리
+        if (this.speechSynthesis.speaking) {
+            this.speechSynthesis.cancel();
+        }
+        
+        // 모바일에서 speechSynthesis 초기화 대기
+        setTimeout(() => {
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'ko-KR';
+            utterance.rate = this.currentSpeed;
+            utterance.pitch = 1.2;
+            utterance.volume = 1.0;
 
-                    const utterance = new SpeechSynthesisUtterance(text);
-                    utterance.lang = 'ko-KR';
-                    utterance.rate = this.currentSpeed;
-                    utterance.pitch = 1.2;
-                    utterance.volume = 1.0;
-
-                    if (element) {
-                        element.classList.add('playing');
-                    }
-
-                    utterance.onend = () => {
-                        if (element) {
-                            element.classList.remove('playing');
-                        }
-                        setTimeout(resolve, delayMs);
-                    };
-
-                    utterance.onerror = () => {
-                        if (element) {
-                            element.classList.remove('playing');
-                        }
-                        setTimeout(resolve, delayMs);
-                    };
-
-                    this.speechSynthesis.speak(utterance);
-                });
+            if (element) {
+                element.classList.add('playing');
             }
+
+            let isResolved = false;
+            const resolveOnce = () => {
+                if (!isResolved) {
+                    isResolved = true;
+                    if (element) {
+                        element.classList.remove('playing');
+                    }
+                    setTimeout(resolve, delayMs);
+                }
+            };
+
+            utterance.onend = resolveOnce;
+            utterance.onerror = (e) => {
+                console.warn('TTS 오류:', e);
+                resolveOnce();
+            };
+
+            // 모바일에서 TTS가 응답하지 않을 경우를 대비한 타임아웃
+            const timeoutId = setTimeout(() => {
+                console.warn('TTS 타임아웃, 강제 종료');
+                this.speechSynthesis.cancel();
+                resolveOnce();
+            }, Math.max(text.length * 200, 2000)); // 텍스트 길이에 따른 동적 타임아웃
+
+            utterance.onstart = () => {
+                clearTimeout(timeoutId);
+            };
+
+            this.speechSynthesis.speak(utterance);
+        }, 50); // 모바일에서 안정성을 위한 짧은 대기
+    });
+}
 
             delay(ms) {
                 return new Promise(resolve => setTimeout(resolve, ms));
@@ -1043,19 +1086,30 @@
             }
 
             resetApp() {
-                this.resultSection.classList.add('hidden');
-                this.voiceStatus.textContent = '마이크 버튼을 눌러 단어를 말해보세요';
-                this.currentData = null;
-                this.syllableGroups = [];
-                
-                if (this.speechSynthesis.speaking) {
-                    this.speechSynthesis.cancel();
-                }
-                
-                this.isPlaying = false;
-                this.playAllButton.disabled = false;
-                this.playAllButton.textContent = '▶️ 전체 재생';
-            }
+    // 재생 중단
+    this.isPlaying = false;
+    
+    // TTS 완전히 정리
+    if (this.speechSynthesis.speaking) {
+        this.speechSynthesis.cancel();
+    }
+    
+    // 약간의 지연 후 UI 초기화 (모바일에서 TTS 정리 시간 확보)
+    setTimeout(() => {
+        this.resultSection.classList.add('hidden');
+        this.voiceStatus.textContent = '마이크 버튼을 눌러 단어를 말해보세요';
+        this.currentData = null;
+        this.syllableGroups = [];
+        
+        this.playAllButton.disabled = false;
+        this.playAllButton.textContent = '▶️ 전체 재생';
+        
+        // 모든 playing 클래스 제거
+        document.querySelectorAll('.phonics-item.playing').forEach(item => {
+            item.classList.remove('playing');
+        });
+    }, 100);
+}
         }
 
         // 앱 초기화
