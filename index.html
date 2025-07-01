@@ -121,16 +121,16 @@
             position: absolute;
             top: 20px;
             left: 20px;
-            background: linear-gradient(135deg, #ffeaa7, #fdcb6e);
+            background: #FFFFFF;
             border: none;
             border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            color: #d63031;
+            width: 30px;
+            height: 30px;
+            color: #666;
             font-size: 20px;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 8px rgba(253, 203, 110, 0.3);
+            box-shadow: 0;
             -webkit-tap-highlight-color: transparent;
             touch-action: manipulation;
             user-select: none;
@@ -530,9 +530,9 @@
             background: white;
             border: 2px solid #ddd;
             border-radius: 15px;
-            padding: 15px 25px;
-            color: black;
-            font-size: 16px;
+            padding: 12px 20px;
+            color: #666;
+            font-size: 14px;
             cursor: pointer;
             transition: all 0.3s ease;
             font-weight: bold;
@@ -623,11 +623,11 @@
 
         .choice-button {
             background: white;
-            border: 2px solid black;
+            border: 2px solid #ddd;
             border-radius: 15px;
             padding: 10px 20px;
             font-size: 1.3em;
-            color: black;
+            color: #666;
             cursor: pointer;
             transition: all 0.3s ease;
             min-width: 80px;
@@ -754,9 +754,8 @@
         }
 
         .jamo-tab-button.active {
-            background: linear-gradient(135deg, #4facfe, #00f2fe);
-            color: white;
-            border-color: #4facfe;
+            background: #fff9c4;
+            border-color: #ffeb3b;
         }
 
         .jamo-tab-content {
@@ -990,23 +989,7 @@
             box-shadow: 0 4px 8px rgba(79, 172, 254, 0.3);
         }
 
-        .stroke-instructions {
-            background: #f8f9ff;
-            padding: 15px;
-            border-radius: 10px;
-            border-left: 4px solid #4facfe;
-        }
-
-        .stroke-instructions p {
-            margin: 8px 0;
-            font-size: 14px;
-            color: #4a5568;
-        }
-
-        .stroke-instructions strong {
-            color: #2d3748;
-        }
-
+      
         /* 모바일 반응형 */
         @media (max-width: 480px) {
             .main-container {
@@ -1128,15 +1111,7 @@
                 font-size: 12px;
             }
 
-            .stroke-instructions {
-                padding: 12px;
-            }
-
-            .stroke-instructions p {
-                font-size: 12px;
-                margin: 6px 0;
-            }
-        }
+                  }
     </style>
 </head>
 <body>
@@ -1165,7 +1140,7 @@
 
         <!-- 소리 분석 화면 -->
         <div id="soundAnalysisScreen" class="hidden">
-            <button class="back-button" onclick="showMainMenu()">←</button>
+            <button class="back-button" onclick="showMainMenu()">🔙</button>
             <h1 class="title">🎤 소리 놀이</h1>
             <p class="subtitle">단어를 말하면 자음과 모음, 받침으로 나누어 들려줄게요!</p>
 
@@ -1242,7 +1217,7 @@
 
         <!-- 게임 화면 -->
         <div id="gameScreen" class="hidden">
-            <button class="back-button" onclick="showMainMenu()">←</button>
+            <button class="back-button" onclick="showMainMenu()">🔙</button>
             <h1 class="title">🎮 소리 맞추기 게임</h1>
             <div class="question-area">
                 <div class="question-number">단어의 자음·모음·받침 소리를 듣고 맞는 단어를 선택하세요!</div>
@@ -1279,7 +1254,7 @@
 
         <!-- 자음·모음 학습 화면 -->
         <div id="jamoLearningScreen" class="hidden">
-            <button class="back-button" onclick="showMainMenu()">←</button>
+            <button class="back-button" onclick="showMainMenu()">🔙</button>
             <h1 class="title">📝 자음·모음 배우기</h1>
             <p class="subtitle">각 글자를 클릭하면 소리를 들을 수 있어요!</p>
 
@@ -1334,16 +1309,13 @@
                             <button class="stroke-btn" onclick="practiceMode()">✏️ 연습하기</button>
                         </div>
                     </div>
-                    <div class="stroke-instructions">
-                        <p>📺 <strong>획순 보기</strong>: 글자가 어떻게 쓰이는지 봐요</p>
-                        <p>✏️ <strong>연습하기</strong>: 화면에 직접 따라 써보세요</p>
-                    </div>
-                </div>
+                      </div>
             </div>
         </div>
     </div>
 
     <script>
+let audioPlayback = null;
         // 전역 변수
         let currentApp = null;
         let gameState = {
@@ -1364,10 +1336,21 @@
             document.getElementById('gameScreen').classList.add('hidden');
             document.getElementById('jamoLearningScreen').classList.add('hidden');
             
-            // 음성 합성 중단
-            if (window.speechSynthesis) {
-                window.speechSynthesis.cancel();
-            }
+          // 모든 음성 재생 완전히 중단
+if (window.speechSynthesis) {
+    window.speechSynthesis.cancel();
+    // 한 번 더 확실히 중단
+    setTimeout(() => {
+        if (window.speechSynthesis.speaking) {
+            window.speechSynthesis.cancel();
+        }
+    }, 100);
+}
+
+// 게임의 오디오 재생 중단
+if (typeof stopAudioPlayback === 'function') {
+    stopAudioPlayback();
+}
             
             // 소리 분석 앱 리셋
             if (currentApp && currentApp.resetApp) {
@@ -1594,13 +1577,13 @@
                 }, 500);
             }
 
-            testWord(word) {
+             testWord(word) {
                 this.voiceStatus.textContent = `"${word}"를 분석중이에요...`;
                 this.loading.style.display = 'block';
-                // 기본으로 연습하기 모드 실행
-setTimeout(() => {
-    practiceMode();
-}, 300);
+                setTimeout(() => {
+                    this.analyzeHangul(word);
+                    this.loading.style.display = 'none';
+                }, 500);
             }
 
             analyzeHangul(text) {
@@ -1942,38 +1925,49 @@ setTimeout(() => {
         }
 
         // 단어를 파닉스로 분해 (디버깅 버전)
-        function wordToPhonics(word) {
-            const phonics = [];
+       function wordToPhonics(word) {
+    const phonics = [];
+    
+    console.log('분해할 단어:', word);
+    
+    for (let char of word) {
+        const decomposed = decomposeHangul(char);
+        console.log(`${char} 분해 결과:`, decomposed);
+        
+        if (decomposed) {
+            // 음절별로 묶어서 처리
+            const syllablePhonics = [];
             
-            console.log('분해할 단어:', word);
+            // 초성 (자음)
+            const initialSound = INITIAL_PRONUNCIATION[decomposed.initial] || decomposed.initial;
+            syllablePhonics.push(initialSound);
             
-            for (let char of word) {
-                const decomposed = decomposeHangul(char);
-                console.log(`${char} 분해 결과:`, decomposed);
-                
-                if (decomposed) {
-                    // 초성 (자음)
-                    const initialSound = INITIAL_PRONUNCIATION[decomposed.initial] || decomposed.initial;
-                    console.log('초성:', decomposed.initial, '→', initialSound);
-                    phonics.push(initialSound);
-                    
-                    // 중성 (모음)
-                    const vowelSound = VOWEL_PRONUNCIATION[decomposed.medial] || decomposed.medial;
-                    console.log('중성:', decomposed.medial, '→', vowelSound);
-                    phonics.push(vowelSound);
-                    
-                    // 종성 (받침) - 있는 경우에만
-                    if (decomposed.final) {
-                        const finalSound = FINAL_PRONUNCIATION[decomposed.final] || decomposed.final;
-                        console.log('종성:', decomposed.final, '→', finalSound);
-                        phonics.push(finalSound);
-                    }
-                }
+            // 중성 (모음)
+            const vowelSound = VOWEL_PRONUNCIATION[decomposed.medial] || decomposed.medial;
+            syllablePhonics.push(vowelSound);
+            
+            // 종성 (받침) - 있는 경우에만
+            if (decomposed.final) {
+                const finalSound = FINAL_PRONUNCIATION[decomposed.final] || decomposed.final;
+                syllablePhonics.push(finalSound);
             }
             
-            console.log('최종 파닉스 배열:', phonics);
-            return phonics;
+            // 음절 단위로 phonics 배열에 추가
+            phonics.push(...syllablePhonics);
         }
+    }
+    
+    // 연속된 동일한 소리 제거
+    const uniquePhonics = [];
+    for (let i = 0; i < phonics.length; i++) {
+        if (i === 0 || phonics[i] !== phonics[i-1]) {
+            uniquePhonics.push(phonics[i]);
+        }
+    }
+    
+    console.log('중복 제거 후 파닉스:', uniquePhonics);
+    return uniquePhonics;
+}
 
         // 단어 데이터
         const noBatchimWordsWithIcons = [
@@ -2149,58 +2143,69 @@ setTimeout(() => {
         }
 
         function playAudio() {
-            if (!gameState.currentQuestion) return;
+    if (!gameState.currentQuestion) return;
 
-            // 기존 음성 재생 중단
-            if (window.speechSynthesis.speaking) {
-                window.speechSynthesis.cancel();
-            }
+    // 기존 재생 중단
+    stopAudioPlayback();
 
-            const phonics = wordToPhonics(gameState.currentQuestion.word);
-            console.log('재생할 파닉스:', phonics);
-            
-            // 중복 제거 (연속된 같은 소리 제거)
-            const uniquePhonics = [];
-            for (let i = 0; i < phonics.length; i++) {
-                if (i === 0 || phonics[i] !== phonics[i-1]) {
-                    uniquePhonics.push(phonics[i]);
-                }
-            }
-            
-            console.log('중복 제거 후:', uniquePhonics);
-            
-            let index = 0;
-
-            function playNext() {
-                if (index >= uniquePhonics.length) return;
-
-                const utterance = new SpeechSynthesisUtterance(uniquePhonics[index]);
-                utterance.lang = 'ko-KR';
-                utterance.rate = 0.5;
-                utterance.volume = 1.0;
-                utterance.pitch = 1.2;
-
-                utterance.onend = function() {
-                    index++;
-                    if (index < uniquePhonics.length) {
-                        setTimeout(playNext, 400);
-                    }
-                };
-
-                utterance.onerror = function() {
-                    console.log('음성 재생 오류');
-                    index++;
-                    if (index < uniquePhonics.length) {
-                        setTimeout(playNext, 400);
-                    }
-                };
-
-                window.speechSynthesis.speak(utterance);
-            }
-
-            // 첫 번째 소리 재생 시작
-            setTimeout(playNext, 100);
+    const phonics = wordToPhonics(gameState.currentQuestion.word);
+    console.log('재생할 파닉스:', phonics);
+    
+    const uniquePhonics = [];
+    for (let i = 0; i < phonics.length; i++) {
+        if (i === 0 || phonics[i] !== phonics[i-1]) {
+            uniquePhonics.push(phonics[i]);
         }
+    }
+    
+    console.log('중복 제거 후:', uniquePhonics);
+    
+    let index = 0;
+    let isStopped = false;
+
+    function playNext() {
+        if (index >= uniquePhonics.length || isStopped) return;
+
+        const utterance = new SpeechSynthesisUtterance(uniquePhonics[index]);
+        utterance.lang = 'ko-KR';
+        utterance.rate = 0.5;
+        utterance.volume = 1.0;
+        utterance.pitch = 1.2;
+
+        utterance.onend = function() {
+            index++;
+            if (index < uniquePhonics.length && !isStopped) {
+                setTimeout(playNext, 400);
+            }
+        };
+
+        utterance.onerror = function() {
+            console.log('음성 재생 오류');
+            index++;
+            if (index < uniquePhonics.length && !isStopped) {
+                setTimeout(playNext, 400);
+            }
+        };
+
+        window.speechSynthesis.speak(utterance);
+    }
+
+    audioPlayback = {
+        stop: function() {
+            isStopped = true;
+            window.speechSynthesis.cancel();
+        }
+    };
+
+    setTimeout(playNext, 100);
+}
+function stopAudioPlayback() {
+    if (audioPlayback && audioPlayback.stop) {
+        audioPlayback.stop();
+        audioPlayback = null;
+    }
+    window.speechSynthesis.cancel();
+}
 
         function displayQuestion() {
             gameState.currentQuestion = generateNewQuestion();
@@ -2228,21 +2233,26 @@ setTimeout(() => {
         function selectAnswer(selectedIndex) {
             if (gameState.isAnswered) return;
             
-            // 기존 음성 재생 완전히 중단
-            if (window.speechSynthesis.speaking) {
-                window.speechSynthesis.cancel();
-            }
-            
-            // 선택한 보기의 소리 재생
-            setTimeout(() => {
-                const selectedWord = gameState.currentQuestion.choices[selectedIndex];
-                const utterance = new SpeechSynthesisUtterance(selectedWord);
-                utterance.lang = 'ko-KR';
-                utterance.rate = 0.8;
-                utterance.volume = 1.0;
-                utterance.pitch = 1.0;
-                window.speechSynthesis.speak(utterance);
-            }, 200);
+        // 파닉스 재생 완전히 중단
+stopAudioPlayback();
+
+// 짧은 대기 후 완전히 중단되었는지 확인
+setTimeout(() => {
+    if (window.speechSynthesis.speaking) {
+        window.speechSynthesis.cancel();
+    }
+}, 50);
+
+// 선택한 보기의 소리 재생
+setTimeout(() => {
+    const selectedWord = gameState.currentQuestion.choices[selectedIndex];
+    const utterance = new SpeechSynthesisUtterance(selectedWord);
+    utterance.lang = 'ko-KR';
+    utterance.rate = 0.8;
+    utterance.volume = 1.0;
+    utterance.pitch = 1.0;
+    window.speechSynthesis.speak(utterance);
+}, 200);
             
             gameState.isAnswered = true;
 
@@ -2362,7 +2372,9 @@ setTimeout(() => {
             showMainMenu();
         };
 
-        // 자음·모음 학습 관련 함수들
+       // 획순 데이터 정의
+
+// 자음·모음 학습 관련 함수들
         function initializeJamoLearning() {
             createConsonantCards();
             createVowelCards();
@@ -2572,11 +2584,16 @@ setTimeout(() => {
             canvas.addEventListener('mouseout', stopDrawing);
         }
 
-        function clearCanvas() {
-            if (!ctx) return;
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            drawGuideLines();
-        }
+       function clearCanvas() {
+    if (!ctx) return;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawGuideLines();
+    
+    // 연습 모드일 때는 연한 글씨 가이드도 다시 그리기
+    if (isPracticeMode) {
+        drawGuideCharacter();
+    }
+}
 
         function drawGuideLines() {
             if (!ctx) return;
