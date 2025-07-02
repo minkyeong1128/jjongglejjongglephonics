@@ -2377,6 +2377,114 @@ setTimeout(() => {
         };
 
        // 획순 데이터 정의
+const STROKE_ORDER = {
+    'ㄱ': [
+        [{ type: 'line', start: [0.2, 0.3], end: [0.6, 0.3] }, { type: 'line', start: [0.6, 0.3], end: [0.6, 0.7] }]  // 1획: 가로+세로 연결
+    ],
+    'ㄴ': [
+        [{ type: 'line', start: [0.3, 0.2], end: [0.3, 0.7] }, { type: 'line', start: [0.3, 0.7], end: [0.7, 0.7] }]  // 1획: 세로+가로 연결
+    ],
+    'ㄷ': [
+        [{ type: 'line', start: [0.2, 0.3], end: [0.7, 0.3] }],  // 1획: 위쪽 가로획
+        [{ type: 'line', start: [0.2, 0.3], end: [0.2, 0.7] }, { type: 'line', start: [0.2, 0.7], end: [0.7, 0.7] }]  // 2획: 세로+가로 연결
+    ],
+    'ㄹ': [
+        [{ type: 'line', start: [0.15, 0.25], end: [0.6, 0.25] }, { type: 'line', start: [0.6, 0.25], end: [0.6, 0.45] }],  // 1획: 가로+세로
+        [{ type: 'line', start: [0.15, 0.45], end: [0.6, 0.45] }],  // 2획: 가로획
+        [{ type: 'line', start: [0.15, 0.45], end: [0.15, 0.7] }, { type: 'line', start: [0.15, 0.7], end: [0.6, 0.7] }]  // 3획: 세로+가로
+    ],
+    'ㅁ': [
+        [{ type: 'line', start: [0.25, 0.25], end: [0.25, 0.75] }],  // 1획: 왼쪽 세로획
+        [{ type: 'line', start: [0.25, 0.25], end: [0.75, 0.25] }, { type: 'line', start: [0.75, 0.25], end: [0.75, 0.75] }],  // 2획: 가로+세로
+        [{ type: 'line', start: [0.25, 0.75], end: [0.75, 0.75] }]  // 3획: 아래 가로획
+    ],
+    'ㅂ': [
+        [{ type: 'line', start: [0.25, 0.25], end: [0.25, 0.75] }],  // 1획: 왼쪽 세로획
+        [{ type: 'line', start: [0.75, 0.25], end: [0.75, 0.75] }],  // 2획: 오른쪽 세로획
+        [{ type: 'line', start: [0.25, 0.5], end: [0.75, 0.5] }],   // 3획: 가운데 가로획
+        [{ type: 'line', start: [0.25, 0.75], end: [0.75, 0.75] }]  // 4획: 아래 가로획
+    ],
+    'ㅅ': [
+        [{ type: 'line', start: [0.6, 0.3], end: [0.3, 0.7] }],     // 1획: 오른쪽 대각선
+        [{ type: 'line', start: [0.4, 0.3], end: [0.7, 0.7] }]      // 2획: 왼쪽 대각선
+    ],
+    'ㅇ': [
+        [{ type: 'circle', center: [0.5, 0.5], radius: 0.2 }]       // 1획: 원
+    ],
+    'ㅈ': [
+        [{ type: 'line', start: [0.2, 0.3], end: [0.6, 0.3] }, { type: 'line', start: [0.6, 0.3], end: [0.3, 0.7] }],  // 1획: 가로+대각선
+        [{ type: 'line', start: [0.45, 0.5], end: [0.75, 0.7] }]    // 2획: 오른쪽 대각선
+    ],
+    'ㅊ': [
+        [{ type: 'line', start: [0.2, 0.25], end: [0.6, 0.25] }],   // 1획: 짧은 가로줄
+        [{ type: 'line', start: [0.2, 0.35], end: [0.6, 0.35] }, { type: 'line', start: [0.6, 0.35], end: [0.3, 0.7] }],  // 2획: 가로+대각선
+        [{ type: 'line', start: [0.45, 0.525], end: [0.75, 0.7] }]  // 3획: 오른쪽 대각선
+    ],
+    'ㅋ': [
+        [{ type: 'line', start: [0.2, 0.3], end: [0.6, 0.3] }, { type: 'line', start: [0.6, 0.3], end: [0.6, 0.7] }],  // 1획: 가로+세로
+        [{ type: 'line', start: [0.2, 0.5], end: [0.6, 0.5] }]      // 2획: 가운데 가로획
+    ],
+    'ㅌ': [
+        [{ type: 'line', start: [0.2, 0.3], end: [0.7, 0.3] }],     // 1획: 위 가로획
+        [{ type: 'line', start: [0.2, 0.3], end: [0.2, 0.7] }, { type: 'line', start: [0.2, 0.7], end: [0.7, 0.7] }],  // 2획: 세로+가로
+        [{ type: 'line', start: [0.2, 0.5], end: [0.6, 0.5] }]      // 3획: 가운데 가로획
+    ],
+    'ㅍ': [
+        [{ type: 'line', start: [0.2, 0.3], end: [0.8, 0.3] }],     // 1획: 위 가로획
+        [{ type: 'line', start: [0.35, 0.3], end: [0.35, 0.7] }],   // 2획: 왼쪽 세로획
+        [{ type: 'line', start: [0.65, 0.3], end: [0.65, 0.7] }],   // 3획: 오른쪽 세로획
+        [{ type: 'line', start: [0.2, 0.7], end: [0.8, 0.7] }]      // 4획: 아래 가로획
+    ],
+    'ㅎ': [
+        [{ type: 'line', start: [0.2, 0.25], end: [0.6, 0.25] }],   // 1획: 짧은 가로줄
+        [{ type: 'line', start: [0.15, 0.35], end: [0.65, 0.35] }], // 2획: 긴 가로줄
+        [{ type: 'circle', center: [0.4, 0.6], radius: 0.15 }]      // 3획: 원
+    ],
+    
+    // 모음
+    'ㅏ': [
+        [{ type: 'line', start: [0.5, 0.2], end: [0.5, 0.8] }],     // 1획: 긴 세로줄
+        [{ type: 'line', start: [0.5, 0.5], end: [0.7, 0.5] }]      // 2획: 짧은 가로줄
+    ],
+    'ㅑ': [
+        [{ type: 'line', start: [0.5, 0.2], end: [0.5, 0.8] }],     // 1획: 긴 세로줄
+        [{ type: 'line', start: [0.5, 0.45], end: [0.7, 0.45] }],   // 2획: 위 가로줄
+        [{ type: 'line', start: [0.5, 0.55], end: [0.7, 0.55] }]    // 3획: 아래 가로줄
+    ],
+    'ㅓ': [
+        [{ type: 'line', start: [0.3, 0.5], end: [0.5, 0.5] }],     // 1획: 짧은 가로줄
+        [{ type: 'line', start: [0.5, 0.2], end: [0.5, 0.8] }]      // 2획: 긴 세로줄
+    ],
+    'ㅕ': [
+        [{ type: 'line', start: [0.3, 0.45], end: [0.5, 0.45] }],   // 1획: 위 가로줄
+        [{ type: 'line', start: [0.3, 0.55], end: [0.5, 0.55] }],   // 2획: 아래 가로줄
+        [{ type: 'line', start: [0.5, 0.2], end: [0.5, 0.8] }]      // 3획: 긴 세로줄
+    ],
+    'ㅗ': [
+        [{ type: 'line', start: [0.5, 0.3], end: [0.5, 0.45] }],    // 1획: 짧은 세로줄
+        [{ type: 'line', start: [0.2, 0.45], end: [0.8, 0.45] }]    // 2획: 긴 가로줄
+    ],
+    'ㅛ': [
+        [{ type: 'line', start: [0.45, 0.3], end: [0.45, 0.45] }],  // 1획: 왼쪽 세로줄
+        [{ type: 'line', start: [0.55, 0.3], end: [0.55, 0.45] }],  // 2획: 오른쪽 세로줄
+        [{ type: 'line', start: [0.2, 0.45], end: [0.8, 0.45] }]    // 3획: 긴 가로줄
+    ],
+    'ㅜ': [
+        [{ type: 'line', start: [0.2, 0.55], end: [0.8, 0.55] }],   // 1획: 긴 가로줄
+        [{ type: 'line', start: [0.5, 0.55], end: [0.5, 0.7] }]     // 2획: 짧은 세로줄
+    ],
+    'ㅠ': [
+        [{ type: 'line', start: [0.2, 0.55], end: [0.8, 0.55] }],   // 1획: 긴 가로줄
+        [{ type: 'line', start: [0.4, 0.55], end: [0.4, 0.7] }],    // 2획: 왼쪽 세로줄
+        [{ type: 'line', start: [0.6, 0.55], end: [0.6, 0.7] }]     // 3획: 오른쪽 세로줄
+    ],
+    'ㅡ': [
+        [{ type: 'line', start: [0.2, 0.5], end: [0.8, 0.5] }]      // 1획: 긴 가로줄
+    ],
+    'ㅣ': [
+        [{ type: 'line', start: [0.5, 0.2], end: [0.5, 0.8] }]      // 1획: 긴 세로줄
+    ]
+};
 
 // 자음·모음 학습 관련 함수들
         function initializeJamoLearning() {
@@ -2487,6 +2595,9 @@ setTimeout(() => {
         let ctx = null;
         let isDrawing = false;
         let isPracticeMode = false;
+let currentStrokeIndex = 0;
+        let strokeAnimationInterval = null;
+        let isShowingStrokes = false;
 
        function openStrokeModal(jamo, sound, type) {
     console.log('모달 열기:', jamo, sound, type);
@@ -2559,7 +2670,10 @@ setTimeout(() => {
             }, 100);
         }
 
-        function closeStrokeModal() {
+       function closeStrokeModal() {
+            // 획순 애니메이션 중단
+            stopStrokeAnimation();
+            
             document.getElementById('strokeOrderModal').classList.add('hidden');
             if (canvas) {
                 clearCanvas();
@@ -2586,8 +2700,12 @@ setTimeout(() => {
             canvas.addEventListener('mouseout', stopDrawing);
         }
 
-       function clearCanvas() {
+     function clearCanvas() {
     if (!ctx) return;
+    
+    // 획순 애니메이션 중단
+    stopStrokeAnimation();
+    
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawGuideLines();
     
@@ -2625,7 +2743,7 @@ setTimeout(() => {
             drawGuideCharacter();
         }
 
-        function drawGuideCharacter() {
+function drawGuideCharacter() {
             if (!ctx) return;
             
             ctx.save();
@@ -2635,11 +2753,176 @@ setTimeout(() => {
             ctx.textBaseline = 'middle';
             ctx.fillText(currentJamo, canvas.width / 2, canvas.height / 2);
             ctx.restore();
+            
+            // 획순 가이드 시작
+            setTimeout(() => {
+                showStrokeOrder();
+            }, 500);
+        }  
+
+function showStrokeOrder() {
+            const strokes = STROKE_ORDER[currentJamo];
+            if (!strokes) return;
+            
+            currentStrokeIndex = 0;
+            isShowingStrokes = true;
+            showStrokeInfo();
+            
+            strokeAnimationInterval = setInterval(() => {
+                if (currentStrokeIndex < strokes.length - 1) {
+                    currentStrokeIndex++;
+                    showStrokeInfo();
+                } else {
+                    currentStrokeIndex = 0;
+                    showStrokeInfo();
+                }
+            }, 3000);
         }
 
-      
-       function startDrawing(e) {
+function showStrokeInfo() {
+            const strokes = STROKE_ORDER[currentJamo];
+            if (!strokes || currentStrokeIndex >= strokes.length) return;
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawGuideLines();
+            
+            // 연한 글자 다시 그리기
+            ctx.save();
+            ctx.font = '200px "Malgun Gothic", Arial, sans-serif';
+            ctx.fillStyle = 'rgba(200, 200, 200, 0.3)';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(currentJamo, canvas.width / 2, canvas.height / 2);
+            ctx.restore();
+            
+           // 획순 그리기
+            ctx.save();
+            for (let i = 0; i <= currentStrokeIndex; i++) {
+                if (i === currentStrokeIndex) {
+                    ctx.strokeStyle = 'rgba(255, 100, 100, 0.8)';
+                    ctx.lineWidth = 15; // 글자 굵기와 맞춤
+                } else {
+                    ctx.strokeStyle = 'rgba(100, 150, 255, 0.3)';
+                    ctx.lineWidth = 15; // 글자 굵기와 맞춤
+                }
+                
+                // 각 획 그룹의 모든 선을 그리기
+                const strokeGroup = strokes[i];
+                for (let j = 0; j < strokeGroup.length; j++) {
+                    drawStroke(strokeGroup[j]);
+                }
+            }
+            ctx.restore();
+            
+            // 번호 표시 (첫 번째 선의 시작점에)
+            showStrokeNumber(strokes[currentStrokeIndex][0], currentStrokeIndex + 1);
+        }
+
+function drawStroke(stroke) {
+            if (!ctx) return;
+            
+            // 글씨체와 동일한 설정으로 스케일 계산
+            ctx.save();
+            ctx.font = '200px "Malgun Gothic", Arial, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            
+            // 실제 글자 크기를 측정
+            const metrics = ctx.measureText(currentJamo);
+            const actualWidth = metrics.width;
+            const actualHeight = 200; // 폰트 크기
+            
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            
+            // 글자 크기에 맞춘 스케일
+            const scaleX = actualWidth;
+            const scaleY = actualHeight;
+            
+            ctx.restore();
+            
+            // 선 굵기를 글자 굵기와 비슷하게 설정
+            const originalLineWidth = ctx.lineWidth;
+            ctx.lineWidth = Math.max(originalLineWidth, 12); // 글자와 비슷한 굵기
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            
+            ctx.beginPath();
+            
+            if (stroke.type === 'line') {
+                const startX = centerX + (stroke.start[0] - 0.5) * scaleX;
+                const startY = centerY + (stroke.start[1] - 0.5) * scaleY;
+                const endX = centerX + (stroke.end[0] - 0.5) * scaleX;
+                const endY = centerY + (stroke.end[1] - 0.5) * scaleY;
+                
+                ctx.moveTo(startX, startY);
+                ctx.lineTo(endX, endY);
+            } else if (stroke.type === 'circle') {
+                const circleX = centerX + (stroke.center[0] - 0.5) * scaleX;
+                const circleY = centerY + (stroke.center[1] - 0.5) * scaleY;
+                const radius = stroke.radius * Math.min(scaleX, scaleY);
+                
+                ctx.arc(circleX, circleY, radius, 0, 2 * Math.PI);
+            }
+            
+            ctx.stroke();
+        }
+
+function showStrokeNumber(stroke, number) {
+            if (!ctx) return;
+            
+            // 글자 크기에 맞춘 스케일 계산
+            ctx.save();
+            ctx.font = '200px "Malgun Gothic", Arial, sans-serif';
+            const metrics = ctx.measureText(currentJamo);
+            const actualWidth = metrics.width;
+            const actualHeight = 200;
+            ctx.restore();
+            
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const scaleX = actualWidth;
+            const scaleY = actualHeight;
+            
+            let numberX, numberY;
+            
+            if (stroke.type === 'circle') {
+                numberX = centerX + (stroke.center[0] - 0.5) * scaleX;
+                numberY = centerY + (stroke.center[1] - 0.5) * scaleY - stroke.radius * Math.min(scaleX, scaleY) - 25;
+            } else {
+                numberX = centerX + (stroke.start[0] - 0.5) * scaleX - 20;
+                numberY = centerY + (stroke.start[1] - 0.5) * scaleY - 15;
+            }
+            
+            ctx.save();
+            ctx.fillStyle = 'rgba(255, 100, 100, 0.9)';
+            ctx.beginPath();
+            ctx.arc(numberX, numberY, 18, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 18px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(number.toString(), numberX, numberY);
+            ctx.restore();
+        }
+
+function stopStrokeAnimation() {
+            if (strokeAnimationInterval) {
+                clearInterval(strokeAnimationInterval);
+                strokeAnimationInterval = null;
+            }
+            isShowingStrokes = false;
+            currentStrokeIndex = 0;
+        }
+
+    
+     function startDrawing(e) {
     if (!isPracticeMode) return;
+    
+    // 사용자가 그리기 시작하면 획순 애니메이션 중단
+    stopStrokeAnimation();
     
     isDrawing = true;
     const rect = canvas.getBoundingClientRect();
