@@ -1651,16 +1651,17 @@ if (typeof stopAudioPlayback === 'function') {
 
                     const phonicsItems = [];
 
-                    if (syllable.initial) {
-                        const initialItem = this.createPhonicsItem(
-                            syllable.initial, 
-                            this.INITIAL_PRONUNCIATION_MAP[syllable.initial] || syllable.initial,
-                            'consonant',
-                            '자음'
-                        );
-                        phonicsContainer.appendChild(initialItem);
-                        phonicsItems.push(initialItem);
-                    }
+                 if (syllable.initial) {
+    const pronunciation = this.INITIAL_PRONUNCIATION_MAP[syllable.initial] || syllable.initial;
+    const initialItem = this.createPhonicsItem(
+        syllable.initial, 
+        pronunciation,
+        'consonant',
+        '자음'
+    );
+    phonicsContainer.appendChild(initialItem);
+    phonicsItems.push(initialItem);
+}
 
                     if (syllable.vowel) {
                         const vowelItem = this.createPhonicsItem(
@@ -1700,6 +1701,7 @@ if (typeof stopAudioPlayback === 'function') {
     
     item.innerHTML = `
         <div class="jamo">${jamo}</div>
+        <div class="pronunciation" style="display: none;">${pronunciation}</div>
         <div class="jamo-type ${type}">${typeLabel}</div>
     `;
 
@@ -1755,12 +1757,15 @@ if (typeof stopAudioPlayback === 'function') {
                         const group = this.syllableGroups[i];
                         await this.playWithDelay(this.currentData.syllables[i].original, null, 600);
                         
-                        for (let j = 0; j < group.items.length; j++) {
-                            if (!this.isPlaying) break;
-                            const item = group.items[j];
-                            const pronunciation = item.querySelector('.pronunciation').textContent;
-                            await this.playWithDelay(pronunciation, item, 400);
-                        }
+                      for (let j = 0; j < group.items.length; j++) {
+    if (!this.isPlaying) break;
+    const item = group.items[j];
+    const pronunciationElement = item.querySelector('.pronunciation');
+    if (pronunciationElement) {
+        const pronunciation = pronunciationElement.textContent;
+        await this.playWithDelay(pronunciation, item, 400);
+    }
+}
                         
                         if (i < this.syllableGroups.length - 1) {
                             await this.delay(300);
