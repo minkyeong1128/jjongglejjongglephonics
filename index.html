@@ -918,34 +918,35 @@
             color: #666;
         }
 
-        .stroke-info {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
-            margin-bottom: 20px;
-            padding: 15px;
-            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-            border-radius: 15px;
-        }
+      .stroke-info {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+    padding: 15px;
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border-radius: 15px;
+}
 
-        .modal-sound {
-            font-size: 24px;
-            font-weight: bold;
-            color: #4a5568;
-        }
+/* .modal-sound 스타일 삭제 또는 주석 처리 */
 
-        .sound-replay-btn {
-            background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
-            border: none;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            color: white;
-            font-size: 16px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
+.sound-replay-btn {
+    background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
+    border: none;
+    border-radius: 25px; /* 둥근 버튼에서 둥근 사각형으로 변경 */
+    padding: 12px 20px; /* 패딩 추가 */
+    color: white;
+    font-size: 14px; /* 폰트 크기 조정 */
+    font-weight: bold; /* 굵게 */
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 8px rgba(255, 107, 107, 0.3); /* 그림자 추가 */
+}
+
+.sound-replay-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(255, 107, 107, 0.4);
+}
 
         .sound-replay-btn:hover {
             transform: scale(1.1);
@@ -1297,10 +1298,9 @@
                     <button class="modal-close" onclick="closeStrokeModal()">×</button>
                 </div>
                 <div class="modal-body">
-                    <div class="stroke-info">
-                        <span id="modalJamoSound" class="modal-sound">그</span>
-                        <button class="sound-replay-btn" id="soundReplayBtn">🔊</button>
-                    </div>
+                 <div class="stroke-info">
+    <button class="sound-replay-btn" id="soundReplayBtn">🔊</button>
+</div>
                     <div class="stroke-canvas-container">
                         <canvas id="strokeCanvas" width="300" height="300"></canvas>
                         <div class="stroke-controls">
@@ -1694,15 +1694,14 @@ if (typeof stopAudioPlayback === 'function') {
                 });
             }
 
-            createPhonicsItem(jamo, pronunciation, type, typeLabel) {
-                const item = document.createElement('div');
-                item.className = `phonics-item ${type}`;
-                
-                item.innerHTML = `
-                    <div class="jamo">${jamo}</div>
-                    <div class="pronunciation">${pronunciation}</div>
-                    <div class="jamo-type ${type}">${typeLabel}</div>
-                `;
+          createPhonicsItem(jamo, pronunciation, type, typeLabel) {
+    const item = document.createElement('div');
+    item.className = `phonics-item ${type}`;
+    
+    item.innerHTML = `
+        <div class="jamo">${jamo}</div>
+        <div class="jamo-type ${type}">${typeLabel}</div>
+    `;
 
                 item.addEventListener('click', () => {
                     this.playSound(pronunciation, item);
@@ -2455,15 +2454,14 @@ setTimeout(() => {
             });
         }
 
-        function createJamoCard(jamo, sound, type, typeLabel) {
-            const card = document.createElement('div');
-            card.className = `jamo-card ${type}-card`;
-            
-            card.innerHTML = `
-                <div class="jamo-card-jamo">${jamo}</div>
-                <div class="jamo-card-sound">${sound}</div>
-                <div class="jamo-card-type ${type}-type">${typeLabel}</div>
-            `;
+      function createJamoCard(jamo, sound, type, typeLabel) {
+    const card = document.createElement('div');
+    card.className = `jamo-card ${type}-card`;
+    
+    card.innerHTML = `
+        <div class="jamo-card-jamo">${jamo}</div>
+        <div class="jamo-card-type ${type}-type">${typeLabel}</div>
+    `;
 
             card.addEventListener('click', () => {
                 playJamoSound(sound, card);
@@ -2492,7 +2490,6 @@ setTimeout(() => {
     currentType = type;
 
     document.getElementById('modalJamoTitle').textContent = jamo;
-    document.getElementById('modalJamoSound').textContent = sound;
     document.getElementById('strokeOrderModal').classList.remove('hidden');
 
     // 소리 재생 버튼에 이벤트 리스너 추가
