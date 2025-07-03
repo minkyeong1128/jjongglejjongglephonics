@@ -1400,6 +1400,10 @@ if (typeof stopAudioPlayback === 'function') {
                 this.currentData = null;
                 this.syllableGroups = [];
                 this.playingIndex = -1;
+
+this.isRecognizing = false;
+    this.lastProcessedText = '';
+    this.processingTimeout = null;
                 
                 this.initializeElements();
                 this.initializeEventListeners();
@@ -1498,18 +1502,34 @@ if (typeof stopAudioPlayback === 'function') {
                 this.recognition.onstart = () => {
                     this.micButton.classList.add('recording');
                     this.voiceStatus.textContent = '듣고 있어요... 단어를 말해보세요!';
+this.isRecognizing = true;
                 };
 
                 this.recognition.onresult = (event) => {
-                    if (event.results && event.results.length > 0) {
-                        const text = event.results[0][0].transcript.trim();
-                        if (text) {
-                            this.processVoiceInput(text);
-                        }
-                    }
-                };
+    if (!this.isRecognizing) return;
+    
+    if (event.results && event.results.length > 0) {
+        const text = event.results[0][0].transcript.trim();
+        
+        if (text && text !== this.lastProcessedText) {
+            this.lastProcessedText = text;
+            this.isRecognizing = false;
+            this.micButton.classList.remove('recording');
+            
+            if (this.processingTimeout) {
+                clearTimeout(this.processingTimeout);
+            }
+            
+            this.processingTimeout = setTimeout(() => {
+                this.processVoiceInput(text);
+                this.processingTimeout = null;
+            }, 100);
+        }
+    }
+};
 
                 this.recognition.onerror = (event) => {
+this.isRecognizing = false;  // ← 이 줄을 추가
                     this.micButton.classList.remove('recording');
                     let errorMessage = '음성인식에 실패했어요. ';
                     switch(event.error) {
@@ -1531,6 +1551,7 @@ if (typeof stopAudioPlayback === 'function') {
                 };
 
                 this.recognition.onend = () => {
+this.isRecognizing = false;  // ← 이 줄을 추가
                     this.micButton.classList.remove('recording');
                     if (this.voiceStatus.textContent.includes('듣고 있어요')) {
                         this.voiceStatus.textContent = '마이크 버튼을 눌러 단어를 말해보세요';
@@ -1551,24 +1572,39 @@ if (typeof stopAudioPlayback === 'function') {
                 }
             }
 
-            toggleRecording() {
-                if (!this.recognition) {
-                    alert('음성인식을 사용할 수 없습니다.');
-                    return;
-                }
+           toggleRecording() {
+    if (!this.recognition) {
+        alert('음성인식을 사용할 수 없습니다.');
+        return;
+    }
 
-                if (this.micButton.classList.contains('recording')) {
-                    this.recognition.stop();
-                } else {
-                    try {
-                        this.recognition.start();
-                    } catch (error) {
-                        this.voiceStatus.textContent = '음성인식을 시작할 수 없어요. 다시 시도해주세요.';
-                    }
-                }
-            }
+    if (this.micButton.classList.contains('recording') || this.isRecognizing) {
+        // 인식 중단
+        this.isRecognizing = false;
+        this.recognition.stop();
+        this.micButton.classList.remove('recording');
+        this.voiceStatus.textContent = '마이크 버튼을 눌러 단어를 말해보세요';
+    } else {
+        // 인식 시작
+        if (this.processingTimeout) {
+            clearTimeout(this.processingTimeout);
+            this.processingTimeout = null;
+        }
+        
+        this.isRecognizing = true;
+        this.lastProcessedText = '';
+        
+        try {
+            this.recognition.start();
+        } catch (error) {
+            this.isRecognizing = false;
+            this.voiceStatus.textContent = '음성인식을 시작할 수 없어요. 다시 시도해주세요.';
+        }
+    }
+}
 
             processVoiceInput(text) {
+if (this.isRecognizing) return;  // ← 이 줄을 추가
                 this.voiceStatus.textContent = `"${text}"를 분석중이에요...`;
                 this.loading.style.display = 'block';
                 setTimeout(() => {
@@ -1845,7 +1881,13 @@ if (typeof stopAudioPlayback === 'function') {
 
             resetApp() {
                 this.isPlaying = false;
-                
+                 this.isRecognizing = false;      // ← 추가
+    this.lastProcessedText = '';     // ← 추가
+    
+    if (this.processingTimeout) {    // ← 추가 시작
+        clearTimeout(this.processingTimeout);
+        this.processingTimeout = null;
+    }                                // ← 추가 끝
                 if (this.speechSynthesis.speaking) {
                     this.speechSynthesis.cancel();
                 }
