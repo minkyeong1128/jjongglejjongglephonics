@@ -2260,10 +2260,14 @@ else if (currentJamo === 'ㄲ') {
         const midY = (startY + endY) / 2;
         arrowX = midX;
         arrowY = midY + 20; // 아래쪽으로 20px (짧은 화살표)
-    } else if (strokeIndex === 4) {
-        // 5획 (두 번째 ㅂ 왼쪽 세로획)은 획과 가깝게
-        offset = 25;
-        positionRatio = 0.3;
+   
+      } else if (strokeIndex === 4) {
+    // 5획 (두 번째 ㅂ 왼쪽 세로획)은 왼쪽으로 이동
+    const quarterX = startX + (endX - startX) * 0.3;
+    const quarterY = startY + (endY - startY) * 0.3;
+    arrowX = quarterX - 15; // 왼쪽으로 30px 이동
+    arrowY = quarterY;
+
     } else if (strokeIndex === 5) {
         // 6획 (두 번째 ㅂ 오른쪽 세로획)은 획의 오른쪽에 가깝게
         offset = 25;
@@ -2414,7 +2418,7 @@ else if (currentJamo === 'ㄲ') {
     !(currentJamo === 'ㅋ' && strokeIndex === 1) &&
     !(currentJamo === 'ㅌ' && strokeIndex === 1) &&
     !(currentJamo === 'ㄸ' && strokeIndex === 3) &&
-    !(currentJamo === 'ㅃ' && (strokeIndex === 1 || strokeIndex === 2 || strokeIndex === 3 || strokeIndex === 5 || strokeIndex === 6 || strokeIndex === 7)) &&
+    !(currentJamo === 'ㅃ' && (strokeIndex === 1 || strokeIndex === 2 || strokeIndex === 3 || strokeIndex === 4 || strokeIndex === 5 || strokeIndex === 6 || strokeIndex === 7)) &&
     !(currentJamo === 'ㅆ' && (strokeIndex === 0 || strokeIndex === 1 || strokeIndex === 2 || strokeIndex === 3)) &&
     !(currentJamo === 'ㅉ' && (strokeIndex === 1 || strokeIndex === 3))) {
         const quarterX = startX + (endX - startX) * positionRatio;
