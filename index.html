@@ -2313,11 +2313,33 @@ else if (currentJamo === 'ㄲ') {
         offset = 60;
         positionRatio = 0.25;
     }
-}
-else if (currentJamo === 'ㅉ') {
+} else if (currentJamo === 'ㅉ') {
+    if (strokeIndex === 0) {
+        // 1획은 획과 가깝게
+        offset = 25;  // 55 → 25로 변경
+        positionRatio = 0.2;
+    } else if (strokeIndex === 1) {
+        // 2획은 오른쪽 위 대각선 방향으로 이동
+        const midX = (startX + endX) / 2;
+        const midY = (startY + endY) / 2;
+        arrowX = midX + 20;  // 오른쪽으로 20px 이동
+        arrowY = midY - 25;  // 위쪽으로 25px 이동
+    } else if (strokeIndex === 2) {
+        // 3획은 획과 가깝게
+        offset = 25;  // 55 → 25로 변경
+        positionRatio = 0.2;
+    } else if (strokeIndex === 3) {
+        // 4획은 오른쪽 아래 대각선 방향으로 이동
+        const midX = (startX + endX) / 2;
+        const midY = (startY + endY) / 2;
+        arrowX = midX + 20;  // 오른쪽으로 20px 이동
+        arrowY = midY - 25;  // 아래쪽으로 25px 이동
+    } else {
+        // 나머지 획들은 기존 설정 유지
         offset = 55;
         positionRatio = 0.2;
     }
+}
     // 모음
     else if (currentJamo === 'ㅏ') {
         offset = 45;
@@ -2393,7 +2415,8 @@ else if (currentJamo === 'ㅉ') {
     !(currentJamo === 'ㅌ' && strokeIndex === 1) &&
     !(currentJamo === 'ㄸ' && strokeIndex === 3) &&
     !(currentJamo === 'ㅃ' && (strokeIndex === 1 || strokeIndex === 2 || strokeIndex === 3 || strokeIndex === 5 || strokeIndex === 6 || strokeIndex === 7)) &&
-    !(currentJamo === 'ㅆ' && (strokeIndex === 0 || strokeIndex === 1 || strokeIndex === 2 || strokeIndex === 3))) {
+    !(currentJamo === 'ㅆ' && (strokeIndex === 0 || strokeIndex === 1 || strokeIndex === 2 || strokeIndex === 3)) &&
+    !(currentJamo === 'ㅉ' && (strokeIndex === 1 || strokeIndex === 3))) {
         const quarterX = startX + (endX - startX) * positionRatio;
         const quarterY = startY + (endY - startY) * positionRatio;
         
