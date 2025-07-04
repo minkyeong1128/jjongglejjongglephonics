@@ -2448,11 +2448,13 @@ else if (currentJamo === 'ㄲ') {
         offset = 50;
         positionRatio = 0.2;
     }
-  } else if (currentJamo === 'ㅗ') {
+ } else if (currentJamo === 'ㅗ') {
     if (strokeIndex === 0) {
-        // 1획은 획과 가깝게
-        offset = 25; // 50에서 25로 변경
-        positionRatio = 0.2;
+        // 1획 화살표를 획의 왼쪽에 배치
+        const midX = (startX + endX) / 2;
+        const midY = (startY + endY) / 2;
+        arrowX = midX - 30; // 왼쪽으로 30px 이동
+        arrowY = midY;
     } else if (strokeIndex === 1) {
         // 2획은 획 바로 아래에 (짧은 화살표)
         const midX = (startX + endX) / 2;
@@ -2823,7 +2825,7 @@ if (!(currentJamo === 'ㄹ' && strokeIndex === 1) &&
     !(currentJamo === 'ㅑ' && (strokeIndex === 1 || strokeIndex === 2)) &&
     !(currentJamo === 'ㅓ' && strokeIndex === 0) &&
     !(currentJamo === 'ㅕ' && (strokeIndex === 0 || strokeIndex === 1 || strokeIndex === 2)) &&
-    !(currentJamo === 'ㅗ' && strokeIndex === 1) &&
+    !(currentJamo === 'ㅗ' && (strokeIndex === 0 ||strokeIndex === 1)) &&
     !(currentJamo === 'ㅛ' && (strokeIndex === 1 || strokeIndex === 2)) &&
     !(currentJamo === 'ㅜ' && strokeIndex === 1) &&
     !(currentJamo === 'ㅠ' && (strokeIndex === 1 || strokeIndex === 2)) &&
