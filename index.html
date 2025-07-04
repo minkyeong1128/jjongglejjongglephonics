@@ -1112,7 +1112,7 @@ const STROKE_ADJUSTMENTS = {
     'ㅁ': { scaleX: 1.0, scaleY: 1.0, offsetX: 0, offsetY: -10 },
     'ㅂ': { scaleX: 1.0, scaleY: 1.0, offsetX: 0, offsetY: -10 },
     'ㅅ': { scaleX: 1.1, scaleY: 1.0, offsetX: -10, offsetY: 0 },
-    'ㅇ': { scaleX: 1.1, scaleY: 1.0, offsetX: 10, offsetY: -10 },
+    'ㅇ': { scaleX: 1.1, scaleY: 1.0, offsetX: 0, offsetY: 0 },
     'ㅈ': { scaleX: 1.3, scaleY: 1.0, offsetX: 0, offsetY: -10 },
     'ㅊ': { scaleX: 1.4, scaleY: 1.0, offsetX: 15, offsetY: 0 },
     'ㅋ': { scaleX: 1.4, scaleY: 1.0, offsetX: 20, offsetY: -10 },
@@ -1978,150 +1978,389 @@ function stopStrokeAnimation() {
             isShowingStrokes = false;
             currentStrokeIndex = 0;
         }
-// 방향 화살표를 그리는 함수
-        function drawDirectionArrows(strokeGroup, strokeIndex) {
-            if (!ctx) return;
-            
-            const centerX = canvas.width / 2;
-            const centerY = canvas.height / 2;
-            
-            // 개별 조정값 가져오기
-            const adjustment = STROKE_ADJUSTMENTS[currentJamo] || DEFAULT_ADJUSTMENT;
-            
-            // 실제 글자와 동일한 크기 계산 + 개별 조정
-            ctx.save();
-            ctx.font = '200px "Malgun Gothic", Arial, sans-serif';
-            const metrics = ctx.measureText(currentJamo);
-            const actualFontHeight = 200 * 1.0;
-            const scaleX = actualFontHeight * adjustment.scaleX;
-            const scaleY = actualFontHeight * adjustment.scaleY;
-            const adjustedCenterX = centerX + adjustment.offsetX;
-            const adjustedCenterY = centerY + adjustment.offsetY;
-            ctx.restore();
-            
-            // 화살표 색상 설정
-            ctx.strokeStyle = '#FF4757';
-            ctx.fillStyle = '#FF4757';
-            ctx.lineWidth = 3;
-            
-// 꺾이는 획인지 확인 (strokeGroup의 length가 2 이상이고 모두 line인 경우)
-if (strokeGroup.length >= 2 && strokeGroup.every(s => s.type === 'line')) {
-    // 꺾이는 획의 경우: 첫 번째 선분에만 화살표 표시
-    const firstStroke = strokeGroup[0];
-    const startX = adjustedCenterX + (firstStroke.start[0] - 0.5) * scaleX;
-    const startY = adjustedCenterY + (firstStroke.start[1] - 0.5) * scaleY;
-    const endX = adjustedCenterX + (firstStroke.end[0] - 0.5) * scaleX;
-    const endY = adjustedCenterY + (firstStroke.end[1] - 0.5) * scaleY;
+// 방향 화살표를 그리는 함수 (정확한 획순 위치)
+function drawDirectionArrows(strokeGroup, strokeIndex) {
+    if (!ctx) return;
     
-    drawArrow(startX, startY, endX, endY);
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
     
-} else {
-    // 기존 방식으로 각 stroke별로 화살표 그리기
-    for (let i = 0; i < strokeGroup.length; i++) {
-        const stroke = strokeGroup[i];
+    // 개별 조정값 가져오기
+    const adjustment = STROKE_ADJUSTMENTS[currentJamo] || DEFAULT_ADJUSTMENT;
+    
+    // 실제 글자와 동일한 크기 계산 + 개별 조정
+    ctx.save();
+    ctx.font = '200px "Malgun Gothic", Arial, sans-serif';
+    const metrics = ctx.measureText(currentJamo);
+    const actualFontHeight = 200 * 1.0;
+    const scaleX = actualFontHeight * adjustment.scaleX;
+    const scaleY = actualFontHeight * adjustment.scaleY;
+    const adjustedCenterX = centerX + adjustment.offsetX;
+    const adjustedCenterY = centerY + adjustment.offsetY;
+    ctx.restore();
+    
+    // 화살표 색상 설정
+    ctx.strokeStyle = '#FF4757';
+    ctx.fillStyle = '#FF4757';
+    ctx.lineWidth = 3;
+
+    // 꺾이는 획인지 확인 (strokeGroup의 length가 2 이상이고 모두 line인 경우)
+    if (strokeGroup.length >= 2 && strokeGroup.every(s => s.type === 'line')) {
+        // 꺾이는 획의 경우: 첫 번째 선분에만 화살표 표시
+        const firstStroke = strokeGroup[0];
+        const startX = adjustedCenterX + (firstStroke.start[0] - 0.5) * scaleX;
+        const startY = adjustedCenterY + (firstStroke.start[1] - 0.5) * scaleY;
+        const endX = adjustedCenterX + (firstStroke.end[0] - 0.5) * scaleX;
+        const endY = adjustedCenterY + (firstStroke.end[1] - 0.5) * scaleY;
         
-        if (stroke.type === 'line') {
-            const startX = adjustedCenterX + (stroke.start[0] - 0.5) * scaleX;
-            const startY = adjustedCenterY + (stroke.start[1] - 0.5) * scaleY;
-            const endX = adjustedCenterX + (stroke.end[0] - 0.5) * scaleX;
-            const endY = adjustedCenterY + (stroke.end[1] - 0.5) * scaleY;
+        drawArrowOutside(startX, startY, endX, endY, strokeIndex);
+        
+    } else {
+        // 각 stroke별로 화살표 그리기
+        for (let i = 0; i < strokeGroup.length; i++) {
+            const stroke = strokeGroup[i];
             
-            drawArrow(startX, startY, endX, endY);
-            
-        } else if (stroke.type === 'circle') {
-            const circleX = adjustedCenterX + (stroke.center[0] - 0.5) * scaleX;
-            const circleY = adjustedCenterY + (stroke.center[1] - 0.5) * scaleY;
-            const radius = stroke.radius * Math.min(scaleX, scaleY) + 5;
-            
-            drawCircleArrow(circleX, circleY, radius);
+            if (stroke.type === 'line') {
+                const startX = adjustedCenterX + (stroke.start[0] - 0.5) * scaleX;
+                const startY = adjustedCenterY + (stroke.start[1] - 0.5) * scaleY;
+                const endX = adjustedCenterX + (stroke.end[0] - 0.5) * scaleX;
+                const endY = adjustedCenterY + (stroke.end[1] - 0.5) * scaleY;
+                
+                drawArrowOutside(startX, startY, endX, endY, strokeIndex);
+                
+            } else if (stroke.type === 'circle') {
+                // 원형 글자는 중앙에 위치하도록 offset 무시
+                const circleX = centerX + (stroke.center[0] - 0.5) * scaleX;
+                const circleY = centerY + (stroke.center[1] - 0.5) * scaleY;
+                const radius = stroke.radius * Math.min(scaleX, scaleY) + 5;
+                
+                // 원형 화살표는 한 번만 그리기
+                drawCircleArrowOutside(circleX, circleY, radius);
+            }
         }
     }
 }
-        }
 
-        // 직선 화살표 그리기 함수
-        // 직선 화살표 그리기 함수
-        function drawArrow(startX, startY, endX, endY) {
-            const headLength = 20; // 화살표 머리 길이
-            const headAngle = Math.PI / 6; // 화살표 머리 각도
-            const offset = 25; // 획으로부터의 거리
-            
-            // 방향 계산
-            const angle = Math.atan2(endY - startY, endX - startX);
-            
-            // 화살표 위치 (선의 중간 지점)
+// 직선 화살표 그리기 함수 (모든 자모 최적화)
+function drawArrowOutside(startX, startY, endX, endY, strokeIndex) {
+    const headLength = 20;
+    const headAngle = Math.PI / 6;
+    let offset = 40; // 기본 거리
+    
+    // 방향 계산
+    const angle = Math.atan2(endY - startY, endX - startX);
+    const lineLength = Math.sqrt((endX - startX) ** 2 + (endY - startY) ** 2);
+    
+    let arrowX, arrowY;
+    let positionRatio = 0.2; // 기본 위치
+    
+    // 자모별 개별 설정
+    if (currentJamo === 'ㄱ') {
+        offset = 25; // 획과 가깝게
+        positionRatio = 0.15;
+    } else if (currentJamo === 'ㄴ') {
+        offset = 25; // 획과 가깝게
+        positionRatio = 0.25; // 조금 내려와서
+    } else if (currentJamo === 'ㄷ') {
+        if (strokeIndex === 0) {
+            // 1획은 획과 가깝게
+            offset = 25;
+            positionRatio = 0.15;
+        } else {
+            // 2획은 더 아래로 내려서
+            offset = 25;
+            positionRatio = 0.5; // 0.35에서 0.5로 더 아래로
+        }
+    } else if (currentJamo === 'ㄹ') {
+        if (strokeIndex === 1) {
+            // 2획만 바로 위에 표시
+            offset = 20; // 25→20으로 더 가깝게
             const midX = (startX + endX) / 2;
             const midY = (startY + endY) / 2;
-            
-            // 획과 수직인 방향으로 오프셋 계산
-            const perpAngle = angle + Math.PI / 2;
-            const arrowX = midX + offset * Math.cos(perpAngle);
-            const arrowY = midY + offset * Math.sin(perpAngle);
-            
-            // 화살표 끝점 계산
-            const arrowEndX = arrowX + headLength * Math.cos(angle);
-            const arrowEndY = arrowY + headLength * Math.sin(angle);
-            
-            // 화살표 색상을 연한 회색으로 설정
-            ctx.save();
-            ctx.strokeStyle = '#888888';
-            ctx.fillStyle = '#888888';
-            ctx.lineWidth = 2;
-            
-            // 화살표 몸통 그리기
-            ctx.beginPath();
-            ctx.moveTo(arrowX - headLength * 0.5 * Math.cos(angle), 
-                       arrowY - headLength * 0.5 * Math.sin(angle));
-            ctx.lineTo(arrowEndX, arrowEndY);
-            ctx.stroke();
-            
-            // 화살표 머리 그리기
-            ctx.beginPath();
-            ctx.moveTo(arrowEndX, arrowEndY);
-            ctx.lineTo(arrowEndX - headLength * 0.7 * Math.cos(angle - headAngle), 
-                       arrowEndY - headLength * 0.7 * Math.sin(angle - headAngle));
-            ctx.lineTo(arrowEndX - headLength * 0.7 * Math.cos(angle + headAngle), 
-                       arrowEndY - headLength * 0.7 * Math.sin(angle + headAngle));
-            ctx.closePath();
-            ctx.fill();
-            
-            ctx.restore();
+            arrowX = midX;
+            arrowY = midY - offset;
+        } else if (strokeIndex === 2) {
+            // 3획은 더 아래로, 오른쪽으로 이동
+            offset = 25;
+            positionRatio = 0.4; // 0.35→0.4로 조금 더 오른쪽으로
+        } else {
+            // 1획
+            offset = 25;
+            positionRatio = 0.25;
         }
-
-       // 원형 화살표 그리기 함수
-        function drawCircleArrow(centerX, centerY, radius) {
-            const arrowSize = 15;
-            const offset = 30; // 원으로부터의 거리
-            
-            // 시계방향 화살표를 12시 방향 바깥쪽에 그리기
-            const arrowX = centerX;
-            const arrowY = centerY - radius - offset;
-            
-            // 화살표 색상을 연한 회색으로 설정
-            ctx.save();
-            ctx.strokeStyle = '#888888';
-            ctx.fillStyle = '#888888';
-            ctx.lineWidth = 2;
-            
-            // 곡선 화살표 그리기
-            ctx.beginPath();
-            ctx.arc(centerX, centerY, radius + offset, -Math.PI/2, -Math.PI/4);
-            ctx.stroke();
-            
-            // 화살표 머리 그리기
-            const headX = centerX + (radius + offset) * Math.cos(-Math.PI/4);
-            const headY = centerY + (radius + offset) * Math.sin(-Math.PI/4);
-            
-            ctx.beginPath();
-            ctx.moveTo(headX, headY);
-            ctx.lineTo(headX - arrowSize * 0.7, headY - arrowSize * 0.3);
-            ctx.lineTo(headX - arrowSize * 0.3, headY - arrowSize * 0.7);
-            ctx.closePath();
-            ctx.fill();
-            
-            ctx.restore();
+    } else if (currentJamo === 'ㅁ') {
+        if (strokeIndex === 0) {
+            // 1획은 더 아래로
+            offset = 25;
+            positionRatio = 0.4; // 0.25→0.4로 더 아래로
+        } else {
+            offset = 25;
+            positionRatio = 0.25;
         }
+    } else if (currentJamo === 'ㅂ') {
+        if (strokeIndex === 2) {
+            // 3획 (가운데 가로획)은 십자선 세로선 위치에 표시
+            offset = 25; // 30→25로 더 가깝게
+            const centerX = canvas.width / 2;
+            const midY = (startY + endY) / 2;
+            arrowX = centerX;
+            arrowY = midY - offset;
+        } else if (strokeIndex === 3) {
+            // 4획 (아래 가로획)은 십자선 세로선 위치 아래에 표시
+            offset = 25; // 30→25로 더 가깝게
+            const centerX = canvas.width / 2;
+            const midY = (startY + endY) / 2;
+            arrowX = centerX;
+            arrowY = midY + offset; // 아래쪽으로 변경
+        } else {
+            offset = 25; // 50→25로 더 가깝게
+            positionRatio = 0.4; // 0.5→0.4로 조금 올려서
+        }
+    } else if (currentJamo === 'ㅅ') {
+        if (strokeIndex === 1) {
+            // 2획은 오른쪽 아래 대각선으로 더 내려서
+            offset = 30;
+            positionRatio = 0.5; // 0.3→0.5로 더 아래로
+        } else {
+            offset = 30;
+            positionRatio = 0.3;
+        }
+    } else if (currentJamo === 'ㅇ') {
+        // 원형이므로 여기서는 처리하지 않음
+        return;
+    } else if (currentJamo === 'ㅈ') {
+        if (strokeIndex === 1) {
+            // 2획은 오른쪽 아래로 더 멀리, 거리는 가깝게
+            offset = 25;
+            positionRatio = 0.6;
+        } else {
+            offset = 50;
+            positionRatio = 0.2;
+        }
+    } else if (currentJamo === 'ㅊ') {
+        if (strokeIndex === 1) {
+            // 2획 (가로+대각선)은 가로 부분 가운데에 표시
+            offset = 20;
+            const midX = (startX + endX) / 2;
+            const midY = (startY + endY) / 2;
+            arrowX = midX - 15; // 왼쪽으로 15px 이동
+            arrowY = midY + offset; // 가로획보다 살짝 아래
+        } else if (strokeIndex === 2) {
+            // 3획 (오른쪽 대각선)은 오른쪽 아래로 표시
+            offset = 20;
+            positionRatio = 0.5;
+        } else {
+            offset = 55;
+            positionRatio = 0.2;
+        }
+    } else if (currentJamo === 'ㅋ') {
+        offset = 55;
+        positionRatio = 0.15;
+    } else if (currentJamo === 'ㅌ') {
+        offset = 55;
+        positionRatio = 0.15;
+    } else if (currentJamo === 'ㅍ') {
+        offset = 50;
+        positionRatio = 0.15;
+    } else if (currentJamo === 'ㅎ') {
+        offset = 60; // 복잡하므로 더 멀리
+        positionRatio = 0.2;
+    } 
+    // 쌍자음
+    else if (currentJamo === 'ㄲ') {
+        offset = 55;
+        positionRatio = 0.15;
+    } else if (currentJamo === 'ㄸ') {
+        offset = 55;
+        positionRatio = 0.15;
+    } else if (currentJamo === 'ㅃ') {
+        offset = 60;
+        positionRatio = 0.15;
+    } else if (currentJamo === 'ㅆ') {
+        offset = 60;
+        positionRatio = 0.25;
+    } else if (currentJamo === 'ㅉ') {
+        offset = 55;
+        positionRatio = 0.2;
+    }
+    // 모음
+    else if (currentJamo === 'ㅏ') {
+        offset = 45;
+        positionRatio = 0.2;
+    } else if (currentJamo === 'ㅑ') {
+        offset = 50;
+        positionRatio = 0.2;
+    } else if (currentJamo === 'ㅓ') {
+        offset = 45;
+        positionRatio = 0.2;
+    } else if (currentJamo === 'ㅕ') {
+        offset = 50;
+        positionRatio = 0.2;
+    } else if (currentJamo === 'ㅗ') {
+        offset = 50;
+        positionRatio = 0.2;
+    } else if (currentJamo === 'ㅛ') {
+        offset = 55;
+        positionRatio = 0.2;
+    } else if (currentJamo === 'ㅜ') {
+        offset = 50;
+        positionRatio = 0.2;
+    } else if (currentJamo === 'ㅠ') {
+        offset = 55;
+        positionRatio = 0.2;
+    } else if (currentJamo === 'ㅡ') {
+        offset = 50;
+        positionRatio = 0.5; // 가로줄은 중간에
+    } else if (currentJamo === 'ㅣ') {
+        offset = 50;
+        positionRatio = 0.2;
+    }
+    // 이중모음
+    else if (currentJamo === 'ㅐ') {
+        offset = 55;
+        positionRatio = 0.2;
+    } else if (currentJamo === 'ㅒ') {
+        offset = 60;
+        positionRatio = 0.2;
+    } else if (currentJamo === 'ㅔ') {
+        offset = 55;
+        positionRatio = 0.2;
+    } else if (currentJamo === 'ㅖ') {
+        offset = 60;
+        positionRatio = 0.2;
+    } else if (currentJamo === 'ㅘ') {
+        offset = 60;
+        positionRatio = 0.2;
+    } else if (currentJamo === 'ㅙ') {
+        offset = 65;
+        positionRatio = 0.2;
+    } else if (currentJamo === 'ㅚ') {
+        offset = 60;
+        positionRatio = 0.2;
+    } else if (currentJamo === 'ㅝ') {
+        offset = 60;
+        positionRatio = 0.2;
+    } else if (currentJamo === 'ㅞ') {
+        offset = 65;
+        positionRatio = 0.2;
+    } else if (currentJamo === 'ㅟ') {
+        offset = 60;
+        positionRatio = 0.2;
+    } else if (currentJamo === 'ㅢ') {
+        offset = 55;
+        positionRatio = 0.2;
+    }
     
+    // ㄹ의 2획, ㅂ의 3,4획, ㅊ의 2획이 아닌 경우 일반 처리
+    if (!(currentJamo === 'ㄹ' && strokeIndex === 1) && 
+        !(currentJamo === 'ㅂ' && (strokeIndex === 2 || strokeIndex === 3)) &&
+        !(currentJamo === 'ㅊ' && strokeIndex === 1)) {
+        const quarterX = startX + (endX - startX) * positionRatio;
+        const quarterY = startY + (endY - startY) * positionRatio;
+        
+        const perpAngle = angle + Math.PI / 2;
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+        
+        const toCenterX = centerX - quarterX;
+        const toCenterY = centerY - quarterY;
+        
+        let finalOffset = offset;
+        if (toCenterX * Math.cos(perpAngle) + toCenterY * Math.sin(perpAngle) > 0) {
+            finalOffset = -offset;
+        }
+        
+        arrowX = quarterX + finalOffset * Math.cos(perpAngle);
+        arrowY = quarterY + finalOffset * Math.sin(perpAngle);
+    }
+    
+    // 화살표 끝점 계산
+    const arrowEndX = arrowX + headLength * Math.cos(angle);
+    const arrowEndY = arrowY + headLength * Math.sin(angle);
+    
+    // 화살표 그리기
+    ctx.save();
+    ctx.strokeStyle = '#FF3742';
+    ctx.fillStyle = '#FF3742';
+    ctx.lineWidth = 3;
+    
+    // 화살표 몸통 그리기
+    ctx.beginPath();
+    ctx.moveTo(arrowX - headLength * 0.8 * Math.cos(angle), 
+               arrowY - headLength * 0.8 * Math.sin(angle));
+    ctx.lineTo(arrowEndX, arrowEndY);
+    ctx.stroke();
+    
+    // 화살표 머리 그리기
+    ctx.beginPath();
+    ctx.moveTo(arrowEndX, arrowEndY);
+    ctx.lineTo(arrowEndX - headLength * 0.7 * Math.cos(angle - headAngle), 
+               arrowEndY - headLength * 0.7 * Math.sin(angle - headAngle));
+    ctx.lineTo(arrowEndX - headLength * 0.7 * Math.cos(angle + headAngle), 
+               arrowEndY - headLength * 0.7 * Math.sin(angle + headAngle));
+    ctx.closePath();
+    ctx.fill();
+    
+    ctx.restore();
+}
+
+// 원형 화살표 그리기 함수 (바깥쪽으로 표시)
+function drawCircleArrowOutside(centerX, centerY, radius) {
+    const arrowSize = 15;
+    const offset = 30; // 더 가깝게
+    
+    ctx.save();
+    ctx.strokeStyle = '#FF3742';
+    ctx.fillStyle = '#FF3742';
+    ctx.lineWidth = 3;
+    
+    // 곡선 화살표 그리기 (오른쪽에서 시작)
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius + offset, 0, Math.PI/3); // 3시에서 5시 방향
+    ctx.stroke();
+    
+    // 화살표 머리 그리기
+    const headX = centerX + (radius + offset) * Math.cos(Math.PI/3);
+    const headY = centerY + (radius + offset) * Math.sin(Math.PI/3);
+    
+    ctx.beginPath();
+    ctx.moveTo(headX, headY);
+    ctx.lineTo(headX - arrowSize * 0.5, headY - arrowSize * 0.8);
+    ctx.lineTo(headX - arrowSize * 0.8, headY - arrowSize * 0.5);
+    ctx.closePath();
+    ctx.fill();
+    
+    ctx.restore();
+}
+// 원형 화살표 그리기 함수 (바깥쪽으로 표시)
+function drawCircleArrowOutside(centerX, centerY, radius) {
+    const arrowSize = 15;
+    const offset = 50; // 원으로부터의 거리
+    
+    ctx.save();
+    ctx.strokeStyle = '#FF3742';
+    ctx.fillStyle = '#FF3742';
+    ctx.lineWidth = 3;
+    
+    // 곡선 화살표 그리기 (더 바깥쪽에서)
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius + offset, -Math.PI/2, -Math.PI/4);
+    ctx.stroke();
+    
+    // 화살표 머리 그리기
+    const headX = centerX + (radius + offset) * Math.cos(-Math.PI/4);
+    const headY = centerY + (radius + offset) * Math.sin(-Math.PI/4);
+    
+    ctx.beginPath();
+    ctx.moveTo(headX, headY);
+    ctx.lineTo(headX - arrowSize * 0.7, headY - arrowSize * 0.3);
+    ctx.lineTo(headX - arrowSize * 0.3, headY - arrowSize * 0.7);
+    ctx.closePath();
+    ctx.fill();
+    
+    ctx.restore();
+}
+
      function startDrawing(e) {
     if (!isPracticeMode) return;
     
