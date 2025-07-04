@@ -2128,40 +2128,84 @@ function drawArrowOutside(startX, startY, endX, endY, strokeIndex) {
     } else if (currentJamo === 'ㅇ') {
         // 원형이므로 여기서는 처리하지 않음
         return;
-    } else if (currentJamo === 'ㅈ') {
-        if (strokeIndex === 1) {
-            // 2획은 오른쪽 아래로 더 멀리, 거리는 가깝게
-            offset = 25;
-            positionRatio = 0.6;
-        } else {
-            offset = 50;
-            positionRatio = 0.2;
-        }
-    } else if (currentJamo === 'ㅊ') {
-        if (strokeIndex === 1) {
-            // 2획 (가로+대각선)은 가로 부분 가운데에 표시
-            offset = 20;
-            const midX = (startX + endX) / 2;
-            const midY = (startY + endY) / 2;
-            arrowX = midX - 15; // 왼쪽으로 15px 이동
-            arrowY = midY + offset; // 가로획보다 살짝 아래
-        } else if (strokeIndex === 2) {
-            // 3획 (오른쪽 대각선)은 오른쪽 아래로 표시
-            offset = 20;
-            positionRatio = 0.5;
-        } else {
-            offset = 55;
-            positionRatio = 0.2;
-        }
-    } else if (currentJamo === 'ㅋ') {
-        offset = 55;
+  } else if (currentJamo === 'ㅈ') {
+    if (strokeIndex === 1) {
+        // 2획은 오른쪽 아래로 더 멀리, 거리는 가깝게
+        offset = 25;
+        positionRatio = 0.6;
+    } else {
+        offset = 25;  // 50 → 25로 변경 (1획 화살표를 획과 가깝게)
+        positionRatio = 0.2;
+    }
+} else if (currentJamo === 'ㅊ') {
+    if (strokeIndex === 0) {
+        // 1획은 획의 정확한 가운데에 표시
+        offset = 30;
+        positionRatio = 0.5; // 획의 정확한 가운데 (50% 지점)
+    } else if (strokeIndex === 1) {
+        // 2획 (가로+대각선)은 가로 부분 가운데에 표시
+        offset = 20;
+        const midX = (startX + endX) / 2;
+        const midY = (startY + endY) / 2;
+        arrowX = midX - 15; // 왼쪽으로 15px 이동
+        arrowY = midY + offset; // 가로획보다 살짝 아래
+    } else if (strokeIndex === 2) {
+        // 3획 (오른쪽 대각선)은 오른쪽 아래로 표시
+        offset = 20;
+        positionRatio = 0.5;
+    } else {
+        offset = 25;
+        positionRatio = 0.2;
+    }
+} else if (currentJamo === 'ㅋ') {
+    if (strokeIndex === 1) {
+        // 2획은 획 바로 위에 표시
+        offset = 20;
+        const midX = (startX + endX) / 2;
+        const midY = (startY + endY) / 2;
+        arrowX = midX;
+        arrowY = midY - offset;
+    } else {
+        offset = 25;  // 55 → 25로 변경 (1획 화살표를 획과 가깝게)
         positionRatio = 0.15;
-    } else if (currentJamo === 'ㅌ') {
-        offset = 55;
+    }
+} else if (currentJamo === 'ㅌ') {
+    if (strokeIndex === 1) {
+        // 2획은 획 바로 위에 표시
+        offset = 20;
+        const midX = (startX + endX) / 2;
+        const midY = (startY + endY) / 2;
+        arrowX = midX;
+        arrowY = midY - offset;
+    } else if (strokeIndex === 2) {
+        // 3획은 아래로 이동시켜서 획순번호를 가리지 않게 함
+        offset = 30;
+        positionRatio = 0.7;  // 0.15 → 0.7로 변경하여 아래로 이동
+    } else {
+        offset = 25;  // 55 → 25로 변경 (1획 화살표를 획과 가깝게)
         positionRatio = 0.15;
+    }
     } else if (currentJamo === 'ㅍ') {
-        offset = 50;
-        positionRatio = 0.15;
+    if (strokeIndex === 0) {
+        // 1획 (위 가로획)은 획과 가깝게
+        offset = 25;
+        positionRatio = 0.2;
+    } else if (strokeIndex === 1) {
+        // 2획 (왼쪽 세로획)은 획과 가깝게
+        offset = 25;
+        positionRatio = 0.6;
+    } else if (strokeIndex === 2) {
+        // 3획 (오른쪽 세로획)은 획과 가깝게, 아래쪽으로 내려서 획순번호 안 가리게
+        offset = 25;
+        positionRatio = 0.7; // 아래쪽으로 이동
+    } else if (strokeIndex === 3) {
+        // 4획 (아래 가로획)은 획과 가깝게, 아래쪽으로 내려서 획순번호 안 가리게
+        offset = 25;
+        positionRatio = 0.7; // 아래쪽으로 이동
+    } else {
+        offset = 25;
+        positionRatio = 0.2;
+    }
     } else if (currentJamo === 'ㅎ') {
         offset = 60; // 복잡하므로 더 멀리
         positionRatio = 0.2;
