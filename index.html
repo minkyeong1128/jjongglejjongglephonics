@@ -2525,40 +2525,273 @@ else if (currentJamo === 'ㄲ') {
         positionRatio = 0.2;
     }
     // 이중모음
-    else if (currentJamo === 'ㅐ') {
-        offset = 55;
+  else if (currentJamo === 'ㅐ') {
+    if (strokeIndex === 0) {
+        // 1획은 획과 가깝게
+        offset = 25; // 55에서 25로 변경
         positionRatio = 0.2;
-    } else if (currentJamo === 'ㅒ') {
-        offset = 60;
+    } else if (strokeIndex === 1) {
+        // 2획은 획과 가깝게, 오른쪽으로 조금 이동 (짧은 화살표)
+        const midX = (startX + endX) / 2;
+        const midY = (startY + endY) / 2;
+        arrowX = midX + 5; // 오른쪽으로 5px 이동
+        arrowY = midY + 15; // 아래쪽으로 15px 이동 (짧은 화살표)
+    } else if (strokeIndex === 2) {
+        // 3획은 획과 가깝게
+        offset = 25; // 55에서 25로 변경
         positionRatio = 0.2;
-    } else if (currentJamo === 'ㅔ') {
-        offset = 55;
-        positionRatio = 0.2;
-    } else if (currentJamo === 'ㅖ') {
-        offset = 60;
-        positionRatio = 0.2;
-    } else if (currentJamo === 'ㅘ') {
-        offset = 60;
-        positionRatio = 0.2;
-    } else if (currentJamo === 'ㅙ') {
-        offset = 65;
-        positionRatio = 0.2;
-    } else if (currentJamo === 'ㅚ') {
-        offset = 60;
-        positionRatio = 0.2;
-    } else if (currentJamo === 'ㅝ') {
-        offset = 60;
-        positionRatio = 0.2;
-    } else if (currentJamo === 'ㅞ') {
-        offset = 65;
-        positionRatio = 0.2;
-    } else if (currentJamo === 'ㅟ') {
-        offset = 60;
-        positionRatio = 0.2;
-    } else if (currentJamo === 'ㅢ') {
+    } else {
         offset = 55;
         positionRatio = 0.2;
     }
+   } else if (currentJamo === 'ㅒ') {
+    if (strokeIndex === 0) {
+        // 1획은 획과 가깝게
+        offset = 25; // 60에서 25로 변경
+        positionRatio = 0.2;
+    } else if (strokeIndex === 1) {
+        // 2획은 획 바로 아래에 (짧은 화살표)
+        const midX = (startX + endX) / 2;
+        const midY = (startY + endY) / 2;
+        arrowX = midX;
+        arrowY = midY + 15; // 아래쪽으로 15px 이동 (짧은 화살표)
+    } else if (strokeIndex === 2) {
+        // 3획은 획 바로 아래에 (짧은 화살표)
+        const midX = (startX + endX) / 2;
+        const midY = (startY + endY) / 2;
+        arrowX = midX;
+        arrowY = midY + 15; // 아래쪽으로 15px 이동 (짧은 화살표)
+    } else if (strokeIndex === 3) {
+        // 4획은 획과 가깝게
+        offset = 25; // 60에서 25로 변경
+        positionRatio = 0.2;
+    } else {
+        offset = 60;
+        positionRatio = 0.2;
+    }
+  } else if (currentJamo === 'ㅔ') {
+    if (strokeIndex === 0) {
+        // 1획은 획과 가깝게, 오른쪽으로 이동
+        const quarterX = startX + (endX - startX) * 0.2;
+        const quarterY = startY + (endY - startY) * 0.2;
+        
+        const perpAngle = angle + Math.PI / 2;
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+        
+        const toCenterX = centerX - quarterX;
+        const toCenterY = centerY - quarterY;
+        
+        let finalOffset = 25;
+        if (toCenterX * Math.cos(perpAngle) + toCenterY * Math.sin(perpAngle) > 0) {
+            finalOffset = -25;
+        }
+        
+        arrowX = quarterX + finalOffset * Math.cos(perpAngle) + 10; // 오른쪽으로 5px 이동
+        arrowY = quarterY + finalOffset * Math.sin(perpAngle);
+    } else if (strokeIndex === 1) {
+        // 2획은 획과 가깝게
+        offset = 25; // 55에서 25로 변경
+        positionRatio = 0.2;
+    } else if (strokeIndex === 2) {
+        // 3획은 획과 가깝게
+        offset = 25; // 55에서 25로 변경
+        positionRatio = 0.2;
+    } else {
+        offset = 55;
+        positionRatio = 0.2;
+    }
+  } else if (currentJamo === 'ㅖ') {
+    if (strokeIndex === 0) {
+        // 1획은 획 바로 아래에 (짧은 화살표)
+        const midX = (startX + endX) / 2;
+        const midY = (startY + endY) / 2;
+        arrowX = midX;
+        arrowY = midY + 15; // 아래쪽으로 15px 이동 (짧은 화살표)
+    } else if (strokeIndex === 1) {
+        // 2획은 획 바로 아래에 (짧은 화살표)
+        const midX = (startX + endX) / 2;
+        const midY = (startY + endY) / 2;
+        arrowX = midX;
+        arrowY = midY + 15; // 아래쪽으로 15px 이동 (짧은 화살표)
+    } else if (strokeIndex === 2) {
+        // 3획은 획과 가깝게
+        offset = 25; // 60에서 25로 변경
+        positionRatio = 0.2;
+    } else if (strokeIndex === 3) {
+        // 4획은 획과 가깝게
+        offset = 25; // 60에서 25로 변경
+        positionRatio = 0.2;
+    } else {
+        offset = 60;
+        positionRatio = 0.2;
+    }
+  } else if (currentJamo === 'ㅘ') {
+    if (strokeIndex === 0) {
+        // 1획은 획과 가깝게, 조금 아래로 내려서 획순 번호 안 가리게
+        offset = 25; // 60에서 25로 변경
+        positionRatio = 0.4; // 0.2에서 0.4로 변경하여 아래로 이동
+    } else if (strokeIndex === 1) {
+        // 2획은 획 바로 아래에 (짧은 화살표)
+        const midX = (startX + endX) / 2;
+        const midY = (startY + endY) / 2;
+        arrowX = midX;
+        arrowY = midY + 15; // 아래쪽으로 15px 이동 (짧은 화살표)
+    } else if (strokeIndex === 2) {
+        // 3획은 획과 가깝게
+        offset = 25; // 60에서 25로 변경
+        positionRatio = 0.2;
+    } else if (strokeIndex === 3) {
+        // 4획은 획 바로 아래에 (짧은 화살표)
+        const midX = (startX + endX) / 2;
+        const midY = (startY + endY) / 2;
+        arrowX = midX;
+        arrowY = midY + 15; // 아래쪽으로 15px 이동 (짧은 화살표)
+    } else {
+        offset = 60;
+        positionRatio = 0.2;
+    }
+   } else if (currentJamo === 'ㅙ') {
+    if (strokeIndex === 0) {
+        // 1획은 ㅘ와 동일하게 (획과 가깝게, 조금 아래로)
+        offset = 25; // 65에서 25로 변경
+        positionRatio = 0.4; // 아래로 이동
+    } else if (strokeIndex === 1) {
+        // 2획은 ㅘ와 동일하게 (획 바로 아래에, 짧은 화살표)
+        const midX = (startX + endX) / 2;
+        const midY = (startY + endY) / 2;
+        arrowX = midX;
+        arrowY = midY + 15; // 아래쪽으로 15px 이동 (짧은 화살표)
+    } else if (strokeIndex === 2) {
+        // 3획은 ㅘ와 동일하게 (획과 가깝게)
+        offset = 25; // 65에서 25로 변경
+        positionRatio = 0.2;
+    } else if (strokeIndex === 3) {
+        // 4획은 획 바로 아래에 (짧은 화살표)
+        const midX = (startX + endX) / 2;
+        const midY = (startY + endY) / 2;
+        arrowX = midX;
+        arrowY = midY + 15; // 아래쪽으로 15px 이동 (짧은 화살표)
+    } else if (strokeIndex === 4) {
+        // 5획은 획과 가깝게
+        offset = 25; // 65에서 25로 변경
+        positionRatio = 0.2;
+    } else {
+        offset = 65;
+        positionRatio = 0.2;
+    }
+   } else if (currentJamo === 'ㅚ') {
+    if (strokeIndex === 0) {
+        // 1획은 ㅙ와 동일하게 (획과 가깝게, 조금 아래로)
+        offset = 25; // 60에서 25로 변경
+        positionRatio = 0.4; // 아래로 이동
+    } else if (strokeIndex === 1) {
+        // 2획은 ㅙ와 동일하게 (획 바로 아래에, 짧은 화살표)
+        const midX = (startX + endX) / 2;
+        const midY = (startY + endY) / 2;
+        arrowX = midX;
+        arrowY = midY + 15; // 아래쪽으로 15px 이동 (짧은 화살표)
+    } else if (strokeIndex === 2) {
+        // 3획은 ㅙ와 동일하게 (획과 가깝게)
+        offset = 25; // 60에서 25로 변경
+        positionRatio = 0.2;
+    } else {
+        offset = 60;
+        positionRatio = 0.2;
+    }
+  } else if (currentJamo === 'ㅝ') {
+    if (strokeIndex === 0) {
+        // 1획은 획과 가깝게
+        offset = 25; // 60에서 25로 변경
+        positionRatio = 0.2;
+    } else if (strokeIndex === 1) {
+        // 2획은 획과 가깝게, 왼쪽으로 이동 (짧은 화살표)
+        const midX = (startX + endX) / 2;
+        const midY = (startY + endY) / 2;
+        arrowX = midX - 15; // 왼쪽으로 15px 이동
+        arrowY = midY + 10; // 아래쪽으로 10px 이동 (짧은 화살표)
+    } else if (strokeIndex === 2) {
+        // 3획은 획과 가깝게 (짧은 화살표)
+        const midX = (startX + endX) / 2;
+        const midY = (startY + endY) / 2;
+        arrowX = midX;
+        arrowY = midY + 15; // 아래쪽으로 15px 이동 (짧은 화살표)
+    } else if (strokeIndex === 3) {
+        // 4획은 획과 가깝게
+        offset = 25; // 60에서 25로 변경
+        positionRatio = 0.2;
+    } else {
+        offset = 60;
+        positionRatio = 0.2;
+    }
+} else if (currentJamo === 'ㅞ') {
+    if (strokeIndex === 0) {
+        // 1획은 획 아래에 직접 표시
+        const quarterX = startX + (endX - startX) * 0.2;
+        const quarterY = startY + (endY - startY) * 0.2;
+        arrowX = quarterX;
+        arrowY = quarterY + 20; // 아래쪽으로 20px 이동
+    } else if (strokeIndex === 1) {
+        // 2획은 ㅝ와 동일하게
+        const midX = (startX + endX) / 2;
+        const midY = (startY + endY) / 2;
+        arrowX = midX - 15; 
+        arrowY = midY + 15; 
+    } else if (strokeIndex === 2) {
+        // 3획은 ㅝ와 동일하게
+        const midX = (startX + endX) / 2;
+        const midY = (startY + endY) / 2;
+        arrowX = midX;
+        arrowY = midY + 15; 
+    } else if (strokeIndex === 3) {
+        // 4획은 ㅝ와 동일하게
+        offset = 25; 
+        positionRatio = 0.2;
+    } else if (strokeIndex === 4) {
+        // 5획은 획과 가깝게
+        offset = 25; 
+        positionRatio = 0.2;
+    } else {
+        offset = 65;
+        positionRatio = 0.2;
+    }
+   } else if (currentJamo === 'ㅟ') {
+    if (strokeIndex === 0) {
+        // 1획은 ㅞ와 동일하게 (획 아래에 직접 표시, 획과 가깝게)
+        const quarterX = startX + (endX - startX) * 0.2;
+        const quarterY = startY + (endY - startY) * 0.2;
+        arrowX = quarterX;
+        arrowY = quarterY + 20; // 아래쪽으로 20px 이동
+    } else if (strokeIndex === 1) {
+        // 2획은 ㅞ와 동일하게 (왼쪽으로 10px 이동)
+        const midX = (startX + endX) / 2;
+        const midY = (startY + endY) / 2;
+        arrowX = midX - 15; // 왼쪽으로 10px 이동
+        arrowY = midY + 15; 
+    } else if (strokeIndex === 2) {
+        // 3획은 획과 가깝게
+        offset = 25; // 60에서 25로 변경
+        positionRatio = 0.2;
+    } else {
+        offset = 60;
+        positionRatio = 0.2;
+    }
+    } else if (currentJamo === 'ㅢ') {
+    if (strokeIndex === 0) {
+        // 1획은 획 아래에 직접 표시, 획과 가깝게
+        const quarterX = startX + (endX - startX) * 0.2;
+        const quarterY = startY + (endY - startY) * 0.2;
+        arrowX = quarterX;
+        arrowY = quarterY + 20; // 아래쪽으로 20px 이동
+    } else if (strokeIndex === 1) {
+        // 2획은 획과 가깝게
+        offset = 25; // 55에서 25로 변경
+        positionRatio = 0.2;
+    } else {
+        offset = 55;
+        positionRatio = 0.2;
+    }
+}
     
 if (!(currentJamo === 'ㄹ' && strokeIndex === 1) && 
     !(currentJamo === 'ㅂ' && (strokeIndex === 2 || strokeIndex === 3)) &&
@@ -2576,7 +2809,18 @@ if (!(currentJamo === 'ㄹ' && strokeIndex === 1) &&
     !(currentJamo === 'ㅗ' && strokeIndex === 1) &&
     !(currentJamo === 'ㅛ' && (strokeIndex === 1 || strokeIndex === 2)) &&
     !(currentJamo === 'ㅜ' && strokeIndex === 1) &&
-    !(currentJamo === 'ㅠ' && (strokeIndex === 1 || strokeIndex === 2))) {
+    !(currentJamo === 'ㅠ' && (strokeIndex === 1 || strokeIndex === 2)) &&
+    !(currentJamo === 'ㅐ' && strokeIndex === 1) &&
+    !(currentJamo === 'ㅒ' && (strokeIndex === 1 || strokeIndex === 2)) &&
+    !(currentJamo === 'ㅔ' && strokeIndex === 0) &&
+    !(currentJamo === 'ㅖ' && (strokeIndex === 0 || strokeIndex === 1)) &&
+    !(currentJamo === 'ㅘ' && (strokeIndex === 1 || strokeIndex === 3)) &&
+    !(currentJamo === 'ㅙ' && (strokeIndex === 1 || strokeIndex === 3)) &&
+    !(currentJamo === 'ㅚ' && strokeIndex === 1) &&
+    !(currentJamo === 'ㅝ' && (strokeIndex === 1 || strokeIndex === 2)) &&
+    !(currentJamo === 'ㅞ' && (strokeIndex === 0 || strokeIndex === 1 || strokeIndex === 2)) &&
+    !(currentJamo === 'ㅟ' && (strokeIndex === 0 || strokeIndex === 1)) &&
+    !(currentJamo === 'ㅢ' && strokeIndex === 0)) {
         const quarterX = startX + (endX - startX) * positionRatio;
         const quarterY = startY + (endY - startY) * positionRatio;
         
