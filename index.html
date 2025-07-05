@@ -2926,7 +2926,7 @@
             !(currentJamo === 'ㅊ' && strokeIndex === 1) &&
             !(currentJamo === 'ㅋ' && strokeIndex === 1) &&
             !(currentJamo === 'ㅌ' && strokeIndex === 1) &&
-            !(currentJamo === 'ㅎ' && (strokeIndex === 0 || strokeIndex === 1)) &&
+            !(currentJamo === 'ㅎ' && (strokeIndex === 0 || strokeIndex === 1|| strokeIndex === 2)) &&
             !(currentJamo === 'ㄸ' && strokeIndex === 3) &&
             !(currentJamo === 'ㅃ' && (strokeIndex === 1 || strokeIndex === 2 || strokeIndex === 3 || strokeIndex === 4 || strokeIndex === 5 || strokeIndex === 6 || strokeIndex === 7)) &&
             !(currentJamo === 'ㅆ' && (strokeIndex === 0 || strokeIndex === 1 || strokeIndex === 2 || strokeIndex === 3)) &&
@@ -2999,63 +2999,73 @@
             ctx.restore();
         }
         
-        // 원형 화살표 그리기 함수 (바깥쪽으로 표시)
-        function drawCircleArrowOutside(centerX, centerY, radius) {
-            const arrowSize = 15;
-            const offset = 30; // 더 가깝게
-            
-            ctx.save();
-            ctx.strokeStyle = '#FF3742';
-            ctx.fillStyle = '#FF3742';
-            ctx.lineWidth = 3;
-            
-            // 곡선 화살표 그리기 (오른쪽에서 시작)
-            ctx.beginPath();
-            ctx.arc(centerX, centerY, radius + offset, 0, Math.PI/3); // 3시에서 5시 방향
-            ctx.stroke();
-            
-            // 화살표 머리 그리기
-            const headX = centerX + (radius + offset) * Math.cos(Math.PI/3);
-            const headY = centerY + (radius + offset) * Math.sin(Math.PI/3);
-            
-            ctx.beginPath();
-            ctx.moveTo(headX, headY);
-            ctx.lineTo(headX - arrowSize * 0.5, headY - arrowSize * 0.8);
-            ctx.lineTo(headX - arrowSize * 0.8, headY - arrowSize * 0.5);
-            ctx.closePath();
-            ctx.fill();
-            
-            ctx.restore();
-        }
-        // 원형 화살표 그리기 함수 (바깥쪽으로 표시)
-        function drawCircleArrowOutside(centerX, centerY, radius) {
-            const arrowSize = 15;
-            const offset = 50; // 원으로부터의 거리
-            
-            ctx.save();
-            ctx.strokeStyle = '#FF3742';
-            ctx.fillStyle = '#FF3742';
-            ctx.lineWidth = 3;
-            
-            // 곡선 화살표 그리기 (더 바깥쪽에서)
-            ctx.beginPath();
-            ctx.arc(centerX, centerY, radius + offset, -Math.PI/2, -Math.PI/4);
-            ctx.stroke();
-            
-            // 화살표 머리 그리기
-            const headX = centerX + (radius + offset) * Math.cos(-Math.PI/4);
-            const headY = centerY + (radius + offset) * Math.sin(-Math.PI/4);
-            
-            ctx.beginPath();
-            ctx.moveTo(headX, headY);
-            ctx.lineTo(headX - arrowSize * 0.7, headY - arrowSize * 0.3);
-            ctx.lineTo(headX - arrowSize * 0.3, headY - arrowSize * 0.7);
-            ctx.closePath();
-            ctx.fill();
-            
-            ctx.restore();
-        }
+// 원형 화살표 그리기 함수 (바깥쪽으로 표시) - 수정된 버전
+function drawCircleArrowOutside(centerX, centerY, radius) {
+    ctx.save();
+    ctx.strokeStyle = '#FF3742';
+    ctx.fillStyle = '#FF3742';
+    ctx.lineWidth = 3; // 다른 화살표들과 동일한 두께
+    
+    if (currentJamo === 'ㅇ') {
+        // ㅇ의 경우 - 오른쪽 위 부분에 위치, 더 굴곡진 호
+        const arrowSize = 18; // 15 → 18로 크기 증가
+        const offset = 25; // 30 → 25로 조정하여 더 위로
         
+        // 곡선 화살표 그리기 (더 굴곡진 호 - 더 긴 호로 변경)
+        ctx.beginPath();
+        ctx.lineWidth = 3; // 다른 화살표들과 같은 두께
+        ctx.arc(centerX, centerY, radius + offset, -Math.PI/3, Math.PI/4); // 더 긴 호 (-60도에서 45도까지)
+        ctx.stroke();
+        
+        // 화살표 머리 그리기 (시계방향 회전 표시, 크기 증가)
+        const headX = centerX + (radius + offset) * Math.cos(Math.PI/4);
+        const headY = centerY + (radius + offset) * Math.sin(Math.PI/4);
+        
+        // 곡선 끝점에서의 접선 방향 (시계방향)
+        const tangentAngle = Math.PI/4 + Math.PI/2; // 곡선 끝점에서의 접선 방향
+        
+        ctx.beginPath();
+        ctx.moveTo(headX, headY);
+        ctx.lineTo(headX - arrowSize * 0.6 * Math.cos(tangentAngle - Math.PI/6), 
+                   headY - arrowSize * 0.6 * Math.sin(tangentAngle - Math.PI/6));
+        ctx.lineTo(headX - arrowSize * 0.6 * Math.cos(tangentAngle + Math.PI/6), 
+                   headY - arrowSize * 0.6 * Math.sin(tangentAngle + Math.PI/6));
+        ctx.closePath();
+        ctx.fill();
+        
+    } else if (currentJamo === 'ㅎ') {
+        // ㅎ의 경우 - 더 굴곡진 회전 화살표, 크기 조정
+        const arrowSize = 15; // 12 → 15로 화살표 머리 크기 복원
+        const offset = 20; // 25 → 20으로 조정 (더 가깝게)
+        const adjustedCenterX = centerX + 20;
+        const adjustedCenterY = centerY - 20;
+        
+        // 시작부분을 더 굴곡지게 조정한 호
+        ctx.beginPath();
+        ctx.lineWidth = 3; // 다른 화살표들과 같은 두께
+        ctx.arc(adjustedCenterX, adjustedCenterY, radius + offset, -Math.PI/6, Math.PI/4); // 시작점을 더 굴곡지게 (-60도)
+        ctx.stroke();
+        
+        // 화살표 머리 그리기 (곡선의 접선 방향에 맞게, 크기 조정)
+        const headX = adjustedCenterX + (radius + offset) * Math.cos(Math.PI/4);
+        const headY = adjustedCenterY + (radius + offset) * Math.sin(Math.PI/4);
+        
+        // 곡선 끝점에서의 접선 방향 (시계방향)
+        const tangentAngle = Math.PI/4 + Math.PI/2;
+        
+        ctx.beginPath();
+        ctx.moveTo(headX, headY);
+        ctx.lineTo(headX - arrowSize * 0.6 * Math.cos(tangentAngle - Math.PI/6), 
+                   headY - arrowSize * 0.6 * Math.sin(tangentAngle - Math.PI/6));
+        ctx.lineTo(headX - arrowSize * 0.6 * Math.cos(tangentAngle + Math.PI/6), 
+                   headY - arrowSize * 0.6 * Math.sin(tangentAngle + Math.PI/6));
+        ctx.closePath();
+        ctx.fill();
+    }
+    
+    ctx.restore();
+}
+
              function startDrawing(e) {
             if (!isPracticeMode) return;
             
