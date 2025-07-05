@@ -2219,7 +2219,7 @@ function drawArrowOutside(startX, startY, endX, endY, strokeIndex) {
             const midX = (startX + endX) / 2;
             const midY = (startY + endY) / 2;
             arrowX = midX;
-            arrowY = midY + 25; // 아래쪽으로 25px 이동
+            arrowY = midY - 25; // 아래쪽으로 25px 이동
         } else if (strokeIndex === 1) {
             // 2획 (긴 가로줄)은 해당 획 바로 아래에 표시
             const midX = (startX + endX) / 2;
