@@ -134,8 +134,8 @@ this.isRecognizing = false;
                 this.FINAL_PRONUNCIATION_MAP = {
                     'ㄱ': '윽', 'ㄲ': '윽', 'ㄳ': '윽', 'ㅋ': '윽',
                     'ㄴ': '은', 'ㄵ': '은', 'ㄶ': '은',
-                    'ㄷ': '읏', 'ㅅ': '읏', 'ㅆ': '읏', 'ㅈ': '읏', 
-                    'ㅊ': '읏', 'ㅌ': '읏', 'ㅎ': '읏',
+                    'ㄷ': '읃', 'ㅅ': '읃', 'ㅆ': '읃', 'ㅈ': '읃', 
+                    'ㅊ': '읃', 'ㅌ': '읃', 'ㅎ': '읃',
                     'ㄹ': '을', 'ㄺ': '윽', 'ㄻ': '음', 'ㄼ': '을', 
                     'ㄽ': '을', 'ㄾ': '을', 'ㄿ': '읍', 'ㅀ': '을',
                     'ㅁ': '음',
@@ -602,7 +602,7 @@ if (this.isRecognizing) return;  // ← 이 줄을 추가
         const INITIAL_PRONUNCIATION = {
             'ㄱ': '그', 'ㄲ': '끄', 'ㄴ': '느', 'ㄷ': '드', 'ㄸ': '뜨',
             'ㄹ': '르', 'ㅁ': '므', 'ㅂ': '브', 'ㅃ': '쁘', 'ㅅ': '스',
-            'ㅆ': '쓰', 'ㅇ': '으', 'ㅈ': '즈', 'ㅉ': '쯔', 'ㅊ': '츠',
+            'ㅆ': '쓰', 'ㅇ': ' ', 'ㅈ': '즈', 'ㅉ': '쯔', 'ㅊ': '츠',
             'ㅋ': '크', 'ㅌ': '트', 'ㅍ': '프', 'ㅎ': '흐'
         };
         
@@ -620,7 +620,7 @@ if (this.isRecognizing) return;  // ← 이 줄을 추가
             'ㄹ': '을',   // ㄹ 받침
             'ㅁ': '음',   // ㅁ 받침
             'ㅂ': '읍',   // ㅂ 받침
-            'ㅅ': '읏',   // ㅅ 받침
+            'ㅅ': '읃',   // ㅅ 받침
             'ㅇ': '응',   // ㅇ 받침
             
             // 나머지 받침들 (게임용으로 유지)
@@ -1487,6 +1487,13 @@ let currentStrokeIndex = 0;
     const soundReplayBtn = document.getElementById('soundReplayBtn');
     soundReplayBtn.removeEventListener('click', handleSoundReplay);
     soundReplayBtn.addEventListener('click', handleSoundReplay);
+
+// 자음 'ㅇ'일 때만 스피커 버튼 숨기기
+    if (jamo === 'ㅇ') {
+        soundReplayBtn.style.display = 'none';
+    } else {
+        soundReplayBtn.style.display = 'block';
+    }
 
     // 캔버스 초기화
     canvas = document.getElementById('strokeCanvas');
