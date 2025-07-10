@@ -584,11 +584,11 @@ this.FINAL_PRONUNCIATION_MAP = {
                         return item;
                     }
         
-                // 기존 함수 전체를 이것으로 교체
-playSound(base64String, element = null) {
+ playSound(base64String, element = null) {
     // 기존 오디오 중단
     if (this.currentAudio) {
         this.currentAudio.pause();
+        this.currentAudio.currentTime = 0;
         this.currentAudio = null;
     }
 
@@ -606,9 +606,14 @@ playSound(base64String, element = null) {
             const audioUrl = URL.createObjectURL(blob);
             const audio = new Audio(audioUrl);
             
+            // 모바일 최적화 및 볼륨 일정화
+            audio.preload = 'auto';
             audio.playbackRate = this.currentSpeed;
-            audio.volume = 1.0;
+            audio.volume = 1.0; // 최대 볼륨으로 설정
             this.currentAudio = audio;
+
+            // 오디오 컨텍스트를 사용한 볼륨 증폭 (선택사항)
+            this.amplifyAudio(audio);
 
             if (element) {
                 element.classList.add('playing');
@@ -626,20 +631,35 @@ playSound(base64String, element = null) {
             
             audio.onended = cleanup;
             audio.onerror = cleanup;
-            setTimeout(cleanup, 3000);
+            
+            // 볼륨 재확인 및 설정
+            audio.onloadeddata = () => {
+                audio.volume = 1.0;
+            };
+            
+            setTimeout(cleanup, 5000);
 
-            audio.play().catch(error => {
-                console.error('오디오 재생 실패:', error);
-                cleanup();
-            });
+            // 재생 시작
+            const playPromise = audio.play();
+            if (playPromise !== undefined) {
+                playPromise
+                    .then(() => {
+                        // 재생 중에도 볼륨 유지
+                        audio.volume = 1.0;
+                    })
+                    .catch(error => {
+                        console.error('오디오 재생 실패:', error);
+                        cleanup();
+                    });
+            }
         } catch (error) {
             console.error('오디오 생성 실패:', error);
         }
-    }, 50);
+    }, 100);
 }
 
         
-                  async playAll() {
+               async playAll() {
     if (this.isPlaying || !this.currentData) return;
 
     this.isPlaying = true;
@@ -648,6 +668,7 @@ playSound(base64String, element = null) {
 
     try {
         await this.delay(100);
+        
         // TTS로 전체 단어 재생
         await this.playTTSWithDelay(this.currentData.original, null, 800);
 
@@ -655,17 +676,18 @@ playSound(base64String, element = null) {
             if (!this.isPlaying) break;
             
             const group = this.syllableGroups[i];
+            
             // 음절별로도 TTS 사용
             await this.playTTSWithDelay(this.currentData.syllables[i].original, null, 600);
             
-            // 개별 음소는 기존 오디오 방식
+            // 개별 음소는 모바일 호환 오디오 방식
             for (let j = 0; j < group.items.length; j++) {
                 if (!this.isPlaying) break;
                 const item = group.items[j];
                 const pronunciationElement = item.querySelector('.pronunciation');
                 if (pronunciationElement) {
                     const pronunciation = pronunciationElement.textContent;
-                    await this.playWithDelay(pronunciation, item, 400);
+                    await this.playWithDelayMobile(pronunciation, item, 400);
                 }
             }
             
@@ -691,6 +713,7 @@ playSound(base64String, element = null) {
         });
     }
 }
+// TTS 볼륨도 일정화
 playTTSWithDelay(text, element, delayMs) {
     return new Promise((resolve) => {
         // 기존 TTS 중단
@@ -707,7 +730,7 @@ playTTSWithDelay(text, element, delayMs) {
             utterance.lang = 'ko-KR';
             utterance.rate = this.currentSpeed;
             utterance.pitch = 1.2;
-            utterance.volume = 1.0;
+            utterance.volume = 1.0; // 최대 볼륨으로 설정
 
             let isResolved = false;
             const resolveOnce = () => {
@@ -723,14 +746,19 @@ playTTSWithDelay(text, element, delayMs) {
             utterance.onend = resolveOnce;
             utterance.onerror = resolveOnce;
 
-            // 안전장치: 5초 후 강제 종료
-            setTimeout(resolveOnce, 5000);
+            setTimeout(resolveOnce, 8000);
 
-            this.speechSynthesis.speak(utterance);
-        }, 50);
+            // TTS 재생
+            try {
+                this.speechSynthesis.speak(utterance);
+            } catch (error) {
+                console.error('TTS 재생 실패:', error);
+                resolveOnce();
+            }
+        }, 100);
     });
 }
-        
+
               // 기존 함수 전체를 이것으로 교체
 playWithDelay(base64String, element, delayMs) {
     return new Promise((resolve) => {
@@ -798,6 +826,147 @@ playWithDelay(base64String, element, delayMs) {
             }
         }, 50);
     });
+}
+
+// 모바일 호환성을 위한 새로운 함수 추가
+playWithDelayMobile(base64String, element, delayMs) {
+    return new Promise((resolve) => {
+        // 기존 오디오 정리
+        if (this.currentAudio) {
+            this.currentAudio.pause();
+            this.currentAudio.currentTime = 0;
+            this.currentAudio = null;
+        }
+        
+        setTimeout(() => {
+            try {
+                // Base64를 바이너리로 변환
+                const binaryString = atob(base64String);
+                const bytes = new Uint8Array(binaryString.length);
+                for (let i = 0; i < binaryString.length; i++) {
+                    bytes[i] = binaryString.charCodeAt(i);
+                }
+                
+                // Blob 생성 및 오디오 재생
+                const blob = new Blob([bytes], { type: 'audio/mpeg' });
+                const audioUrl = URL.createObjectURL(blob);
+                const audio = new Audio(audioUrl);
+                
+                // 모바일 최적화 설정 및 볼륨 일정화
+                audio.preload = 'auto';
+                audio.playbackRate = this.currentSpeed;
+                audio.volume = 1.0; // 최대 볼륨
+                this.currentAudio = audio;
+
+                // 오디오 컨텍스트를 사용한 볼륨 증폭
+                this.amplifyAudio(audio);
+
+                if (element) {
+                    element.classList.add('playing');
+                }
+
+                let isResolved = false;
+                const resolveOnce = () => {
+                    if (!isResolved) {
+                        isResolved = true;
+                        if (element) {
+                            element.classList.remove('playing');
+                        }
+                        if (this.currentAudio === audio) {
+                            this.currentAudio = null;
+                        }
+                        URL.revokeObjectURL(audioUrl);
+                        setTimeout(resolve, delayMs);
+                    }
+                };
+
+                // 이벤트 리스너 추가
+                audio.onended = resolveOnce;
+                audio.onerror = (error) => {
+                    console.error('오디오 재생 오류:', error);
+                    resolveOnce();
+                };
+                
+                // 볼륨 재확인 및 설정
+                audio.onloadeddata = () => {
+                    audio.volume = 1.0;
+                };
+                
+                // 안전장치: 10초 후 강제 종료
+                const timeoutId = setTimeout(() => {
+                    if (audio && !audio.paused) {
+                        audio.pause();
+                    }
+                    resolveOnce();
+                }, 10000);
+
+                // 재생 시작 시 타임아웃 해제
+                audio.onplay = () => {
+                    clearTimeout(timeoutId);
+                    // 재생 중에도 볼륨 유지
+                    audio.volume = 1.0;
+                };
+
+                // 모바일에서 재생 시작
+                const playPromise = audio.play();
+                
+                if (playPromise !== undefined) {
+                    playPromise
+                        .then(() => {
+                            // 재생 성공
+                            clearTimeout(timeoutId);
+                            audio.volume = 1.0; // 볼륨 재확인
+                        })
+                        .catch(error => {
+                            console.error('오디오 재생 실패:', error);
+                            clearTimeout(timeoutId);
+                            resolveOnce();
+                        });
+                }
+
+            } catch (error) {
+                console.error('오디오 생성 실패:', error);
+                setTimeout(resolve, delayMs);
+            }
+        }, 100);
+    });
+}
+
+// 오디오 증폭 함수 (Web Audio API 사용)
+amplifyAudio(audioElement) {
+    try {
+        // 이미 증폭된 오디오는 건너뛰기
+        if (audioElement.isAmplified) return;
+        
+        // Web Audio API 지원 확인
+        if (!window.AudioContext && !window.webkitAudioContext) {
+            return; // 지원하지 않으면 기본 볼륨 사용
+        }
+        
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        
+        // 기존 컨텍스트 재사용 또는 새로 생성
+        if (!this.audioContext) {
+            this.audioContext = new AudioContext();
+        }
+        
+        // 오디오 소스 생성
+        const source = this.audioContext.createMediaElementSource(audioElement);
+        const gainNode = this.audioContext.createGain();
+        
+        // 볼륨 증폭 (1.5배 증폭)
+        gainNode.gain.value = 1.5;
+        
+        // 연결: 소스 → 게인 → 출력
+        source.connect(gainNode);
+        gainNode.connect(this.audioContext.destination);
+        
+        // 증폭 완료 표시
+        audioElement.isAmplified = true;
+        
+    } catch (error) {
+        console.log('오디오 증폭 실패, 기본 볼륨 사용:', error);
+    }
 }
         
                     delay(ms) {
