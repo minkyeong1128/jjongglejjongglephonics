@@ -282,7 +282,7 @@
                         this.recognition = new SpeechRecognition();
                         this.recognition.lang = 'ko-KR';
                         this.recognition.continuous = false;
-                        this.recognition.interimResults = false;
+                       this.recognition.interimResults = true;
                         this.recognition.maxAlternatives = 1;
         
                         this.recognition.onstart = () => {
@@ -291,28 +291,30 @@
         this.isRecognizing = true;
                         };
         
-                        this.recognition.onresult = (event) => {
-            if (!this.isRecognizing) return;
+                       this.recognition.onresult = (event) => {
+    if (!this.isRecognizing) return;
+    
+    if (event.results && event.results.length > 0) {
+        // 중간 결과와 최종 결과 모두 처리
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+            const result = event.results[i];
+            const text = result[0].transcript.trim();
             
-            if (event.results && event.results.length > 0) {
-                const text = event.results[0][0].transcript.trim();
-                
-                if (text && text !== this.lastProcessedText) {
+            if (text && text !== this.lastProcessedText) {
+                // 최종 결과이거나 충분히 신뢰도가 높은 중간 결과인 경우
+                if (result.isFinal || result[0].confidence > 0.7) {
                     this.lastProcessedText = text;
                     this.isRecognizing = false;
                     this.micButton.classList.remove('recording');
                     
-                    if (this.processingTimeout) {
-                        clearTimeout(this.processingTimeout);
-                    }
-                    
-                    this.processingTimeout = setTimeout(() => {
-                        this.processVoiceInput(text);
-                        this.processingTimeout = null;
-                    }, 100);
+                    // 즉시 처리 (지연 시간 제거)
+                    this.processVoiceInput(text);
+                    return;
                 }
             }
-        };
+        }
+    }
+};
         
                         this.recognition.onerror = (event) => {
         this.isRecognizing = false;  // ← 이 줄을 추가
@@ -333,7 +335,7 @@
                                 if (!this.micButton.classList.contains('recording')) {
                                     this.voiceStatus.textContent = '마이크 버튼을 눌러 단어를 말해보세요';
                                 }
-                            }, 3000);
+                            }, 2000);
                         };
         
                         this.recognition.onend = () => {
@@ -396,7 +398,7 @@
                         setTimeout(() => {
                             this.analyzeHangul(text);
                             this.loading.style.display = 'none';
-                        }, 500);
+                        }, 200);
                     }
         
                      testWord(word) {
@@ -716,25 +718,55 @@
                     'ㅞ': '웨', 'ㅟ': '위', 'ㅠ': '유', 'ㅡ': '으', 'ㅢ': '의', 'ㅣ': '이'
                 };
                 
-                const FINAL_PRONUNCIATION = {
-                    // 기본 받침 7개 (ㄱ,ㄴ,ㄹ,ㅁ,ㅂ,ㅅ,ㅇ)
-                    'ㄱ': '윽',  // ㄱ 받침
-                    'ㄴ': '은',   // ㄴ 받침
-                    'ㄹ': '을',   // ㄹ 받침
-                    'ㅁ': '음',   // ㅁ 받침
-                    'ㅂ': '읍',   // ㅂ 받침
-                    'ㅅ': '읃',   // ㅅ 받침
-                    'ㅇ': '응',   // ㅇ 받침
-                    
-                    // 나머지 받침들 (게임용으로 유지)
-                    'ㄲ': '윽', 'ㄳ': '윽', 'ㅋ': '윽',
-                    'ㄵ': '은', 'ㄶ': '은',
-                    'ㄷ': '읃', 'ㅆ': '읃', 'ㅈ': '읃', 
-                    'ㅊ': '읃', 'ㅌ': '읃', 'ㅎ': '읃',
-                    'ㄺ': '윽', 'ㄻ': '음', 'ㄼ': '을', 
-                    'ㄽ': '을', 'ㄾ': '을', 'ㄿ': '읍', 'ㅀ': '을',
-                    'ㅄ': '읍', 'ㅍ': '읍'
-                };
+               const FINAL_PRONUNCIATION = {
+    // 기본 받침 7개 (ㄱ,ㄴ,ㄹ,ㅁ,ㅂ,ㅅ,ㅇ)
+    'ㄱ': '윽',  // ㄱ 받침
+    'ㄴ': '은',   // ㄴ 받침
+    'ㄹ': '을',   // ㄹ 받침
+    'ㅁ': '음',   // ㅁ 받침
+    'ㅂ': '읍',   // ㅂ 받침
+    'ㅅ': '읃',   // ㅅ 받침
+    'ㅇ': '응',   // ㅇ 받침
+    
+    // 나머지 받침들 (게임용으로 유지)
+    'ㄲ': '윽', 'ㄳ': '윽', 'ㅋ': '윽',
+    'ㄵ': '은', 'ㄶ': '은',
+    'ㄷ': '읃', 'ㅆ': '읃', 'ㅈ': '읃', 
+    'ㅊ': '읃', 'ㅌ': '읃', 'ㅎ': '읃',
+    'ㄺ': '윽', 'ㄻ': '음', 'ㄼ': '을', 
+    'ㄽ': '을', 'ㄾ': '을', 'ㄿ': '읍', 'ㅀ': '을',
+    'ㅄ': '읍', 'ㅍ': '읍'
+};
+
+// 받침 소리를 더 명확하게 재생하는 함수 - 새로 추가
+function playFinalConsonantSound(text, element = null) {
+    if (window.speechSynthesis.speaking) {
+        window.speechSynthesis.cancel();
+    }
+
+    setTimeout(() => {
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'ko-KR';
+        utterance.rate = 0.5;  // 더 천천히
+        utterance.pitch = 0.8; // 더 낮은 톤
+        utterance.volume = 1.0;
+
+        if (element) {
+            element.classList.add('playing');
+            
+            const cleanup = () => {
+                element.classList.remove('playing');
+            };
+            
+            utterance.onend = cleanup;
+            utterance.onerror = cleanup;
+            setTimeout(cleanup, 3000);
+        }
+
+        window.speechSynthesis.speak(utterance);
+    }, 50);
+}
+
         
                 // 한글 자소 분해 함수
                 function decomposeHangul(char) {
@@ -1533,17 +1565,37 @@
                 }
         
                 function createFinalCards() {
-                    // 기본 받침 7개 (ㄱ,ㄴ,ㄹ,ㅁ,ㅂ,ㅅ,ㅇ)
-                    const finals = ['ㄱ', 'ㄴ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅅ', 'ㅇ'];
-                    const grid = document.getElementById('finalsGrid');
-                    grid.innerHTML = '';
-        
-                    finals.forEach(final => {
-                        const sound = FINAL_PRONUNCIATION[final] || final;
-                        const card = createJamoCard(final, sound, 'final', '받침');
-                        grid.appendChild(card);
-                    });
-                }
+    const finals = ['ㄱ', 'ㄴ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅅ', 'ㅇ'];
+    const grid = document.getElementById('finalsGrid');
+    grid.innerHTML = '';
+
+    finals.forEach(final => {
+        const sound = FINAL_PRONUNCIATION[final] || final;
+        const card = createFinalJamoCard(final, sound, 'final', '받침');  // ← 함수명 변경
+        grid.appendChild(card);
+    });
+}
+
+function createFinalJamoCard(jamo, sound, type, typeLabel) {
+    const card = document.createElement('div');
+    card.className = `jamo-card ${type}-card`;
+    
+    card.innerHTML = `
+        <div class="jamo-card-jamo">${jamo}</div>
+        <div class="jamo-card-type ${type}-type">${typeLabel}</div>
+    `;
+
+    card.addEventListener('click', () => {
+        // 받침 소리는 특별한 함수로 재생
+        playFinalConsonantSound(sound, card);
+        // 획순 모달창 열기
+        setTimeout(() => {
+            openStrokeModal(jamo, sound, type);
+        }, 500);
+    });
+
+    return card;
+}
         
               function createJamoCard(jamo, sound, type, typeLabel) {
             const card = document.createElement('div');
@@ -1577,39 +1629,39 @@
                 let strokeAnimationInterval = null;
                 let isShowingStrokes = false;
         
-               function openStrokeModal(jamo, sound, type) {
-            console.log('모달 열기:', jamo, sound, type);
-            currentJamo = jamo;
-            currentSound = sound;
-            currentType = type;
-        
-            document.getElementById('modalJamoTitle').textContent = jamo;
-            document.getElementById('strokeOrderModal').classList.remove('hidden');
-        
-            // 소리 재생 버튼에 이벤트 리스너 추가
-            const soundReplayBtn = document.getElementById('soundReplayBtn');
-            soundReplayBtn.removeEventListener('click', handleSoundReplay);
-            soundReplayBtn.addEventListener('click', handleSoundReplay);
-        
-        // 자음 'ㅇ'일 때만 스피커 버튼 숨기기
-            if (jamo === 'ㅇ') {
-                soundReplayBtn.style.display = 'none';
-            } else {
-                soundReplayBtn.style.display = 'block';
-            }
-        
-            // 캔버스 초기화
-            canvas = document.getElementById('strokeCanvas');
-            ctx = canvas.getContext('2d');
-            setupCanvas();
-            
-            // 기본으로 연습하기 모드 실행
-            setTimeout(() => {
-                practiceMode();
-            }, 300);
-            
-            console.log('모달 설정 완료, currentSound:', currentSound);
-        }
+              function openStrokeModal(jamo, sound, type) {
+    console.log('모달 열기:', jamo, sound, type);
+    currentJamo = jamo;
+    currentSound = sound;
+    currentType = type;
+
+    document.getElementById('modalJamoTitle').textContent = jamo;
+    document.getElementById('strokeOrderModal').classList.remove('hidden');
+
+    // 소리 재생 버튼에 이벤트 리스너 추가
+    const soundReplayBtn = document.getElementById('soundReplayBtn');
+    soundReplayBtn.removeEventListener('click', handleSoundReplay);
+    soundReplayBtn.addEventListener('click', handleSoundReplay);
+
+    // 자음 'ㅇ'일 때만 스피커 버튼 숨기기 (받침 'ㅇ'은 표시)
+    if (jamo === 'ㅇ' && type === 'consonant') {
+        soundReplayBtn.style.display = 'none';
+    } else {
+        soundReplayBtn.style.display = 'block';
+    }
+
+    // 캔버스 초기화
+    canvas = document.getElementById('strokeCanvas');
+    ctx = canvas.getContext('2d');
+    setupCanvas();
+    
+    // 기본으로 연습하기 모드 실행
+    setTimeout(() => {
+        practiceMode();
+    }, 300);
+    
+    console.log('모달 설정 완료, currentSound:', currentSound);
+}
         
                 // 소리 재생 이벤트 핸들러
                 function handleSoundReplay(event) {
@@ -1665,25 +1717,37 @@
                     }
                 }
         
-                function setupCanvas() {
-                    if (!canvas || !ctx) return;
-        
-                    // 캔버스 설정
-                    ctx.lineCap = 'round';
-                    ctx.lineJoin = 'round';
-                    ctx.lineWidth = 8;
-                    
-                    // 터치 이벤트 (모바일)
-                    canvas.addEventListener('touchstart', startDrawing);
-                    canvas.addEventListener('touchmove', draw);
-                    canvas.addEventListener('touchend', stopDrawing);
-                    
-                    // 마우스 이벤트 (데스크탑)
-                    canvas.addEventListener('mousedown', startDrawing);
-                    canvas.addEventListener('mousemove', draw);
-                    canvas.addEventListener('mouseup', stopDrawing);
-                    canvas.addEventListener('mouseout', stopDrawing);
-                }
+              function setupCanvas() {
+    if (!canvas || !ctx) return;
+
+    // 캔버스 설정
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.lineWidth = 8;
+    
+    // 기존 이벤트 리스너 모두 제거
+    canvas.removeEventListener('touchstart', startDrawing);
+    canvas.removeEventListener('touchmove', draw);
+    canvas.removeEventListener('touchend', stopDrawing);
+    canvas.removeEventListener('mousedown', startDrawing);
+    canvas.removeEventListener('mousemove', draw);
+    canvas.removeEventListener('mouseup', stopDrawing);
+    canvas.removeEventListener('mouseout', stopDrawing);
+    
+    // 터치 이벤트 (모바일) - passive 옵션 추가
+    canvas.addEventListener('touchstart', startDrawing, { passive: false });
+    canvas.addEventListener('touchmove', draw, { passive: false });
+    canvas.addEventListener('touchend', stopDrawing, { passive: false });
+    
+    // 마우스 이벤트 (데스크탑)
+    canvas.addEventListener('mousedown', startDrawing);
+    canvas.addEventListener('mousemove', draw);
+    canvas.addEventListener('mouseup', stopDrawing);
+    canvas.addEventListener('mouseout', stopDrawing);
+    
+    // 컨텍스트 메뉴 비활성화 (우클릭 방지)
+    canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+}
         
              function clearCanvas() {
             if (!ctx) return;
@@ -3066,38 +3130,71 @@ function drawCircleArrowOutside(centerX, centerY, radius) {
     ctx.restore();
 }
 
-             function startDrawing(e) {
-            if (!isPracticeMode) return;
-            
-            // 사용자가 그리기 시작하면 획순 애니메이션 중단
-            stopStrokeAnimation();
-            
-            isDrawing = true;
-            const rect = canvas.getBoundingClientRect();
-            const x = (e.clientX || e.touches[0].clientX) - rect.left;
-            const y = (e.clientY || e.touches[0].clientY) - rect.top;
-            
-            ctx.strokeStyle = '#000000';  // 검정색으로 변경
-            ctx.lineWidth = 8;
-            ctx.beginPath();
-            ctx.moveTo(x, y);
-        }
+          function startDrawing(e) {
+    if (!isPracticeMode) return;
+    
+    // 사용자가 그리기 시작하면 획순 애니메이션 중단
+    stopStrokeAnimation();
+    
+    e.preventDefault(); // 기본 동작 방지
+    
+    isDrawing = true;
+    const coords = getEventCoordinates(e);
+    
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 8;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.beginPath();
+    ctx.moveTo(coords.x, coords.y);
+}
         
-                function draw(e) {
-                    if (!isDrawing || !isPracticeMode) return;
-                    
-                    e.preventDefault();
-                    const rect = canvas.getBoundingClientRect();
-                    const x = (e.clientX || e.touches[0].clientX) - rect.left;
-                    const y = (e.clientY || e.touches[0].clientY) - rect.top;
-                    
-                    ctx.lineTo(x, y);
-                    ctx.stroke();
-                }
+            function draw(e) {
+    if (!isDrawing || !isPracticeMode) return;
+    
+    e.preventDefault(); // 기본 동작 방지
+    
+    const coords = getEventCoordinates(e);
+    
+    ctx.lineTo(coords.x, coords.y);
+    ctx.stroke();
+}
         
-                function stopDrawing() {
-                    isDrawing = false;
-                }
+             function stopDrawing(e) {
+    if (!isPracticeMode) return;
+    
+    e.preventDefault(); // 기본 동작 방지
+    isDrawing = false;
+    ctx.beginPath(); // 새로운 경로 시작
+}
+
+// 터치/마우스 이벤트에서 정확한 좌표를 가져오는 함수
+function getEventCoordinates(e) {
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    
+    let clientX, clientY;
+    
+    if (e.touches && e.touches.length > 0) {
+        // 터치 이벤트
+        clientX = e.touches[0].clientX;
+        clientY = e.touches[0].clientY;
+    } else if (e.changedTouches && e.changedTouches.length > 0) {
+        // 터치 종료 이벤트
+        clientX = e.changedTouches[0].clientX;
+        clientY = e.changedTouches[0].clientY;
+    } else {
+        // 마우스 이벤트
+        clientX = e.clientX;
+        clientY = e.clientY;
+    }
+    
+    return {
+        x: (clientX - rect.left) * scaleX,
+        y: (clientY - rect.top) * scaleY
+    };
+}
         
                 // 디버깅을 위한 간단한 테스트 함수
                 function testModalSound() {
