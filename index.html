@@ -1626,16 +1626,16 @@
     soundReplayBtn.removeEventListener('click', handleSoundReplay);
     soundReplayBtn.addEventListener('click', handleSoundReplay);
 
-    // 자음 'ㅇ'일 때만 스피커 버튼 숨기기
-    if (jamo === 'ㅇ') {
-        soundReplayBtn.style.display = 'none';
-    } else {
-        soundReplayBtn.style.display = 'block';
-        // ㅇ이 아닐 때만 자동 소리 재생
-        setTimeout(() => {
-            playModalSound(sound);
-        }, 200);
-    }
+    // type이 'consonant'이고 jamo가 'ㅇ'일 때만 스피커 버튼 숨기기 (자음 ㅇ)
+if (jamo === 'ㅇ' && type === 'consonant') {
+    soundReplayBtn.style.display = 'none';
+} else {
+    soundReplayBtn.style.display = 'block';
+    // 받침 ㅇ이나 다른 소리가 있을 때 자동 소리 재생
+    setTimeout(() => {
+        playModalSound(sound);
+    }, 300);
+}
 
     // 캔버스 초기화
     canvas = document.getElementById('strokeCanvas');
