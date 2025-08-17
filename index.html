@@ -1665,33 +1665,62 @@ setupCanvas();
                 }
         
                 // 모달창용 소리 재생 함수
-                function playModalSound(sound) {
-                    console.log('playModalSound 호출:', sound);
-                    
-                    // 기존 재생 중단
-                    if (window.speechSynthesis.speaking) {
-                        window.speechSynthesis.cancel();
-                    }
+               function playModalSound(sound) {
+    console.log('playModalSound 호출:', sound);
+    
+    // 기존 재생 중단
+    if (window.speechSynthesis.speaking) {
+        window.speechSynthesis.cancel();
+    }
+
+    setTimeout(() => {
+        const utterance = new SpeechSynthesisUtterance(sound);
+        utterance.lang = 'ko-KR';
         
-                    setTimeout(() => {
-                        const utterance = new SpeechSynthesisUtterance(sound);
-                        utterance.lang = 'ko-KR';
-                        utterance.rate = 0.8;
-                        utterance.pitch = 1.2;
-                        utterance.volume = 1.0;
+        // 특정 소리들에 대해 개별 설정
+        if (sound === '그') { // ㄱ
+            utterance.rate = 0.4;
+            utterance.pitch = 0.8;
+        } else if (sound === '크') { // ㅋ
+            utterance.rate = 0.4;
+            utterance.pitch = 1.4;
+        } else if (sound === '드') { // ㄷ
+            utterance.rate = 0.4;
+            utterance.pitch = 0.8;
+        } else if (sound === '트') { // ㅌ
+            utterance.rate = 0.4;
+            utterance.pitch = 1.4;
+        } else if (sound === '즈') { // ㅈ
+            utterance.rate = 0.4;
+            utterance.pitch = 0.9;
+        } else if (sound === '츠') { // ㅊ
+            utterance.rate = 0.4;
+            utterance.pitch = 1.3;
+        } else if (sound === '윽') { // ㄱ받침
+            utterance.rate = 0.3;
+            utterance.pitch = 0.7;
+        } else if (sound === '읃') { // ㅅ받침
+            utterance.rate = 0.3;
+            utterance.pitch = 1.3;
+        } else {
+            utterance.rate = 0.8;
+            utterance.pitch = 1.2;
+        }
         
-                        utterance.onend = () => {
-                            console.log('모달 소리 재생 완료:', sound);
-                        };
-        
-                        utterance.onerror = (e) => {
-                            console.error('모달 소리 재생 오류:', e);
-                        };
-        
-                        console.log('모달 소리 재생 시작:', sound);
-                        window.speechSynthesis.speak(utterance);
-                    }, 100);
-                }
+        utterance.volume = 1.0;
+
+        utterance.onend = () => {
+            console.log('모달 소리 재생 완료:', sound);
+        };
+
+        utterance.onerror = (e) => {
+            console.error('모달 소리 재생 오류:', e);
+        };
+
+        console.log('모달 소리 재생 시작:', sound);
+        window.speechSynthesis.speak(utterance);
+    }, 100);
+}
         
                function closeStrokeModal() {
                     // 획순 애니메이션 중단
