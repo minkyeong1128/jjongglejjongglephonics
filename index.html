@@ -1606,48 +1606,52 @@
                 let strokeAnimationInterval = null;
                 let isShowingStrokes = false;
         
-               function openStrokeModal(jamo, sound, type) {
-            console.log('모달 열기:', jamo, sound, type);
-            currentJamo = jamo;
-            currentSound = sound;
-            currentType = type;
-        
-            document.getElementById('modalJamoTitle').textContent = jamo;
-            document.getElementById('strokeOrderModal').classList.remove('hidden');
-        
-            // 소리 재생 버튼에 이벤트 리스너 추가
-            const soundReplayBtn = document.getElementById('soundReplayBtn');
-            soundReplayBtn.removeEventListener('click', handleSoundReplay);
-            soundReplayBtn.addEventListener('click', handleSoundReplay);
-        
-        // 자음 'ㅇ'일 때만 스피커 버튼 숨기기
-            if (jamo === 'ㅇ') {
-                soundReplayBtn.style.display = 'none';
-            } else {
-                soundReplayBtn.style.display = 'block';
-            }
-        
-           // 캔버스 초기화
-canvas = document.getElementById('strokeCanvas');
-ctx = canvas.getContext('2d');
+             function openStrokeModal(jamo, sound, type) {
+    console.log('모달 열기:', jamo, sound, type);
+    currentJamo = jamo;
+    currentSound = sound;
+    currentType = type;
 
-// 아이패드용 캔버스 설정 추가
-if (canvas) {
-    canvas.style.touchAction = 'none';
-    canvas.style.userSelect = 'none';
-    canvas.style.webkitUserSelect = 'none';
-    canvas.style.webkitTouchCallout = 'none';
+    document.getElementById('modalJamoTitle').textContent = jamo;
+    document.getElementById('strokeOrderModal').classList.remove('hidden');
+
+    // 소리 재생 버튼에 이벤트 리스너 추가
+    const soundReplayBtn = document.getElementById('soundReplayBtn');
+    soundReplayBtn.removeEventListener('click', handleSoundReplay);
+    soundReplayBtn.addEventListener('click', handleSoundReplay);
+
+    // 자음 'ㅇ'일 때만 스피커 버튼 숨기기
+    if (jamo === 'ㅇ') {
+        soundReplayBtn.style.display = 'none';
+    } else {
+        soundReplayBtn.style.display = 'block';
+        // ㅇ이 아닐 때만 자동 소리 재생
+        setTimeout(() => {
+            playModalSound(sound);
+        }, 200);
+    }
+
+    // 캔버스 초기화
+    canvas = document.getElementById('strokeCanvas');
+    ctx = canvas.getContext('2d');
+    
+    // 아이패드용 캔버스 설정 추가
+    if (canvas) {
+        canvas.style.touchAction = 'none';
+        canvas.style.userSelect = 'none';
+        canvas.style.webkitUserSelect = 'none';
+        canvas.style.webkitTouchCallout = 'none';
+    }
+    
+    setupCanvas();
+    
+    // 기본으로 연습하기 모드 실행
+    setTimeout(() => {
+        practiceMode();
+    }, 300);
+    
+    console.log('모달 설정 완료, currentSound:', currentSound);
 }
-
-setupCanvas();
-            
-            // 기본으로 연습하기 모드 실행
-            setTimeout(() => {
-                practiceMode();
-            }, 300);
-            
-            console.log('모달 설정 완료, currentSound:', currentSound);
-        }
         
                 // 소리 재생 이벤트 핸들러
                 function handleSoundReplay(event) {
