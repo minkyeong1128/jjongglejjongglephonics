@@ -282,7 +282,7 @@
                         this.recognition = new SpeechRecognition();
                         this.recognition.lang = 'ko-KR';
                         this.recognition.continuous = false;
-                       this.recognition.interimResults = true;
+                        this.recognition.interimResults = false;
                         this.recognition.maxAlternatives = 1;
         
                         this.recognition.onstart = () => {
@@ -291,30 +291,28 @@
         this.isRecognizing = true;
                         };
         
-                       this.recognition.onresult = (event) => {
-    if (!this.isRecognizing) return;
-    
-    if (event.results && event.results.length > 0) {
-        // 중간 결과와 최종 결과 모두 처리
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-            const result = event.results[i];
-            const text = result[0].transcript.trim();
+                        this.recognition.onresult = (event) => {
+            if (!this.isRecognizing) return;
             
-            if (text && text !== this.lastProcessedText) {
-                // 최종 결과이거나 충분히 신뢰도가 높은 중간 결과인 경우
-                if (result.isFinal || result[0].confidence > 0.7) {
+            if (event.results && event.results.length > 0) {
+                const text = event.results[0][0].transcript.trim();
+                
+                if (text && text !== this.lastProcessedText) {
                     this.lastProcessedText = text;
                     this.isRecognizing = false;
                     this.micButton.classList.remove('recording');
                     
-                    // 즉시 처리 (지연 시간 제거)
-                    this.processVoiceInput(text);
-                    return;
+                    if (this.processingTimeout) {
+                        clearTimeout(this.processingTimeout);
+                    }
+                    
+                    this.processingTimeout = setTimeout(() => {
+                        this.processVoiceInput(text);
+                        this.processingTimeout = null;
+                    }, 100);
                 }
             }
-        }
-    }
-};
+        };
         
                         this.recognition.onerror = (event) => {
         this.isRecognizing = false;  // ← 이 줄을 추가
@@ -335,7 +333,7 @@
                                 if (!this.micButton.classList.contains('recording')) {
                                     this.voiceStatus.textContent = '마이크 버튼을 눌러 단어를 말해보세요';
                                 }
-                            }, 2000);
+                            }, 3000);
                         };
         
                         this.recognition.onend = () => {
@@ -398,7 +396,7 @@
                         setTimeout(() => {
                             this.analyzeHangul(text);
                             this.loading.style.display = 'none';
-                        }, 200);
+                        }, 500);
                     }
         
                      testWord(word) {
@@ -536,33 +534,56 @@
                         return item;
                     }
         
-                    playSound(text, element = null) {
-                        if (this.speechSynthesis.speaking) {
-                            this.speechSynthesis.cancel();
-                        }
+                  playSound(text, element = null) {
+    if (this.speechSynthesis.speaking) {
+        this.speechSynthesis.cancel();
+    }
+
+    setTimeout(() => {
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'ko-KR';
         
-                        setTimeout(() => {
-                            const utterance = new SpeechSynthesisUtterance(text);
-                            utterance.lang = 'ko-KR';
-                            utterance.rate = this.currentSpeed;
-                            utterance.pitch = 1.2;
-                            utterance.volume = 1.0;
+        // 특정 소리들에 대해 개별 설정
+        if (text === '그') { // ㄱ
+            utterance.rate = 0.4;
+            utterance.pitch = 0.8;
+        } else if (text === '크') { // ㅋ
+            utterance.rate = 0.4;
+            utterance.pitch = 1.4;
+        } else if (text === '드') { // ㄷ
+            utterance.rate = 0.4;
+            utterance.pitch = 0.8;
+        } else if (text === '트') { // ㅌ
+            utterance.rate = 0.4;
+            utterance.pitch = 1.4;
+        } else if (text === '윽') { // ㄱ받침
+            utterance.rate = 0.3;
+            utterance.pitch = 0.7;
+        } else if (text === '읃') { // ㅅ받침
+            utterance.rate = 0.3;
+            utterance.pitch = 1.3;
+        } else {
+            utterance.rate = this.currentSpeed;
+            utterance.pitch = 1.2;
+        }
         
-                            if (element) {
-                                element.classList.add('playing');
-                                
-                                const cleanup = () => {
-                                    element.classList.remove('playing');
-                                };
-                                
-                                utterance.onend = cleanup;
-                                utterance.onerror = cleanup;
-                                setTimeout(cleanup, 3000);
-                            }
-        
-                            this.speechSynthesis.speak(utterance);
-                        }, 50);
-                    }
+        utterance.volume = 1.0;
+
+        if (element) {
+            element.classList.add('playing');
+            
+            const cleanup = () => {
+                element.classList.remove('playing');
+            };
+            
+            utterance.onend = cleanup;
+            utterance.onerror = cleanup;
+            setTimeout(cleanup, 3000);
+        }
+
+        this.speechSynthesis.speak(utterance);
+    }, 50);
+}
         
                     async playAll() {
                         if (this.isPlaying || !this.currentData) return;
@@ -718,55 +739,25 @@
                     'ㅞ': '웨', 'ㅟ': '위', 'ㅠ': '유', 'ㅡ': '으', 'ㅢ': '의', 'ㅣ': '이'
                 };
                 
-               const FINAL_PRONUNCIATION = {
-    // 기본 받침 7개 (ㄱ,ㄴ,ㄹ,ㅁ,ㅂ,ㅅ,ㅇ)
-    'ㄱ': '윽',  // ㄱ 받침
-    'ㄴ': '은',   // ㄴ 받침
-    'ㄹ': '을',   // ㄹ 받침
-    'ㅁ': '음',   // ㅁ 받침
-    'ㅂ': '읍',   // ㅂ 받침
-    'ㅅ': '읃',   // ㅅ 받침
-    'ㅇ': '응',   // ㅇ 받침
-    
-    // 나머지 받침들 (게임용으로 유지)
-    'ㄲ': '윽', 'ㄳ': '윽', 'ㅋ': '윽',
-    'ㄵ': '은', 'ㄶ': '은',
-    'ㄷ': '읃', 'ㅆ': '읃', 'ㅈ': '읃', 
-    'ㅊ': '읃', 'ㅌ': '읃', 'ㅎ': '읃',
-    'ㄺ': '윽', 'ㄻ': '음', 'ㄼ': '을', 
-    'ㄽ': '을', 'ㄾ': '을', 'ㄿ': '읍', 'ㅀ': '을',
-    'ㅄ': '읍', 'ㅍ': '읍'
-};
-
-// 받침 소리를 더 명확하게 재생하는 함수 - 새로 추가
-function playFinalConsonantSound(text, element = null) {
-    if (window.speechSynthesis.speaking) {
-        window.speechSynthesis.cancel();
-    }
-
-    setTimeout(() => {
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = 'ko-KR';
-        utterance.rate = 0.5;  // 더 천천히
-        utterance.pitch = 0.8; // 더 낮은 톤
-        utterance.volume = 1.0;
-
-        if (element) {
-            element.classList.add('playing');
-            
-            const cleanup = () => {
-                element.classList.remove('playing');
-            };
-            
-            utterance.onend = cleanup;
-            utterance.onerror = cleanup;
-            setTimeout(cleanup, 3000);
-        }
-
-        window.speechSynthesis.speak(utterance);
-    }, 50);
-}
-
+                const FINAL_PRONUNCIATION = {
+                    // 기본 받침 7개 (ㄱ,ㄴ,ㄹ,ㅁ,ㅂ,ㅅ,ㅇ)
+                    'ㄱ': '윽',  // ㄱ 받침
+                    'ㄴ': '은',   // ㄴ 받침
+                    'ㄹ': '을',   // ㄹ 받침
+                    'ㅁ': '음',   // ㅁ 받침
+                    'ㅂ': '읍',   // ㅂ 받침
+                    'ㅅ': '읃',   // ㅅ 받침
+                    'ㅇ': '응',   // ㅇ 받침
+                    
+                    // 나머지 받침들 (게임용으로 유지)
+                    'ㄲ': '윽', 'ㄳ': '윽', 'ㅋ': '윽',
+                    'ㄵ': '은', 'ㄶ': '은',
+                    'ㄷ': '읃', 'ㅆ': '읃', 'ㅈ': '읃', 
+                    'ㅊ': '읃', 'ㅌ': '읃', 'ㅎ': '읃',
+                    'ㄺ': '윽', 'ㄻ': '음', 'ㄼ': '을', 
+                    'ㄽ': '을', 'ㄾ': '을', 'ㄿ': '읍', 'ㅀ': '을',
+                    'ㅄ': '읍', 'ㅍ': '읍'
+                };
         
                 // 한글 자소 분해 함수
                 function decomposeHangul(char) {
@@ -1565,37 +1556,17 @@ function playFinalConsonantSound(text, element = null) {
                 }
         
                 function createFinalCards() {
-    const finals = ['ㄱ', 'ㄴ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅅ', 'ㅇ'];
-    const grid = document.getElementById('finalsGrid');
-    grid.innerHTML = '';
-
-    finals.forEach(final => {
-        const sound = FINAL_PRONUNCIATION[final] || final;
-        const card = createFinalJamoCard(final, sound, 'final', '받침');  // ← 함수명 변경
-        grid.appendChild(card);
-    });
-}
-
-function createFinalJamoCard(jamo, sound, type, typeLabel) {
-    const card = document.createElement('div');
-    card.className = `jamo-card ${type}-card`;
-    
-    card.innerHTML = `
-        <div class="jamo-card-jamo">${jamo}</div>
-        <div class="jamo-card-type ${type}-type">${typeLabel}</div>
-    `;
-
-    card.addEventListener('click', () => {
-        // 받침 소리는 특별한 함수로 재생
-        playFinalConsonantSound(sound, card);
-        // 획순 모달창 열기
-        setTimeout(() => {
-            openStrokeModal(jamo, sound, type);
-        }, 500);
-    });
-
-    return card;
-}
+                    // 기본 받침 7개 (ㄱ,ㄴ,ㄹ,ㅁ,ㅂ,ㅅ,ㅇ)
+                    const finals = ['ㄱ', 'ㄴ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅅ', 'ㅇ'];
+                    const grid = document.getElementById('finalsGrid');
+                    grid.innerHTML = '';
+        
+                    finals.forEach(final => {
+                        const sound = FINAL_PRONUNCIATION[final] || final;
+                        const card = createJamoCard(final, sound, 'final', '받침');
+                        grid.appendChild(card);
+                    });
+                }
         
               function createJamoCard(jamo, sound, type, typeLabel) {
             const card = document.createElement('div');
@@ -1629,39 +1600,48 @@ function createFinalJamoCard(jamo, sound, type, typeLabel) {
                 let strokeAnimationInterval = null;
                 let isShowingStrokes = false;
         
-              function openStrokeModal(jamo, sound, type) {
-    console.log('모달 열기:', jamo, sound, type);
-    currentJamo = jamo;
-    currentSound = sound;
-    currentType = type;
+               function openStrokeModal(jamo, sound, type) {
+            console.log('모달 열기:', jamo, sound, type);
+            currentJamo = jamo;
+            currentSound = sound;
+            currentType = type;
+        
+            document.getElementById('modalJamoTitle').textContent = jamo;
+            document.getElementById('strokeOrderModal').classList.remove('hidden');
+        
+            // 소리 재생 버튼에 이벤트 리스너 추가
+            const soundReplayBtn = document.getElementById('soundReplayBtn');
+            soundReplayBtn.removeEventListener('click', handleSoundReplay);
+            soundReplayBtn.addEventListener('click', handleSoundReplay);
+        
+        // 자음 'ㅇ'일 때만 스피커 버튼 숨기기
+            if (jamo === 'ㅇ') {
+                soundReplayBtn.style.display = 'none';
+            } else {
+                soundReplayBtn.style.display = 'block';
+            }
+        
+           // 캔버스 초기화
+canvas = document.getElementById('strokeCanvas');
+ctx = canvas.getContext('2d');
 
-    document.getElementById('modalJamoTitle').textContent = jamo;
-    document.getElementById('strokeOrderModal').classList.remove('hidden');
-
-    // 소리 재생 버튼에 이벤트 리스너 추가
-    const soundReplayBtn = document.getElementById('soundReplayBtn');
-    soundReplayBtn.removeEventListener('click', handleSoundReplay);
-    soundReplayBtn.addEventListener('click', handleSoundReplay);
-
-    // 자음 'ㅇ'일 때만 스피커 버튼 숨기기 (받침 'ㅇ'은 표시)
-    if (jamo === 'ㅇ' && type === 'consonant') {
-        soundReplayBtn.style.display = 'none';
-    } else {
-        soundReplayBtn.style.display = 'block';
-    }
-
-    // 캔버스 초기화
-    canvas = document.getElementById('strokeCanvas');
-    ctx = canvas.getContext('2d');
-    setupCanvas();
-    
-    // 기본으로 연습하기 모드 실행
-    setTimeout(() => {
-        practiceMode();
-    }, 300);
-    
-    console.log('모달 설정 완료, currentSound:', currentSound);
+// 아이패드용 캔버스 설정 추가
+if (canvas) {
+    canvas.style.touchAction = 'none';
+    canvas.style.userSelect = 'none';
+    canvas.style.webkitUserSelect = 'none';
+    canvas.style.webkitTouchCallout = 'none';
 }
+
+setupCanvas();
+            
+            // 기본으로 연습하기 모드 실행
+            setTimeout(() => {
+                practiceMode();
+            }, 300);
+            
+            console.log('모달 설정 완료, currentSound:', currentSound);
+        }
         
                 // 소리 재생 이벤트 핸들러
                 function handleSoundReplay(event) {
@@ -1717,7 +1697,7 @@ function createFinalJamoCard(jamo, sound, type, typeLabel) {
                     }
                 }
         
-              function setupCanvas() {
+           function setupCanvas() {
     if (!canvas || !ctx) return;
 
     // 캔버스 설정
@@ -1725,7 +1705,7 @@ function createFinalJamoCard(jamo, sound, type, typeLabel) {
     ctx.lineJoin = 'round';
     ctx.lineWidth = 8;
     
-    // 기존 이벤트 리스너 모두 제거
+    // 기존 이벤트 리스너 제거
     canvas.removeEventListener('touchstart', startDrawing);
     canvas.removeEventListener('touchmove', draw);
     canvas.removeEventListener('touchend', stopDrawing);
@@ -1734,10 +1714,11 @@ function createFinalJamoCard(jamo, sound, type, typeLabel) {
     canvas.removeEventListener('mouseup', stopDrawing);
     canvas.removeEventListener('mouseout', stopDrawing);
     
-    // 터치 이벤트 (모바일) - passive 옵션 추가
+    // 터치 이벤트 (모바일/아이패드) - passive: false로 preventDefault 허용
     canvas.addEventListener('touchstart', startDrawing, { passive: false });
     canvas.addEventListener('touchmove', draw, { passive: false });
     canvas.addEventListener('touchend', stopDrawing, { passive: false });
+    canvas.addEventListener('touchcancel', stopDrawing, { passive: false });
     
     // 마우스 이벤트 (데스크탑)
     canvas.addEventListener('mousedown', startDrawing);
@@ -1745,8 +1726,10 @@ function createFinalJamoCard(jamo, sound, type, typeLabel) {
     canvas.addEventListener('mouseup', stopDrawing);
     canvas.addEventListener('mouseout', stopDrawing);
     
-    // 컨텍스트 메뉴 비활성화 (우클릭 방지)
-    canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+    // 아이패드용 추가 설정
+    canvas.style.touchAction = 'none';
+    canvas.style.userSelect = 'none';
+    canvas.style.webkitUserSelect = 'none';
 }
         
              function clearCanvas() {
@@ -3130,70 +3113,81 @@ function drawCircleArrowOutside(centerX, centerY, radius) {
     ctx.restore();
 }
 
-          function startDrawing(e) {
-    if (!isPracticeMode) return;
+            function startDrawing(e) {
+    // 아이패드에서 연습 모드가 아닐 때 터치 방지
+    if (!isPracticeMode) {
+        e.preventDefault();
+        return false;
+    }
     
     // 사용자가 그리기 시작하면 획순 애니메이션 중단
     stopStrokeAnimation();
     
-    e.preventDefault(); // 기본 동작 방지
+    e.preventDefault(); // 아이패드에서 스크롤 방지
     
     isDrawing = true;
-    const coords = getEventCoordinates(e);
+    const rect = canvas.getBoundingClientRect();
+    
+    let x, y;
+    if (e.type === 'touchstart') {
+        // 터치 이벤트 (아이패드/모바일)
+        const touch = e.touches[0];
+        x = touch.clientX - rect.left;
+        y = touch.clientY - rect.top;
+    } else {
+        // 마우스 이벤트 (데스크탑)
+        x = e.clientX - rect.left;
+        y = e.clientY - rect.top;
+    }
     
     ctx.strokeStyle = '#000000';
     ctx.lineWidth = 8;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
     ctx.beginPath();
-    ctx.moveTo(coords.x, coords.y);
+    ctx.moveTo(x, y);
+    
+    return false; // 아이패드에서 추가 이벤트 방지
 }
         
-            function draw(e) {
-    if (!isDrawing || !isPracticeMode) return;
-    
-    e.preventDefault(); // 기본 동작 방지
-    
-    const coords = getEventCoordinates(e);
-    
-    ctx.lineTo(coords.x, coords.y);
-    ctx.stroke();
-}
-        
-             function stopDrawing(e) {
-    if (!isPracticeMode) return;
-    
-    e.preventDefault(); // 기본 동작 방지
-    isDrawing = false;
-    ctx.beginPath(); // 새로운 경로 시작
-}
-
-// 터치/마우스 이벤트에서 정확한 좌표를 가져오는 함수
-function getEventCoordinates(e) {
-    const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
-    
-    let clientX, clientY;
-    
-    if (e.touches && e.touches.length > 0) {
-        // 터치 이벤트
-        clientX = e.touches[0].clientX;
-        clientY = e.touches[0].clientY;
-    } else if (e.changedTouches && e.changedTouches.length > 0) {
-        // 터치 종료 이벤트
-        clientX = e.changedTouches[0].clientX;
-        clientY = e.changedTouches[0].clientY;
-    } else {
-        // 마우스 이벤트
-        clientX = e.clientX;
-        clientY = e.clientY;
+             function draw(e) {
+    if (!isDrawing || !isPracticeMode) {
+        if (e.type.startsWith('touch')) {
+            e.preventDefault();
+        }
+        return false;
     }
     
-    return {
-        x: (clientX - rect.left) * scaleX,
-        y: (clientY - rect.top) * scaleY
-    };
+    e.preventDefault();
+    
+    const rect = canvas.getBoundingClientRect();
+    
+    let x, y;
+    if (e.type === 'touchmove') {
+        // 터치 이벤트 (아이패드/모바일)
+        if (e.touches.length > 0) {
+            const touch = e.touches[0];
+            x = touch.clientX - rect.left;
+            y = touch.clientY - rect.top;
+        } else {
+            return false;
+        }
+    } else {
+        // 마우스 이벤트 (데스크탑)
+        x = e.clientX - rect.left;
+        y = e.clientY - rect.top;
+    }
+    
+    ctx.lineTo(x, y);
+    ctx.stroke();
+    
+    return false;
+}
+        
+               function stopDrawing(e) {
+    if (e && e.type.startsWith('touch')) {
+        e.preventDefault();
+    }
+    isDrawing = false;
+    return false;
 }
         
                 // 디버깅을 위한 간단한 테스트 함수
@@ -3206,38 +3200,61 @@ function getEventCoordinates(e) {
                     playJamoSound(currentSound);
                 }
         
-                function playJamoSound(sound, cardElement) {
-                    // 기존 재생 중단
-                    if (window.speechSynthesis.speaking) {
-                        window.speechSynthesis.cancel();
-                    }
+            function playJamoSound(sound, cardElement) {
+    // 기존 재생 중단
+    if (window.speechSynthesis.speaking) {
+        window.speechSynthesis.cancel();
+    }
+
+    // 모든 카드의 playing 클래스 제거
+    document.querySelectorAll('.jamo-card.playing').forEach(card => {
+        card.classList.remove('playing');
+    });
+
+    // 현재 카드에 playing 클래스 추가
+    cardElement.classList.add('playing');
+
+    setTimeout(() => {
+        const utterance = new SpeechSynthesisUtterance(sound);
+        utterance.lang = 'ko-KR';
         
-                    // 모든 카드의 playing 클래스 제거
-                    document.querySelectorAll('.jamo-card.playing').forEach(card => {
-                        card.classList.remove('playing');
-                    });
+        // 특정 소리들에 대해 개별 설정
+        if (sound === '그') { // ㄱ
+            utterance.rate = 0.4;
+            utterance.pitch = 0.8;
+        } else if (sound === '크') { // ㅋ
+            utterance.rate = 0.4;
+            utterance.pitch = 1.4;
+        } else if (sound === '드') { // ㄷ
+            utterance.rate = 0.4;
+            utterance.pitch = 0.8;
+        } else if (sound === '트') { // ㅌ
+            utterance.rate = 0.4;
+            utterance.pitch = 1.4;
+        } else if (sound === '윽') { // ㄱ받침
+            utterance.rate = 0.3;
+            utterance.pitch = 0.7;
+        } else if (sound === '읃') { // ㅅ받침
+            utterance.rate = 0.3;
+            utterance.pitch = 1.3;
+        } else {
+            utterance.rate = 0.8;
+            utterance.pitch = 1.2;
+        }
         
-                    // 현재 카드에 playing 클래스 추가
-                    cardElement.classList.add('playing');
-        
-                    setTimeout(() => {
-                        const utterance = new SpeechSynthesisUtterance(sound);
-                        utterance.lang = 'ko-KR';
-                        utterance.rate = 0.8;
-                        utterance.pitch = 1.2;
-                        utterance.volume = 1.0;
-        
-                        const cleanup = () => {
-                            cardElement.classList.remove('playing');
-                        };
-        
-                        utterance.onend = cleanup;
-                        utterance.onerror = cleanup;
-        
-                        // 타임아웃 안전장치
-                        setTimeout(cleanup, 2000);
-        
-                        window.speechSynthesis.speak(utterance);
-                    }, 100);
-                }
+        utterance.volume = 1.0;
+
+        const cleanup = () => {
+            cardElement.classList.remove('playing');
+        };
+
+        utterance.onend = cleanup;
+        utterance.onerror = cleanup;
+
+        // 타임아웃 안전장치
+        setTimeout(cleanup, 2000);
+
+        window.speechSynthesis.speak(utterance);
+    }, 100);
+}
     </script>
