@@ -45,7 +45,7 @@
             background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
             box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
             border-radius: 15px;
-            padding: 10px 16px;
+            padding: 8px 16px;
         }
 
         .logout-btn:hover {
@@ -54,17 +54,20 @@
             transform: translateY(-2px);
         }
 
-       .stats-btn {
-            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
-            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
-            border-radius: 15px;
-            padding: 10px 16px;
+   .stats-btn {
+            background: none !important;
+            border: none !important;
+            box-shadow: none !important;
+            font-size: 20px;
+            padding: 8px;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            color: inherit;
         }
 
         .stats-btn:hover {
-            background: linear-gradient(135deg, #45a049 0%, #388e3c 100%);
-            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
-            transform: translateY(-2px);
+            background: none !important;
+            transform: scale(1.1);
         }
 
       .user-info {
@@ -183,7 +186,7 @@
                 <span class="user-nickname" id="userNickname"></span>
             </div>
             <button class="login-btn" id="loginBtn" onclick="showAuthModal()">로그인(회원가입)</button>
-            <button class="stats-btn" id="statsBtn" onclick="showStatsModal()" style="display: none;">내 통계</button>
+            <button class="stats-btn" id="statsBtn" onclick="showStatsModal()" style="display: none;">📊</button>
             <button class="logout-btn" id="logoutBtn" onclick="logout()" style="display: none;">로그아웃</button>
         </div>
 
