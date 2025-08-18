@@ -102,6 +102,72 @@
     </div>
     <script>
         let audioPlayback = null;
+// 통합 음성 재생 함수 (모든 화면에서 사용)
+function playUnifiedSound(sound, element = null) {
+    console.log('통합 음성 재생:', sound);
+    
+    if (window.speechSynthesis.speaking) {
+        window.speechSynthesis.cancel();
+    }
+
+    setTimeout(() => {
+        const utterance = new SpeechSynthesisUtterance(sound);
+        utterance.lang = 'ko-KR';
+        
+        if (sound === '그') {
+            utterance.rate = 0.4;
+            utterance.pitch = 0.8;
+        } else if (sound === '크') {
+            utterance.rate = 0.4;
+            utterance.pitch = 1.4;
+        } else if (sound === '드') {
+            utterance.rate = 0.4;
+            utterance.pitch = 0.8;
+        } else if (sound === '트') {
+            utterance.rate = 0.4;
+            utterance.pitch = 1.4;
+        } else if (sound === '즈') {
+            utterance.rate = 0.4;
+            utterance.pitch = 0.9;
+        } else if (sound === '츠') {
+            utterance.rate = 0.4;
+            utterance.pitch = 1.3;
+        } else if (sound === '브') {
+            utterance.rate = 0.4;
+            utterance.pitch = 0.8;
+        } else if (sound === '프') {
+            utterance.rate = 0.4;
+            utterance.pitch = 1.5;
+        } else if (sound === '윽') {
+            utterance.rate = 0.2;
+            utterance.pitch = 0.4;
+            utterance.volume = 0.9;
+        } else if (sound === '읃') {
+            utterance.rate = 0.35;
+            utterance.pitch = 1.2;
+            utterance.volume = 1.0;
+        } else {
+            utterance.rate = 0.8;
+            utterance.pitch = 1.2;
+        }
+        
+        utterance.volume = 1.0;
+
+        if (element) {
+            element.classList.add('playing');
+            
+            const cleanup = () => {
+                element.classList.remove('playing');
+            };
+            
+            utterance.onend = cleanup;
+            utterance.onerror = cleanup;
+            setTimeout(cleanup, 3000);
+        }
+
+        window.speechSynthesis.speak(utterance);
+    }, 100);
+}
                 // 전역 변수
                 let currentApp = null;
                 let gameState = {
@@ -534,69 +600,8 @@
                         return item;
                     }
         
-                  playSound(text, element = null) {
-    if (this.speechSynthesis.speaking) {
-        this.speechSynthesis.cancel();
-    }
-
-    setTimeout(() => {
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = 'ko-KR';
-        
-        // 특정 소리들에 대해 개별 설정
-        if (text === '그') { // ㄱ
-            utterance.rate = 0.4;
-            utterance.pitch = 0.8;
-        } else if (text === '크') { // ㅋ
-            utterance.rate = 0.4;
-            utterance.pitch = 1.4;
-        } else if (text === '드') { // ㄷ
-            utterance.rate = 0.4;
-            utterance.pitch = 0.8;
-        } else if (text === '트') { // ㅌ
-            utterance.rate = 0.4;
-            utterance.pitch = 1.4;
-} else if (text === '즈') { // ㅈ - 이 부분 추가
-    utterance.rate = 0.4;
-    utterance.pitch = 0.9;
-} else if (text === '츠') { // ㅊ - 이 부분 추가
-    utterance.rate = 0.4;
-    utterance.pitch = 1.3;
-} else if (text === '브') { // ㅂ - 새로 추가
-    utterance.rate = 0.4;
-    utterance.pitch = 0.8;
-} else if (text === '프') { // ㅍ - 새로 추가
-    utterance.rate = 0.4;
-    utterance.pitch = 1.5;
-         } else if (sound === '윽') { // ㄱ받침
-            utterance.rate = 0.2;
-            utterance.pitch = 0.4;
- utterance.volume = 0.9;
-        } else if (sound === '읃') { // ㅅ받침
-            utterance.rate = 0.35;
-            utterance.pitch = 1.8;
- utterance.volume = 1.0;
-        } else {
-            utterance.rate = this.currentSpeed;
-            utterance.pitch = 1.2;
-        }
-        
-        utterance.volume = 1.0;
-
-        if (element) {
-            element.classList.add('playing');
-            
-            const cleanup = () => {
-                element.classList.remove('playing');
-            };
-            
-            utterance.onend = cleanup;
-            utterance.onerror = cleanup;
-            setTimeout(cleanup, 3000);
-        }
-
-        this.speechSynthesis.speak(utterance);
-    }, 50);
+                playSound(text, element = null) {
+    playUnifiedSound(text, element);
 }
         
                     async playAll() {
@@ -654,12 +659,50 @@
                                 this.speechSynthesis.cancel();
                             }
                             
-                            setTimeout(() => {
-                                const utterance = new SpeechSynthesisUtterance(text);
-                                utterance.lang = 'ko-KR';
-                                utterance.rate = this.currentSpeed;
-                                utterance.pitch = 1.2;
-                                utterance.volume = 1.0;
+                          setTimeout(() => {
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'ko-KR';
+    
+    // 기존의 utterance.rate = this.currentSpeed; 부분을 다음으로 교체
+    if (text === '그') {
+        utterance.rate = 0.4;
+        utterance.pitch = 0.8;
+    } else if (text === '크') {
+        utterance.rate = 0.4;
+        utterance.pitch = 1.4;
+    } else if (text === '드') {
+        utterance.rate = 0.4;
+        utterance.pitch = 0.8;
+    } else if (text === '트') {
+        utterance.rate = 0.4;
+        utterance.pitch = 1.4;
+    } else if (text === '즈') {
+        utterance.rate = 0.4;
+        utterance.pitch = 0.9;
+    } else if (text === '츠') {
+        utterance.rate = 0.4;
+        utterance.pitch = 1.3;
+    } else if (text === '브') {
+        utterance.rate = 0.4;
+        utterance.pitch = 0.8;
+    } else if (text === '프') {
+        utterance.rate = 0.4;
+        utterance.pitch = 1.5;
+    } else if (text === '윽') {
+        utterance.rate = 0.2;
+        utterance.pitch = 0.4;
+        utterance.volume = 0.9;
+    } else if (text === '읃') {
+        utterance.rate = 0.35;
+        utterance.pitch = 1.2;
+        utterance.volume = 1.0;
+    } else {
+        utterance.rate = this.currentSpeed;
+        utterance.pitch = 1.2;
+    }
+    
+    utterance.volume = 1.0;
+    // 나머지 코드는 그대로 유지
         
                                 if (element) {
                                     element.classList.add('playing');
@@ -1035,11 +1078,49 @@
             function playNext() {
                 if (index >= uniquePhonics.length || isStopped) return;
         
-                const utterance = new SpeechSynthesisUtterance(uniquePhonics[index]);
-                utterance.lang = 'ko-KR';
-                utterance.rate = 0.5;
-                utterance.volume = 1.0;
-                utterance.pitch = 1.2;
+             const utterance = new SpeechSynthesisUtterance(uniquePhonics[index]);
+utterance.lang = 'ko-KR';
+
+// 기존 설정을 다음으로 교체
+const sound = uniquePhonics[index];
+if (sound === '그') {
+    utterance.rate = 0.4;
+    utterance.pitch = 0.8;
+} else if (sound === '크') {
+    utterance.rate = 0.4;
+    utterance.pitch = 1.4;
+} else if (sound === '드') {
+    utterance.rate = 0.4;
+    utterance.pitch = 0.8;
+} else if (sound === '트') {
+    utterance.rate = 0.4;
+    utterance.pitch = 1.4;
+} else if (sound === '즈') {
+    utterance.rate = 0.4;
+    utterance.pitch = 0.9;
+} else if (sound === '츠') {
+    utterance.rate = 0.4;
+    utterance.pitch = 1.3;
+} else if (sound === '브') {
+    utterance.rate = 0.4;
+    utterance.pitch = 0.8;
+} else if (sound === '프') {
+    utterance.rate = 0.4;
+    utterance.pitch = 1.5;
+} else if (sound === '윽') {
+    utterance.rate = 0.2;
+    utterance.pitch = 0.4;
+    utterance.volume = 0.9;
+} else if (sound === '읃') {
+    utterance.rate = 0.35;
+    utterance.pitch = 1.2;
+    utterance.volume = 1.0;
+} else {
+    utterance.rate = 0.5;
+    utterance.pitch = 1.2;
+}
+
+utterance.volume = 1.0;
         
                 utterance.onend = function() {
                     index++;
@@ -1675,69 +1756,8 @@ if (jamo === 'ㅇ' && type === 'consonant') {
                 }
         
                 // 모달창용 소리 재생 함수
-               function playModalSound(sound) {
-    console.log('playModalSound 호출:', sound);
-    
-    // 기존 재생 중단
-    if (window.speechSynthesis.speaking) {
-        window.speechSynthesis.cancel();
-    }
-
-    setTimeout(() => {
-        const utterance = new SpeechSynthesisUtterance(sound);
-        utterance.lang = 'ko-KR';
-        
-        // 특정 소리들에 대해 개별 설정
-        if (sound === '그') { // ㄱ
-            utterance.rate = 0.4;
-            utterance.pitch = 0.8;
-        } else if (sound === '크') { // ㅋ
-            utterance.rate = 0.4;
-            utterance.pitch = 1.4;
-        } else if (sound === '드') { // ㄷ
-            utterance.rate = 0.4;
-            utterance.pitch = 0.8;
-        } else if (sound === '트') { // ㅌ
-            utterance.rate = 0.4;
-            utterance.pitch = 1.4;
-       } else if (sound === '즈') { // ㅈ - text를 sound로 변경
-    utterance.rate = 0.4;
-    utterance.pitch = 0.9;
-} else if (sound === '츠') { // ㅊ - text를 sound로 변경
-    utterance.rate = 0.4;
-    utterance.pitch = 1.3;
-} else if (sound === '브') { // ㅂ - text를 sound로 변경
-    utterance.rate = 0.4;
-    utterance.pitch = 0.8;
-} else if (sound === '프') { // ㅍ - text를 sound로 변경
-    utterance.rate = 0.4;
-    utterance.pitch = 1.5;
-          } else if (sound === '윽') { // ㄱ받침
-            utterance.rate = 0.2;
-            utterance.pitch = 0.4;
- utterance.volume = 0.9;
-        } else if (sound === '읃') { // ㅅ받침
-            utterance.rate = 0.35;
-            utterance.pitch = 1.2;
- utterance.volume = 1.0;
-        } else {
-            utterance.rate = 0.8;
-            utterance.pitch = 1.2;
-        }
-        
-        utterance.volume = 1.0;
-
-        utterance.onend = () => {
-            console.log('모달 소리 재생 완료:', sound);
-        };
-
-        utterance.onerror = (e) => {
-            console.error('모달 소리 재생 오류:', e);
-        };
-
-        console.log('모달 소리 재생 시작:', sound);
-        window.speechSynthesis.speak(utterance);
-    }, 100);
+           function playModalSound(sound) {
+    playUnifiedSound(sound);
 }
         
                function closeStrokeModal() {
@@ -3253,75 +3273,13 @@ function drawCircleArrowOutside(centerX, centerY, radius) {
                     playJamoSound(currentSound);
                 }
         
-            function playJamoSound(sound, cardElement) {
-    // 기존 재생 중단
-    if (window.speechSynthesis.speaking) {
-        window.speechSynthesis.cancel();
-    }
-
+          function playJamoSound(sound, cardElement) {
     // 모든 카드의 playing 클래스 제거
     document.querySelectorAll('.jamo-card.playing').forEach(card => {
         card.classList.remove('playing');
     });
 
-    // 현재 카드에 playing 클래스 추가
-    cardElement.classList.add('playing');
-
-    setTimeout(() => {
-        const utterance = new SpeechSynthesisUtterance(sound);
-        utterance.lang = 'ko-KR';
-        
-        // 특정 소리들에 대해 개별 설정
-        if (sound === '그') { // ㄱ
-            utterance.rate = 0.4;
-            utterance.pitch = 0.8;
-        } else if (sound === '크') { // ㅋ
-            utterance.rate = 0.4;
-            utterance.pitch = 1.4;
-        } else if (sound === '드') { // ㄷ
-            utterance.rate = 0.4;
-            utterance.pitch = 0.8;
-        } else if (sound === '트') { // ㅌ
-            utterance.rate = 0.4;
-            utterance.pitch = 1.4;
-} else if (sound === '즈') { // ㅈ - text를 sound로 변경
-    utterance.rate = 0.4;
-    utterance.pitch = 0.9;
-} else if (sound === '츠') { // ㅊ - text를 sound로 변경
-    utterance.rate = 0.4;
-    utterance.pitch = 1.3;
-} else if (sound === '브') { // ㅂ - text를 sound로 변경
-    utterance.rate = 0.4;
-    utterance.pitch = 0.8;
-} else if (sound === '프') { // ㅍ - text를 sound로 변경
-    utterance.rate = 0.4;
-    utterance.pitch = 1.5;    
-        } else if (sound === '윽') { // ㄱ받침
-            utterance.rate = 0.2;
-            utterance.pitch = 0.4;
- utterance.volume = 0.9;
-        } else if (sound === '읃') { // ㅅ받침
-            utterance.rate = 0.35;
-            utterance.pitch = 1.2;
- utterance.volume = 1.0;
-        } else {
-            utterance.rate = 0.8;
-            utterance.pitch = 1.2;
-        }
-        
-        utterance.volume = 1.0;
-
-        const cleanup = () => {
-            cardElement.classList.remove('playing');
-        };
-
-        utterance.onend = cleanup;
-        utterance.onerror = cleanup;
-
-        // 타임아웃 안전장치
-        setTimeout(cleanup, 2000);
-
-        window.speechSynthesis.speak(utterance);
-    }, 100);
+    // 통합 음성 재생 함수 사용
+    playUnifiedSound(sound, cardElement);
 }
     </script>
