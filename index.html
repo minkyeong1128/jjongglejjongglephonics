@@ -461,10 +461,11 @@ async function login(username, password) {
     }
 }
 
-        function logout() {
-            currentUser = null;
-            updateLoginUI();
-        }
+      function logout() {
+    currentUser = null;
+    localStorage.removeItem('currentUser');
+    updateLoginUI();
+}
 
         function updateLoginUI() {
             const loginBtn = document.getElementById('loginBtn');
@@ -487,10 +488,135 @@ async function login(username, password) {
             }
         }
 
-        function showStatsModal() {
-            if (!currentUser) return;
-            alert('통계 기능은 준비중입니다!');
+      function showStatsModal() {
+    if (!currentUser) return;
+    
+    document.getElementById('statsModal').style.display = 'flex';
+    generateStatsData();
+}
+
+function closeStatsModal() {
+    document.getElementById('statsModal').style.display = 'none';
+}
+
+function switchStatsTab(tabName) {
+    // 모든 탭 비활성화
+    document.querySelectorAll('.stats-tab').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    document.querySelectorAll('.stats-tab-content').forEach(content => {
+        content.classList.remove('active');
+    });
+    
+    // 선택된 탭 활성화
+    event.target.classList.add('active');
+    document.getElementById(tabName + 'Stats').classList.add('active');
+}
+
+function generateStatsData() {
+    if (!currentUser || !currentUser.stats) return;
+    
+    const stats = currentUser.stats;
+    
+    // 기본 자음
+    const consonants = ['ㄱ', 'ㄴ', 'ㄷ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅅ', 'ㅇ', 'ㅈ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ'];
+    const doubleConsonants = ['ㄲ', 'ㄸ', 'ㅃ', 'ㅆ', 'ㅉ'];
+    const vowels = ['ㅏ', 'ㅑ', 'ㅓ', 'ㅕ', 'ㅗ', 'ㅛ', 'ㅜ', 'ㅠ', 'ㅡ', 'ㅣ'];
+    const doubleVowels = ['ㅐ', 'ㅒ', 'ㅔ', 'ㅖ', 'ㅘ', 'ㅙ', 'ㅚ', 'ㅝ', 'ㅞ', 'ㅟ', 'ㅢ'];
+    const finals = ['ㄱ', 'ㄴ', 'ㄷ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅅ', 'ㅇ'];
+    
+    generateStatsGrid('consonants', consonants, stats.consonantErrors || {});
+    generateStatsGrid('doubleConsonants', doubleConsonants, stats.consonantErrors || {});
+    generateStatsGrid('vowels', vowels, stats.vowelErrors || {});
+    generateStatsGrid('doubleVowels', doubleVowels, stats.vowelErrors || {});
+    generateStatsGrid('finals', finals, stats.finalErrors || {});
+}
+
+function generateStatsGrid(type, items, errors) {
+    const grid = document.getElementById(type + 'Grid');
+    const practiceSection = document.getElementById(type + 'Practice');
+    
+    grid.innerHTML = '';
+    
+    const needsPractice = [];
+    
+    items.forEach(item => {
+        const errorCount = errors[item] || 0;
+        const totalAttempts = Math.max(currentUser.stats.totalAttempts || 1, 1);
+        
+        // 정확도 계산 (오류가 적을수록 높은 점수)
+        let accuracy = Math.max(0, 100 - (errorCount / totalAttempts * 100));
+        if (totalAttempts < 5 && errorCount === 0) {
+            accuracy = 50; // 데이터가 부족한 경우
         }
+        
+        const statItem = document.createElement('div');
+        statItem.className = 'stat-item';
+        
+        // 정확도에 따른 클래스 설정
+        if (accuracy >= 90) {
+            statItem.classList.add('excellent');
+        } else if (accuracy >= 70) {
+            statItem.classList.add('good');
+        } else if (accuracy >= 50) {
+            statItem.classList.add('average');
+        } else if (accuracy > 0) {
+            statItem.classList.add('needs-practice');
+            needsPractice.push(item);
+        } else {
+            statItem.classList.add('no-data');
+        }
+        
+        statItem.innerHTML = `
+            <div class="stat-jamo">${item}</div>
+            <div class="stat-bar">
+                <div class="stat-fill" style="width: ${accuracy}%"></div>
+            </div>
+            <div class="stat-percentage">${Math.round(accuracy)}%</div>
+        `;
+        
+        // 클릭 시 해당 자모 연습 모드로 이동
+        statItem.addEventListener('click', () => {
+            closeStatsModal();
+            startFocusedPractice(item, type);
+        });
+        
+        grid.appendChild(statItem);
+    });
+    
+    // 연습이 필요한 항목 표시
+    if (needsPractice.length > 0) {
+        practiceSection.innerHTML = `
+            <div class="practice-title">🎯 집중 연습이 필요한 항목</div>
+            <div class="practice-items">
+                ${needsPractice.map(item => 
+                    `<div class="practice-item" onclick="startFocusedPractice('${item}', '${type}')">${item}</div>`
+                ).join('')}
+            </div>
+        `;
+    } else {
+        practiceSection.innerHTML = `
+            <div class="practice-title">🎉 모든 항목을 잘 하고 있어요!</div>
+        `;
+    }
+}
+
+function startFocusedPractice(jamo, type) {
+    // 해당 자모의 집중 연습 모드 시작
+    alert(`"${jamo}" 집중 연습 모드를 시작합니다!`);
+    
+    // 자음·모음 배우기 화면으로 이동하여 해당 자모에 포커스
+    showJamoLearning();
+    
+    // 해당 탭으로 이동
+    if (type === 'consonants' || type === 'doubleConsonants') {
+        showJamoTab('consonants');
+    } else if (type === 'vowels' || type === 'doubleVowels') {
+        showJamoTab('vowels');
+    } else if (type === 'finals') {
+        showJamoTab('finals');
+    }
+}
         let audioPlayback = null;
 // 통합 음성 재생 함수 (모든 화면에서 사용)
 function playUnifiedSound(sound, element = null) {
@@ -3702,63 +3828,82 @@ function drawCircleArrowOutside(centerX, centerY, radius) {
     playUnifiedSound(sound, cardElement);
 }
 // 로그인 관련 이벤트 처리
-        document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('authForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                const username = document.getElementById('username').value;
-                const password = document.getElementById('password').value;
-                const nickname = document.getElementById('nickname').value;
+      // 로그인 관련 이벤트 처리
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('authForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        const nickname = document.getElementById('nickname').value;
 
-                if (currentAuthMode === 'login') {
-                    if (login(username, password)) {
-                        alert('로그인 성공!');
-                    } else {
-                        alert('아이디 또는 비밀번호가 올바르지 않습니다.');
-                    }
+        if (currentAuthMode === 'login') {
+            // 비동기 함수 제대로 처리
+            login(username, password).then(success => {
+                if (success) {
+                    alert('로그인 성공!');
                 } else {
-                    if (!nickname) {
-                        alert('이름을 입력해주세요.');
-                        return;
-                    }
-                    
-                    if (signup(username, password, nickname)) {
-                        alert('회원가입 성공!');
-                    } else {
-                        alert('이미 존재하는 아이디입니다.');
-                    }
+                    alert('아이디 또는 비밀번호가 올바르지 않습니다.');
                 }
+            }).catch(error => {
+                console.error('로그인 오류:', error);
+                alert('로그인 중 오류가 발생했습니다.');
             });
-
-            // 페이지 로드시 로그인 상태 확인
-const savedUser = localStorage.getItem('currentUser');
-if (savedUser) {
-    const userInfo = JSON.parse(savedUser);
-    // Firebase에서 사용자 데이터 확인 후 자동 로그인
-    getUserData(userInfo.username).then(userData => {
-        if (userData) {
-            currentUser = {
-                username: userInfo.username,
-                nickname: userData.nickname,
-                stats: userData.stats
-            };
-            updateLoginUI();
         } else {
-            // 사용자 데이터가 없으면 로컬 저장소에서 제거
-            localStorage.removeItem('currentUser');
+            if (!nickname) {
+                alert('이름을 입력해주세요.');
+                return;
+            }
+            
+            // 비동기 함수 제대로 처리
+            signup(username, password, nickname).then(success => {
+                if (success) {
+                    alert('회원가입 성공!');
+                } else {
+                    alert('이미 존재하는 아이디입니다.');
+                }
+            }).catch(error => {
+                console.error('회원가입 오류:', error);
+                alert('회원가입 중 오류가 발생했습니다.');
+            });
         }
     });
-}
-        });
 
-        // 세션 유지
-        window.addEventListener('beforeunload', function() {
-            if (currentUser) {
-                localStorage.setItem('currentUser', JSON.stringify({
-                    username: currentUser.username
-                }));
+    // 페이지 로드시 로그인 상태 확인
+    const savedUser = localStorage.getItem('currentUser');
+    if (savedUser) {
+        const userInfo = JSON.parse(savedUser);
+        // Firebase에서 사용자 데이터 확인 후 자동 로그인
+        getUserData(userInfo.username).then(userData => {
+            if (userData) {
+                currentUser = {
+                    username: userInfo.username,
+                    nickname: userData.nickname,
+                    stats: userData.stats || {
+                        consonantErrors: {},
+                        vowelErrors: {},
+                        finalErrors: {},
+                        totalAttempts: 0,
+                        correctAttempts: 0
+                    }
+                };
+                updateLoginUI();
             } else {
+                // 사용자 데이터가 없으면 로컬 저장소에서 제거
                 localStorage.removeItem('currentUser');
             }
         });
+    }
+});
+
+// 세션 유지
+window.addEventListener('beforeunload', function() {
+    if (currentUser) {
+        localStorage.setItem('currentUser', JSON.stringify({
+            username: currentUser.username
+        }));
+    } else {
+        localStorage.removeItem('currentUser');
+    }
+});
     </script>
