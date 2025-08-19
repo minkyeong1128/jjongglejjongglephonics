@@ -181,6 +181,282 @@
             cursor: pointer;
             color: #666;
         }
+/* 통계 모달 스타일 추가 */
+.stats-tabs {
+    display: flex;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #e0e0e0;
+    gap: 5px;
+}
+
+.stats-tab {
+    flex: 1;
+    padding: 12px 8px;
+    background: none;
+    border: none;
+    color: #666;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.stats-tab.active {
+    color: #4facfe;
+    border-bottom-color: #4facfe;
+    background: linear-gradient(135deg, rgba(79, 172, 254, 0.1), rgba(0, 242, 254, 0.05));
+}
+
+.stats-tab:hover:not(.active) {
+    color: #333;
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.stats-tab-content {
+    display: none;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.stats-tab-content.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.stats-section-title {
+    text-align: center;
+    color: #4a5568;
+    margin-bottom: 20px;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.stat-item {
+    background: white;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 15px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.stat-item.excellent {
+    border-color: #38a169;
+    background: linear-gradient(135deg, #f0fff4, #c6f6d5);
+}
+
+.stat-item.excellent::before {
+    content: '🌟';
+    position: absolute;
+    top: 5px;
+    right: 8px;
+    font-size: 14px;
+}
+
+.stat-item.good {
+    border-color: #4299e1;
+    background: linear-gradient(135deg, #f0f8ff, #bee3f8);
+}
+
+.stat-item.good::before {
+    content: '👍';
+    position: absolute;
+    top: 5px;
+    right: 8px;
+    font-size: 14px;
+}
+
+.stat-item.average {
+    border-color: #ed8936;
+    background: linear-gradient(135deg, #fffaf0, #fbd38d);
+}
+
+.stat-item.average::before {
+    content: '⚡';
+    position: absolute;
+    top: 5px;
+    right: 8px;
+    font-size: 14px;
+}
+
+.stat-item.needs-practice {
+    border-color: #e53e3e;
+    background: linear-gradient(135deg, #fff5f5, #fed7d7);
+}
+
+.stat-item.needs-practice::before {
+    content: '🎯';
+    position: absolute;
+    top: 5px;
+    right: 8px;
+    font-size: 14px;
+}
+
+.stat-item.no-data {
+    border-color: #a0aec0;
+    background: linear-gradient(135deg, #f7fafc, #edf2f7);
+    opacity: 0.7;
+}
+
+.stat-item.no-data::before {
+    content: '❓';
+    position: absolute;
+    top: 5px;
+    right: 8px;
+    font-size: 14px;
+}
+
+.stat-jamo {
+    font-size: 32px;
+    font-weight: 700;
+    color: #2d3748;
+    margin-bottom: 10px;
+    font-family: 'Malgun Gothic', Arial, sans-serif;
+}
+
+.stat-bar {
+    width: 100%;
+    height: 8px;
+    background: #e2e8f0;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.stat-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #4facfe, #00f2fe);
+    border-radius: 4px;
+    transition: width 1s ease-out;
+}
+
+.stat-percentage {
+    font-size: 14px;
+    font-weight: 600;
+    color: #4a5568;
+}
+
+.practice-section {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    padding: 20px;
+    border-radius: 15px;
+    margin-top: 20px;
+}
+
+.practice-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #4a5568;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.practice-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+}
+
+.practice-item {
+    background: white;
+    border: 2px solid #e53e3e;
+    border-radius: 10px;
+    padding: 8px 16px;
+    font-size: 18px;
+    font-weight: 700;
+    color: #e53e3e;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    animation: pulse 2s infinite;
+}
+
+.practice-item:hover {
+    background: #e53e3e;
+    color: white;
+    transform: scale(1.05);
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+}
+
+/* 반응형 디자인 */
+@media (max-width: 480px) {
+    .stats-tabs {
+        flex-wrap: wrap;
+        gap: 2px;
+    }
+    
+    .stats-tab {
+        font-size: 12px;
+        padding: 8px 4px;
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+        gap: 10px;
+    }
+    
+    .stat-item {
+        padding: 10px;
+    }
+    
+    .stat-jamo {
+        font-size: 24px;
+        margin-bottom: 8px;
+    }
+    
+    .practice-items {
+        gap: 8px;
+    }
+    
+    .practice-item {
+        padding: 6px 12px;
+        font-size: 16px;
+    }
+}
+
+/* 통계 데이터 로딩 애니메이션 */
+.loading-stats {
+    text-align: center;
+    padding: 40px;
+    color: #666;
+}
+
+.loading-stats::before {
+    content: '📊';
+    display: block;
+    font-size: 48px;
+    margin-bottom: 15px;
+    animation: bounce 1s infinite;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
 </style>
     <div class="main-container">
   <!-- 로그인 영역 -->
@@ -306,6 +582,56 @@
             </div>
         </div>
     </div>
+<!-- 통계 모달 HTML (기존 strokeOrderModal 다음에 추가) -->
+<div class="hidden modal" id="statsModal">
+    <div class="modal-content" style="max-width: 600px; max-height: 80vh;">
+        <div class="modal-header">
+            <h3 class="modal-title">📊 학습 통계</h3>
+            <button class="modal-close" onclick="closeStatsModal()">×</button>
+        </div>
+        <div class="modal-body">
+            <!-- 탭 버튼들 -->
+            <div class="stats-tabs">
+                <button class="stats-tab active" onclick="switchStatsTab('consonants')">자음</button>
+                <button class="stats-tab" onclick="switchStatsTab('doubleConsonants')">쌍자음</button>
+                <button class="stats-tab" onclick="switchStatsTab('vowels')">모음</button>
+                <button class="stats-tab" onclick="switchStatsTab('doubleVowels')">이중모음</button>
+                <button class="stats-tab" onclick="switchStatsTab('finals')">받침</button>
+            </div>
+            
+            <!-- 탭 내용들 -->
+            <div class="stats-tab-content active" id="consonantsStats">
+                <h4 class="stats-section-title">자음 학습 현황</h4>
+                <div class="stats-grid" id="consonantsGrid"></div>
+                <div class="practice-section" id="consonantsPractice"></div>
+            </div>
+            
+            <div class="stats-tab-content" id="doubleConsonantsStats">
+                <h4 class="stats-section-title">쌍자음 학습 현황</h4>
+                <div class="stats-grid" id="doubleConsonantsGrid"></div>
+                <div class="practice-section" id="doubleConsonantsPractice"></div>
+            </div>
+            
+            <div class="stats-tab-content" id="vowelsStats">
+                <h4 class="stats-section-title">모음 학습 현황</h4>
+                <div class="stats-grid" id="vowelsGrid"></div>
+                <div class="practice-section" id="vowelsPractice"></div>
+            </div>
+            
+            <div class="stats-tab-content" id="doubleVowelsStats">
+                <h4 class="stats-section-title">이중모음 학습 현황</h4>
+                <div class="stats-grid" id="doubleVowelsGrid"></div>
+                <div class="practice-section" id="doubleVowelsPractice"></div>
+            </div>
+            
+            <div class="stats-tab-content" id="finalsStats">
+                <h4 class="stats-section-title">받침 학습 현황</h4>
+                <div class="stats-grid" id="finalsGrid"></div>
+                <div class="practice-section" id="finalsPractice"></div>
+            </div>
+        </div>
+    </div>
+</div>
     <script>
 // Firebase 설정
 const firebaseConfig = {
@@ -488,15 +814,18 @@ async function login(username, password) {
             }
         }
 
-      function showStatsModal() {
-    if (!currentUser) return;
+ function showStatsModal() {
+    if (!currentUser) {
+        alert('로그인이 필요한 서비스입니다.');
+        return;
+    }
     
-    document.getElementById('statsModal').style.display = 'flex';
+    document.getElementById('statsModal').classList.remove('hidden'); // style.display 대신 사용
     generateStatsData();
 }
 
 function closeStatsModal() {
-    document.getElementById('statsModal').style.display = 'none';
+    document.getElementById('statsModal').classList.add('hidden');
 }
 
 function switchStatsTab(tabName) {
@@ -508,33 +837,79 @@ function switchStatsTab(tabName) {
         content.classList.remove('active');
     });
     
-    // 선택된 탭 활성화
-    event.target.classList.add('active');
+   // 선택된 탭 활성화 - event.target 대신 다른 방법 사용
+    document.querySelector(`[onclick="switchStatsTab('${tabName}')"]`).classList.add('active');
     document.getElementById(tabName + 'Stats').classList.add('active');
+    
+    // 해당 탭의 데이터 생성 (이미 생성되지 않은 경우에만)
+    const grid = document.getElementById(tabName + 'Grid');
+    if (grid.children.length === 0) {
+        generateStatsDataForTab(tabName);
+    }
 }
 
-function generateStatsData() {
+// 탭별 통계 데이터 생성
+function generateStatsDataForTab(tabName) {
     if (!currentUser || !currentUser.stats) return;
+
+ // grid 요소 존재 확인 추가
+    const grid = document.getElementById(tabName + 'Grid');
+    if (!grid) {
+        console.error(`Grid element not found: ${tabName}Grid`);
+        return;
+    }
     
     const stats = currentUser.stats;
+    let items = [];
+    let errors = {};
     
-    // 기본 자음
-    const consonants = ['ㄱ', 'ㄴ', 'ㄷ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅅ', 'ㅇ', 'ㅈ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ'];
-    const doubleConsonants = ['ㄲ', 'ㄸ', 'ㅃ', 'ㅆ', 'ㅉ'];
-    const vowels = ['ㅏ', 'ㅑ', 'ㅓ', 'ㅕ', 'ㅗ', 'ㅛ', 'ㅜ', 'ㅠ', 'ㅡ', 'ㅣ'];
-    const doubleVowels = ['ㅐ', 'ㅒ', 'ㅔ', 'ㅖ', 'ㅘ', 'ㅙ', 'ㅚ', 'ㅝ', 'ㅞ', 'ㅟ', 'ㅢ'];
-    const finals = ['ㄱ', 'ㄴ', 'ㄷ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅅ', 'ㅇ'];
+    switch(tabName) {
+        case 'consonants':
+            items = ['ㄱ', 'ㄴ', 'ㄷ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅅ', 'ㅇ', 'ㅈ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ'];
+            errors = stats.consonantErrors || {};
+            break;
+        case 'doubleConsonants':
+            items = ['ㄲ', 'ㄸ', 'ㅃ', 'ㅆ', 'ㅉ'];
+            errors = stats.consonantErrors || {};
+            break;
+        case 'vowels':
+            items = ['ㅏ', 'ㅑ', 'ㅓ', 'ㅕ', 'ㅗ', 'ㅛ', 'ㅜ', 'ㅠ', 'ㅡ', 'ㅣ'];
+            errors = stats.vowelErrors || {};
+            break;
+        case 'doubleVowels':
+            items = ['ㅐ', 'ㅒ', 'ㅔ', 'ㅖ', 'ㅘ', 'ㅙ', 'ㅚ', 'ㅝ', 'ㅞ', 'ㅟ', 'ㅢ'];
+            errors = stats.vowelErrors || {};
+            break;
+        case 'finals':
+            items = ['ㄱ', 'ㄴ', 'ㄷ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅅ', 'ㅇ'];
+            errors = stats.finalErrors || {};
+            break;
+    }
     
-    generateStatsGrid('consonants', consonants, stats.consonantErrors || {});
-    generateStatsGrid('doubleConsonants', doubleConsonants, stats.consonantErrors || {});
-    generateStatsGrid('vowels', vowels, stats.vowelErrors || {});
-    generateStatsGrid('doubleVowels', doubleVowels, stats.vowelErrors || {});
-    generateStatsGrid('finals', finals, stats.finalErrors || {});
+    generateStatsGrid(tabName, items, errors);
+}
+function generateStatsData() {
+    if (!currentUser || !currentUser.stats) {
+        // 로딩 상태 표시
+        document.querySelectorAll('.stats-grid').forEach(grid => {
+            grid.innerHTML = '<div class="loading-stats">통계 데이터를 불러오는 중...</div>';
+        });
+        return;
+    }
+    
+    // 기본으로 첫 번째 탭(자음) 데이터 생성
+    generateStatsDataForTab('consonants');
 }
 
 function generateStatsGrid(type, items, errors) {
     const grid = document.getElementById(type + 'Grid');
     const practiceSection = document.getElementById(type + 'Practice');
+
+// null 체크 추가
+    if (!grid || !practiceSection) {
+        console.error(`Required elements not found for type: ${type}`);
+        return;
+    }
     
     grid.innerHTML = '';
     
