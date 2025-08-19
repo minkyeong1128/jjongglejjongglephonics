@@ -602,7 +602,13 @@ function playUnifiedSound(sound, element = null) {
                         currentApp.resetApp();
                     }
                 }
-        function showSoundAnalysis() {
+       function showSoundAnalysis() {
+    // 로그인 체크
+    if (!currentUser) {
+        alert('로그인이 필요한 서비스입니다. 먼저 로그인해주세요.');
+        return;
+    }
+    
     document.getElementById('mainMenu').classList.add('hidden');
     document.getElementById('soundAnalysisScreen').classList.remove('hidden');
     document.getElementById('gameScreen').classList.add('hidden');
@@ -611,13 +617,19 @@ function playUnifiedSound(sound, element = null) {
     // 로그인 영역 숨기기
     document.querySelector('.login-area').style.display = 'none';
                     
-                    // 소리 분석 앱 초기화
-                    if (!currentApp) {
-                        currentApp = new HangulPhonicsApp();
-                    }
-                }
+    // 소리 분석 앱 초기화
+    if (!currentApp) {
+        currentApp = new HangulPhonicsApp();
+    }
+}
         
-                function showSoundGame() {
+               function showSoundGame() {
+    // 로그인 체크
+    if (!currentUser) {
+        alert('로그인이 필요한 서비스입니다. 먼저 로그인해주세요.');
+        return;
+    }
+    
     document.getElementById('mainMenu').classList.add('hidden');
     document.getElementById('soundAnalysisScreen').classList.add('hidden');
     document.getElementById('gameScreen').classList.remove('hidden');
@@ -626,11 +638,17 @@ function playUnifiedSound(sound, element = null) {
     // 로그인 영역 숨기기
     document.querySelector('.login-area').style.display = 'none';
                     
-                    // 게임 초기화
-                    initializeGame();
-                }
+    // 게임 초기화
+    initializeGame();
+}
         
-             function showJamoLearning() {
+          function showJamoLearning() {
+    // 로그인 체크
+    if (!currentUser) {
+        alert('로그인이 필요한 서비스입니다. 먼저 로그인해주세요.');
+        return;
+    }
+    
     document.getElementById('mainMenu').classList.add('hidden');
     document.getElementById('soundAnalysisScreen').classList.add('hidden');
     document.getElementById('gameScreen').classList.add('hidden');
@@ -639,9 +657,9 @@ function playUnifiedSound(sound, element = null) {
     // 로그인 영역 숨기기
     document.querySelector('.login-area').style.display = 'none';
                     
-                    // 자음·모음 학습 초기화
-                    initializeJamoLearning();
-                }
+    // 자음·모음 학습 초기화
+    initializeJamoLearning();
+}
         
                 // 한글 파닉스 앱 클래스 (기존 코드)
                 class HangulPhonicsApp {
