@@ -171,6 +171,42 @@
             background: #45a049;
         }
 
+.auth-links {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
+}
+
+.link-btn {
+    background: transparent !important;
+    border: none !important;
+    color: #ff6b6b !important;
+    font-size: 12px;
+    cursor: pointer;
+    text-decoration: underline;
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+.link-btn:hover {
+    color: #ff8e8e !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+.link-btn:focus {
+    color: #ff6b6b !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+.link-btn:active {
+    color: #ff6b6b !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
         .close-modal {
             position: absolute;
             top: 15px;
@@ -457,6 +493,28 @@
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-10px); }
 }
+
+#findForm .back-button {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    color: #666;
+    font-size: 20px;
+    cursor: pointer;
+    transition: all .3s ease;
+    box-shadow: none !important;
+}
+
+#findForm .back-button:hover {
+    transform: translateY(-2px);
+    background: transparent !important;
+    box-shadow: none !important;
+}
 </style>
     <div class="main-container">
   <!-- 로그인 영역 -->
@@ -481,11 +539,27 @@
                 </div>
 
                 <form class="auth-form" id="authForm">
-                    <input type="text" id="username" placeholder="아이디" required>
-                    <input type="password" id="password" placeholder="비밀번호" required>
-                    <input type="text" id="nickname" placeholder="이름" style="display: none;">
-                    <button type="submit" id="authSubmitBtn">로그인</button>
-                </form>
+    <input type="text" id="username" placeholder="아이디" required>
+    <input type="password" id="password" placeholder="비밀번호" required>
+    <input type="text" id="nickname" placeholder="이름" style="display: none;">
+    <input type="date" id="birthdate" placeholder="생년월일" style="display: none;">
+    <button type="submit" id="authSubmitBtn">로그인</button>
+   <div class="auth-links" id="authLinks">
+    <button type="button" class="link-btn" onclick="showFindForm()">아이디/비밀번호 찾기</button>
+</div>
+</form>
+
+<!-- 아이디/비밀번호 찾기 폼 -->
+<div class="auth-form hidden" id="findForm">
+    <button class="back-button" onclick="hideFindForm()">🔙</button>
+    
+      
+    <form id="findFormContent">
+        <input type="text" id="findName" placeholder="이름" required>
+        <input type="date" id="findBirthdate" placeholder="생년월일" required>
+        <button type="submit" id="findSubmitBtn">찾기</button>
+    </form>
+</div>
             </div>
         </div>
         <div id="mainMenu">
@@ -602,32 +676,32 @@
             <!-- 탭 내용들 -->
             <div class="stats-tab-content active" id="consonantsStats">
                 <h4 class="stats-section-title">자음 학습 현황</h4>
-                <div class="stats-grid" id="consonantsGrid"></div>
-                <div class="practice-section" id="consonantsPractice"></div>
+                <div class="stats-grid" id="statsConsonantsGrid"></div>
+              <div class="practice-section" id="statsConsonantsPractice"></div>
             </div>
             
             <div class="stats-tab-content" id="doubleConsonantsStats">
                 <h4 class="stats-section-title">쌍자음 학습 현황</h4>
-                <div class="stats-grid" id="doubleConsonantsGrid"></div>
-                <div class="practice-section" id="doubleConsonantsPractice"></div>
+              <div class="stats-grid" id="statsDoubleConsonantsGrid"></div>
+                <div class="practice-section" id="statsDoubleConsonantsPractice"></div>
             </div>
             
             <div class="stats-tab-content" id="vowelsStats">
                 <h4 class="stats-section-title">모음 학습 현황</h4>
-                <div class="stats-grid" id="vowelsGrid"></div>
-                <div class="practice-section" id="vowelsPractice"></div>
+               <div class="stats-grid" id="statsVowelsGrid"></div>
+               <div class="practice-section" id="statsVowelsPractice"></div>
             </div>
             
             <div class="stats-tab-content" id="doubleVowelsStats">
                 <h4 class="stats-section-title">이중모음 학습 현황</h4>
-                <div class="stats-grid" id="doubleVowelsGrid"></div>
-                <div class="practice-section" id="doubleVowelsPractice"></div>
+               <div class="stats-grid" id="statsDoubleVowelsGrid"></div>
+               <div class="practice-section" id="statsDoubleVowelsPractice"></div>
             </div>
             
             <div class="stats-tab-content" id="finalsStats">
                 <h4 class="stats-section-title">받침 학습 현황</h4>
-                <div class="stats-grid" id="finalsGrid"></div>
-                <div class="practice-section" id="finalsPractice"></div>
+               <div class="stats-grid" id="statsFinalsGrid"></div>
+               <div class="practice-section" id="statsFinalsPractice"></div>
             </div>
         </div>
     </div>
@@ -686,7 +760,17 @@ async function updateUserStats(username, stats) {
         // 로그인/회원가입 관련 함수들
         function showAuthModal() {
             document.getElementById('authModal').style.display = 'flex';
-        }
+ // 항상 로그인 탭으로 리셋
+    switchAuthTab('login');
+    
+    // 폼 내용도 초기화
+    document.getElementById('authForm').reset();
+    
+    // 찾기 폼이 열려있다면 숨기기
+    document.getElementById('authForm').classList.remove('hidden');
+    document.getElementById('findForm').classList.add('hidden');
+}
+
 
         function closeAuthModal() {
             document.getElementById('authModal').style.display = 'none';
@@ -698,21 +782,29 @@ async function updateUserStats(username, stats) {
             const loginTab = document.querySelector('.auth-tab:first-child');
             const signupTab = document.querySelector('.auth-tab:last-child');
             const nicknameField = document.getElementById('nickname');
+const birthdateField = document.getElementById('birthdate');
+const authLinks = document.getElementById('authLinks');
             const submitBtn = document.getElementById('authSubmitBtn');
 
-            if (mode === 'login') {
-                loginTab.classList.add('active');
-                signupTab.classList.remove('active');
-                nicknameField.style.display = 'none';
-                nicknameField.required = false;
-                submitBtn.textContent = '로그인';
-            } else {
-                loginTab.classList.remove('active');
-                signupTab.classList.add('active');
-                nicknameField.style.display = 'block';
-                nicknameField.required = true;
-                submitBtn.textContent = '회원가입';
-            }
+         if (mode === 'login') {
+    loginTab.classList.add('active');
+    signupTab.classList.remove('active');
+    nicknameField.style.display = 'none';
+    birthdateField.style.display = 'none';
+    nicknameField.required = false;
+    birthdateField.required = false;
+    authLinks.style.display = 'flex';
+    submitBtn.textContent = '로그인';
+} else {
+    loginTab.classList.remove('active');
+    signupTab.classList.add('active');
+    nicknameField.style.display = 'block';
+    birthdateField.style.display = 'block';
+    nicknameField.required = true;
+    birthdateField.required = true;
+    authLinks.style.display = 'none';
+    submitBtn.textContent = '회원가입';
+}
         }
 async function login(username, password) {
     try {
@@ -814,13 +906,19 @@ async function login(username, password) {
             }
         }
 
- function showStatsModal() {
+function showStatsModal() {
     if (!currentUser) {
         alert('로그인이 필요한 서비스입니다.');
         return;
     }
     
-    document.getElementById('statsModal').classList.remove('hidden'); // style.display 대신 사용
+    document.getElementById('statsModal').classList.remove('hidden');
+    
+    // 모든 그리드 초기화
+    document.querySelectorAll('.stats-grid').forEach(grid => {
+        grid.innerHTML = '';
+    });
+    
     generateStatsData();
 }
 
@@ -841,69 +939,64 @@ function switchStatsTab(tabName) {
     document.querySelector(`[onclick="switchStatsTab('${tabName}')"]`).classList.add('active');
     document.getElementById(tabName + 'Stats').classList.add('active');
     
-    // 해당 탭의 데이터 생성 (이미 생성되지 않은 경우에만)
-    const grid = document.getElementById(tabName + 'Grid');
-    if (grid.children.length === 0) {
-        generateStatsDataForTab(tabName);
-    }
+  // 해당 탭의 데이터 생성 (항상 새로 생성)
+generateStatsDataForTab(tabName);
 }
 
 // 탭별 통계 데이터 생성
 function generateStatsDataForTab(tabName) {
-    if (!currentUser || !currentUser.stats) return;
-
- // grid 요소 존재 확인 추가
-    const grid = document.getElementById(tabName + 'Grid');
-    if (!grid) {
-        console.error(`Grid element not found: ${tabName}Grid`);
-        return;
-    }
-    
-    const stats = currentUser.stats;
     let items = [];
-    let errors = {};
+    let correctData = {};
+    let totalData = {};
     
+    // 탭별 글자 목록 정의
     switch(tabName) {
         case 'consonants':
             items = ['ㄱ', 'ㄴ', 'ㄷ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅅ', 'ㅇ', 'ㅈ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ'];
-            errors = stats.consonantErrors || {};
             break;
         case 'doubleConsonants':
             items = ['ㄲ', 'ㄸ', 'ㅃ', 'ㅆ', 'ㅉ'];
-            errors = stats.consonantErrors || {};
             break;
         case 'vowels':
             items = ['ㅏ', 'ㅑ', 'ㅓ', 'ㅕ', 'ㅗ', 'ㅛ', 'ㅜ', 'ㅠ', 'ㅡ', 'ㅣ'];
-            errors = stats.vowelErrors || {};
             break;
         case 'doubleVowels':
             items = ['ㅐ', 'ㅒ', 'ㅔ', 'ㅖ', 'ㅘ', 'ㅙ', 'ㅚ', 'ㅝ', 'ㅞ', 'ㅟ', 'ㅢ'];
-            errors = stats.vowelErrors || {};
             break;
         case 'finals':
-            items = ['ㄱ', 'ㄴ', 'ㄷ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅅ', 'ㅇ'];
-            errors = stats.finalErrors || {};
+            items = ['ㄱ', 'ㄴ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅅ', 'ㅇ'];
             break;
+        default:
+            items = [];
     }
     
-    generateStatsGrid(tabName, items, errors);
+    // 사용자 데이터가 있으면 가져오기
+    if (currentUser && currentUser.stats) {
+        if (tabName === 'consonants' || tabName === 'doubleConsonants') {
+            correctData = currentUser.stats.consonantCorrect || {};
+            totalData = currentUser.stats.consonantTotal || {};
+        } else if (tabName === 'vowels' || tabName === 'doubleVowels') {
+            correctData = currentUser.stats.vowelCorrect || {};
+            totalData = currentUser.stats.vowelTotal || {};
+        } else if (tabName === 'finals') {
+            correctData = currentUser.stats.finalCorrect || {};
+            totalData = currentUser.stats.finalTotal || {};
+        }
+    }
+    
+    console.log(`${tabName} 탭 - 글자 수:`, items.length, '글자들:', items); // 디버깅용
+    
+    generateStatsGrid(tabName, items, correctData, totalData);
 }
+
 function generateStatsData() {
-    if (!currentUser || !currentUser.stats) {
-        // 로딩 상태 표시
-        document.querySelectorAll('.stats-grid').forEach(grid => {
-            grid.innerHTML = '<div class="loading-stats">통계 데이터를 불러오는 중...</div>';
-        });
-        return;
-    }
-    
-    // 기본으로 첫 번째 탭(자음) 데이터 생성
+    // 항상 첫 번째 탭(자음) 데이터 생성 (사용자가 없어도)
     generateStatsDataForTab('consonants');
 }
 
-function generateStatsGrid(type, items, errors) {
-    const grid = document.getElementById(type + 'Grid');
-    const practiceSection = document.getElementById(type + 'Practice');
+function generateStatsGrid(type, items, correctData, totalData) {
+    const grid = document.getElementById('stats' + type.charAt(0).toUpperCase() + type.slice(1) + 'Grid');
+    const practiceSection = document.getElementById('stats' + type.charAt(0).toUpperCase() + type.slice(1) + 'Practice');
 
 // null 체크 추가
     if (!grid || !practiceSection) {
@@ -915,15 +1008,16 @@ function generateStatsGrid(type, items, errors) {
     
     const needsPractice = [];
     
-    items.forEach(item => {
-        const errorCount = errors[item] || 0;
-        const totalAttempts = Math.max(currentUser.stats.totalAttempts || 1, 1);
-        
-        // 정확도 계산 (오류가 적을수록 높은 점수)
-        let accuracy = Math.max(0, 100 - (errorCount / totalAttempts * 100));
-        if (totalAttempts < 5 && errorCount === 0) {
-            accuracy = 50; // 데이터가 부족한 경우
-        }
+  items.forEach(item => {
+    const correctCount = correctData[item] || 0;
+    const totalCount = totalData[item] || 0;
+
+    
+    // 정확도 계산
+    let accuracy = 0;
+    if (totalCount > 0) {
+        accuracy = Math.round((correctCount / totalCount) * 100);
+    }
         
         const statItem = document.createElement('div');
         statItem.className = 'stat-item';
@@ -950,12 +1044,7 @@ function generateStatsGrid(type, items, errors) {
             <div class="stat-percentage">${Math.round(accuracy)}%</div>
         `;
         
-        // 클릭 시 해당 자모 연습 모드로 이동
-        statItem.addEventListener('click', () => {
-            closeStatsModal();
-            startFocusedPractice(item, type);
-        });
-        
+              
         grid.appendChild(statItem);
     });
     
@@ -1520,8 +1609,19 @@ function playUnifiedSound(sound, element = null) {
                         return item;
                     }
         
-                playSound(text, element = null) {
+             playSound(text, element = null) {
     playUnifiedSound(text, element);
+    
+    // 통계 업데이트 (음성 학습 활동으로 기록)
+    if (currentUser && element) {
+        const jamoElement = element.querySelector('.jamo');
+        if (jamoElement) {
+            const jamo = jamoElement.textContent;
+            const type = element.classList.contains('consonant') ? 'consonant' :
+                        element.classList.contains('vowel') ? 'vowel' : 'final';
+            updateLearningStats(jamo, type);
+        }
+    }
 }
         
                     async playAll() {
@@ -2135,6 +2235,10 @@ utterance.volume = 1.0;
                     if (selectedIndex === correctIndex) {
                         gameState.score++;
                         document.getElementById('score').textContent = gameState.score;
+// 통계 업데이트
+if (currentUser) {
+    updateGameStats(gameState.currentQuestion.word, true);
+}
         
                         buttons[selectedIndex].classList.add('correct');
                         feedback.className = 'feedback correct';
@@ -2150,7 +2254,12 @@ utterance.volume = 1.0;
                                 btn.classList.add('incorrect');
                             }
                         });
-        
+       
+ // 통계 업데이트
+if (currentUser) {
+    updateGameStats(gameState.currentQuestion.word, false);
+}
+
                         gameState.wrongAnswers.push({
                             question: gameState.currentQuestionIndex + 1,
                             word: gameState.currentQuestion.word,
@@ -2592,10 +2701,14 @@ utterance.volume = 1.0;
                 <div class="jamo-card-type ${type}-type">${typeLabel}</div>
             `;
         
-                    card.addEventListener('click', () => {
-    // playJamoSound(sound, card); ← 이 줄만 삭제하거나 주석처리
+                  card.addEventListener('click', () => {
+    // 통계 업데이트 (학습 활동으로 기록)
+    if (currentUser) {
+        updateLearningStats(jamo, type);
+    }
+    
     // 획순 모달창 열기
-    openStrokeModal(jamo, sound, type); // 바로 호출
+    openStrokeModal(jamo, sound, type);
 });
               
                     return card;
@@ -4202,7 +4315,41 @@ function drawCircleArrowOutside(centerX, centerY, radius) {
     // 통합 음성 재생 함수 사용
     playUnifiedSound(sound, cardElement);
 }
-// 로그인 관련 이벤트 처리
+// 아이디/비밀번호 찾기 관련 함수
+let currentFindMode = 'id';
+
+function showFindForm() {
+    document.getElementById('authForm').classList.add('hidden');
+    document.getElementById('findForm').classList.remove('hidden');
+    
+    // 로그인/회원가입 탭 숨기기
+    document.querySelector('.auth-tabs').style.display = 'none';
+}
+
+function switchFindTab(mode) {
+    currentFindMode = mode;
+    
+    // 모든 탭 비활성화
+    document.querySelectorAll('.find-tab').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    
+    // 선택된 탭 활성화
+    document.querySelector(`[onclick="switchFindTab('${mode}')"]`).classList.add('active');
+    
+    // 버튼 텍스트 변경
+    const submitBtn = document.getElementById('findSubmitBtn');
+    submitBtn.textContent = mode === 'id' ? '아이디 찾기' : '비밀번호 찾기';
+}
+
+function hideFindForm() {
+    document.getElementById('authForm').classList.remove('hidden');
+    document.getElementById('findForm').classList.add('hidden');
+    document.getElementById('findFormContent').reset();
+    
+    // 로그인/회원가입 탭 다시 보이기
+    document.querySelector('.auth-tabs').style.display = 'flex';
+}
       // 로그인 관련 이벤트 처리
 document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('authForm').addEventListener('submit', function(e) {
@@ -4231,6 +4378,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             // 비동기 함수 제대로 처리
+const birthdate = document.getElementById('birthdate').value;
             signup(username, password, nickname).then(success => {
                 if (success) {
                     alert('회원가입 성공!');
@@ -4243,6 +4391,37 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
     });
+// findFormContent 이벤트 리스너 추가
+    document.getElementById('findFormContent').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const name = document.getElementById('findName').value;
+        const birthdate = document.getElementById('findBirthdate').value;
+        
+        // Firebase에서 이름과 생년월일로 사용자 검색
+        try {
+            const snapshot = await db.collection('users').get();
+            let found = false;
+            
+          snapshot.forEach(doc => {
+    const userData = doc.data();
+    if (userData.nickname === name && userData.birthdate === birthdate) {
+        found = true;
+        alert(`찾은 아이디: ${doc.id}\n찾은 비밀번호: ${userData.password}`);
+    }
+});
+            
+            if (!found) {
+                alert('일치하는 정보를 찾을 수 없습니다.');
+            }
+            
+            hideFindForm();
+        } catch (error) {
+            console.error('검색 오류:', error);
+            alert('검색 중 오류가 발생했습니다.');
+        }
+    });
+    // ↑↑↑ 여기까지 추가 ↑↑↑
 
     // 페이지 로드시 로그인 상태 확인
     const savedUser = localStorage.getItem('currentUser');
@@ -4254,13 +4433,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 currentUser = {
                     username: userInfo.username,
                     nickname: userData.nickname,
-                    stats: userData.stats || {
-                        consonantErrors: {},
-                        vowelErrors: {},
-                        finalErrors: {},
-                        totalAttempts: 0,
-                        correctAttempts: 0
-                    }
+                   stats: userData.stats || {
+    consonantCorrect: {},
+    vowelCorrect: {},
+    finalCorrect: {},
+    consonantTotal: {},
+    vowelTotal: {},
+    finalTotal: {}
+}
                 };
                 updateLoginUI();
             } else {
@@ -4281,4 +4461,120 @@ window.addEventListener('beforeunload', function() {
         localStorage.removeItem('currentUser');
     }
 });
+// 게임 통계 업데이트 함수
+function updateGameStats(word, isCorrect) {
+    if (!currentUser || !currentUser.stats) return;
+    
+    // 단어를 자모로 분해
+    for (let char of word) {
+        const decomposed = decomposeHangul(char);
+        console.log('분해 결과:', decomposed); // 디버깅용
+        
+        if (decomposed) {
+            // 초성 업데이트
+            if (decomposed.initial) {
+                if (!currentUser.stats.consonantTotal) {
+                    currentUser.stats.consonantTotal = {};
+                }
+                if (!currentUser.stats.consonantCorrect) {
+                    currentUser.stats.consonantCorrect = {};
+                }
+                if (!currentUser.stats.consonantTotal[decomposed.initial]) {
+                    currentUser.stats.consonantTotal[decomposed.initial] = 0;
+                }
+                if (!currentUser.stats.consonantCorrect[decomposed.initial]) {
+                    currentUser.stats.consonantCorrect[decomposed.initial] = 0;
+                }
+                currentUser.stats.consonantTotal[decomposed.initial]++;
+                if (isCorrect) {
+                    currentUser.stats.consonantCorrect[decomposed.initial]++;
+                }
+            }
+            
+            // 중성 업데이트 (medial 속성명 확인)
+            const vowel = decomposed.medial || decomposed.vowel;
+            if (vowel) {
+                if (!currentUser.stats.vowelTotal) {
+                    currentUser.stats.vowelTotal = {};
+                }
+                if (!currentUser.stats.vowelCorrect) {
+                    currentUser.stats.vowelCorrect = {};
+                }
+                if (!currentUser.stats.vowelTotal[vowel]) {
+                    currentUser.stats.vowelTotal[vowel] = 0;
+                }
+                if (!currentUser.stats.vowelCorrect[vowel]) {
+                    currentUser.stats.vowelCorrect[vowel] = 0;
+                }
+                currentUser.stats.vowelTotal[vowel]++;
+                if (isCorrect) {
+                    currentUser.stats.vowelCorrect[vowel]++;
+                }
+            }
+            
+            // 종성 업데이트
+            if (decomposed.final) {
+                if (!currentUser.stats.finalTotal) {
+                    currentUser.stats.finalTotal = {};
+                }
+                if (!currentUser.stats.finalCorrect) {
+                    currentUser.stats.finalCorrect = {};
+                }
+                if (!currentUser.stats.finalTotal[decomposed.final]) {
+                    currentUser.stats.finalTotal[decomposed.final] = 0;
+                }
+                if (!currentUser.stats.finalCorrect[decomposed.final]) {
+                    currentUser.stats.finalCorrect[decomposed.final] = 0;
+                }
+                currentUser.stats.finalTotal[decomposed.final]++;
+                if (isCorrect) {
+                    currentUser.stats.finalCorrect[decomposed.final]++;
+                }
+            }
+        }
+    }
+    
+    // Firebase에 저장
+    updateUserStats(currentUser.username, currentUser.stats);
+}
+// 학습 활동 통계 업데이트 함수 (게임이 아닌 학습 활동용)
+function updateLearningStats(jamo, type) {
+    if (!currentUser || !currentUser.stats) return;
+    
+    let correctKey, totalKey;
+    
+    if (type === 'consonant') {
+        correctKey = 'consonantCorrect';
+        totalKey = 'consonantTotal';
+    } else if (type === 'vowel') {
+        correctKey = 'vowelCorrect';
+        totalKey = 'vowelTotal';
+    } else if (type === 'final') {
+        correctKey = 'finalCorrect';
+        totalKey = 'finalTotal';
+    } else {
+        return;
+    }
+    
+    // 학습 활동은 항상 정답으로 처리 (클릭/재생 = 학습)
+    if (!currentUser.stats[totalKey]) {
+        currentUser.stats[totalKey] = {};
+    }
+    if (!currentUser.stats[correctKey]) {
+        currentUser.stats[correctKey] = {};
+    }
+    if (!currentUser.stats[totalKey][jamo]) {
+        currentUser.stats[totalKey][jamo] = 0;
+    }
+    if (!currentUser.stats[correctKey][jamo]) {
+        currentUser.stats[correctKey][jamo] = 0;
+    }
+    
+    // 학습 활동 1회 추가 (정답으로 처리)
+    currentUser.stats[totalKey][jamo]++;
+    currentUser.stats[correctKey][jamo]++;
+    
+    // Firebase에 저장
+    updateUserStats(currentUser.username, currentUser.stats);
+}
     </script>
