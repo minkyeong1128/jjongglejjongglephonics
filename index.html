@@ -138,38 +138,46 @@
             border-bottom-color: #4CAF50;
         }
 
-        .auth-form {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
+       .auth-form, #findForm {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
+}
 
-        .auth-form input {
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 14px;
-        }
+.auth-form input, .auth-form select, #findForm input {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+    .auth-form input, .auth-form select, #findForm input, #findForm button {
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+}
 
         .auth-form input:focus {
             outline: none;
             border-color: #4CAF50;
         }
 
-        .auth-form button {
-            background: #4CAF50;
-            color: white;
-            border: none;
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 14px;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
+    .auth-form button, #findForm button {
+   width: 100%;
+    box-sizing: border-box;
+    background: #4CAF50;
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
 
-        .auth-form button:hover {
-            background: #45a049;
-        }
+.auth-form button:hover, #findForm button:hover {
+    background: #45a049;
+}
 
 .auth-links {
     display: flex;
@@ -186,6 +194,63 @@
     text-decoration: underline;
     box-shadow: none !important;
     outline: none !important;
+}
+
+.birthdate-container {
+    display: flex;
+    gap: 4px;
+    width: 100% !important;
+    max-width: 350px !important; /* 강제로 너비 제한 */
+    box-sizing: border-box !important;
+  margin-top: 15px; /* 이름 입력창과의 간격 추가 */
+ margin-bottom: 15px; /* 찾기 버튼과의 간격 추가 */
+}
+
+.birthdate-container select {
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    flex: 1;
+    min-width: 0;
+    box-sizing: border-box;
+}
+
+.birthdate-container select:first-child {
+    flex: 1.3;
+}
+
+.birthdate-container select:focus {
+    outline: none;
+    border-color: #4CAF50;
+}
+
+.signup-birthdate-container {
+    display: flex;
+    gap: 4px;
+    width: 100% !important;
+    max-width: 350px !important;
+    box-sizing: border-box !important;
+    /* margin 제거 - .auth-form의 gap으로 간격 통일 */
+}
+
+.signup-birthdate-container select {
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    flex: 1;
+    min-width: 0;
+    box-sizing: border-box;
+}
+
+.signup-birthdate-container select:first-child {
+    flex: 1.3;
+}
+
+.signup-birthdate-container select:focus {
+    outline: none;
+    border-color: #4CAF50;
 }
 
 .link-btn:hover {
@@ -542,7 +607,17 @@
     <input type="text" id="username" placeholder="아이디" required>
     <input type="password" id="password" placeholder="비밀번호" required>
     <input type="text" id="nickname" placeholder="이름" style="display: none;">
-    <input type="date" id="birthdate" placeholder="생년월일" style="display: none;">
+    <div class="signup-birthdate-container" style="display: none;">
+    <select id="signupYear" required>
+        <option value="">연도</option>
+    </select>
+    <select id="signupMonth" required>
+        <option value="">월</option>
+    </select>
+    <select id="signupDay" required>
+        <option value="">일</option>
+    </select>
+</div>
     <button type="submit" id="authSubmitBtn">로그인</button>
    <div class="auth-links" id="authLinks">
     <button type="button" class="link-btn" onclick="showFindForm()">아이디/비밀번호 찾기</button>
@@ -556,7 +631,17 @@
       
     <form id="findFormContent">
         <input type="text" id="findName" placeholder="이름" required>
-        <input type="date" id="findBirthdate" placeholder="생년월일" required>
+    <div class="birthdate-container">
+    <select id="findYear" required>
+        <option value="">연도</option>
+    </select>
+    <select id="findMonth" required>
+        <option value="">월</option>
+    </select>
+    <select id="findDay" required>
+        <option value="">일</option>
+    </select>
+</div>
         <button type="submit" id="findSubmitBtn">찾기</button>
     </form>
 </div>
@@ -778,34 +863,32 @@ async function updateUserStats(username, stats) {
         }
 
         function switchAuthTab(mode) {
-            currentAuthMode = mode;
-            const loginTab = document.querySelector('.auth-tab:first-child');
-            const signupTab = document.querySelector('.auth-tab:last-child');
-            const nicknameField = document.getElementById('nickname');
-const birthdateField = document.getElementById('birthdate');
-const authLinks = document.getElementById('authLinks');
-            const submitBtn = document.getElementById('authSubmitBtn');
-
-         if (mode === 'login') {
-    loginTab.classList.add('active');
-    signupTab.classList.remove('active');
-    nicknameField.style.display = 'none';
-    birthdateField.style.display = 'none';
-    nicknameField.required = false;
-    birthdateField.required = false;
-    authLinks.style.display = 'flex';
-    submitBtn.textContent = '로그인';
-} else {
-    loginTab.classList.remove('active');
-    signupTab.classList.add('active');
-    nicknameField.style.display = 'block';
-    birthdateField.style.display = 'block';
-    nicknameField.required = true;
-    birthdateField.required = true;
-    authLinks.style.display = 'none';
-    submitBtn.textContent = '회원가입';
+    currentAuthMode = mode;
+    const loginTab = document.querySelector('.auth-tab:first-child');
+    const signupTab = document.querySelector('.auth-tab:last-child');
+    const nicknameField = document.getElementById('nickname');
+    const authLinks = document.getElementById('authLinks');
+    const submitBtn = document.getElementById('authSubmitBtn');
+    
+    if (mode === 'login') {
+        loginTab.classList.add('active');
+        signupTab.classList.remove('active');
+        document.querySelector('.signup-birthdate-container').style.display = 'none';
+        nicknameField.style.display = 'none';
+        nicknameField.required = false;
+        authLinks.style.display = 'flex';
+        submitBtn.textContent = '로그인';
+    } else {
+        loginTab.classList.remove('active');
+        signupTab.classList.add('active');
+        document.querySelector('.signup-birthdate-container').style.display = 'flex';
+        nicknameField.style.display = 'block';
+        nicknameField.required = true;
+        authLinks.style.display = 'none';
+        submitBtn.textContent = '회원가입';
+    }
 }
-        }
+
 async function login(username, password) {
     try {
         const userData = await getUserData(username);
@@ -998,7 +1081,7 @@ function generateStatsGrid(type, items, correctData, totalData) {
     const grid = document.getElementById('stats' + type.charAt(0).toUpperCase() + type.slice(1) + 'Grid');
     const practiceSection = document.getElementById('stats' + type.charAt(0).toUpperCase() + type.slice(1) + 'Practice');
 
-// null 체크 추가
+    // null 체크 추가
     if (!grid || !practiceSection) {
         console.error(`Required elements not found for type: ${type}`);
         return;
@@ -1008,32 +1091,47 @@ function generateStatsGrid(type, items, correctData, totalData) {
     
     const needsPractice = [];
     
-  items.forEach(item => {
-    const correctCount = correctData[item] || 0;
-    const totalCount = totalData[item] || 0;
-
-    
-    // 정확도 계산
-    let accuracy = 0;
-    if (totalCount > 0) {
-        accuracy = Math.round((correctCount / totalCount) * 100);
-    }
+    items.forEach(item => {
+        const correctCount = correctData[item] || 0;
+        const totalCount = totalData[item] || 0;
+        
+        // 정확도 계산 - 데이터가 없으면 0%
+        let accuracy = 0;
+        if (totalCount > 0) {
+            accuracy = Math.round((correctCount / totalCount) * 100);
+        }
         
         const statItem = document.createElement('div');
         statItem.className = 'stat-item';
         
-        // 정확도에 따른 클래스 설정
-        if (accuracy >= 90) {
+        // 정확도에 따른 클래스 설정 (더 엄격한 기준)
+        if (totalCount === 0) {
+            statItem.classList.add('no-data');
+        } else if (accuracy >= 80) {
             statItem.classList.add('excellent');
-        } else if (accuracy >= 70) {
+        } else if (accuracy >= 60) {
             statItem.classList.add('good');
-        } else if (accuracy >= 50) {
+        } else if (accuracy >= 30) {
             statItem.classList.add('average');
-        } else if (accuracy > 0) {
+        } else {
             statItem.classList.add('needs-practice');
             needsPractice.push(item);
+        }
+        
+        // 학습 횟수 표시 추가
+        let statusText = '';
+        if (totalCount === 0) {
+            statusText = '미학습';
+        } else if (totalCount < 10) {
+            statusText = '초급';
+        } else if (totalCount < 25) {
+            statusText = '중급';
+        } else if (totalCount < 40) {
+            statusText = '고급';
+        } else if (totalCount >= 50) {
+            statusText = '마스터';
         } else {
-            statItem.classList.add('no-data');
+            statusText = '상급';
         }
         
         statItem.innerHTML = `
@@ -1041,10 +1139,12 @@ function generateStatsGrid(type, items, correctData, totalData) {
             <div class="stat-bar">
                 <div class="stat-fill" style="width: ${accuracy}%"></div>
             </div>
-            <div class="stat-percentage">${Math.round(accuracy)}%</div>
+            <div class="stat-percentage">${accuracy}%</div>
+            <div style="font-size: 10px; color: #666; margin-top: 5px;">
+                ${statusText} (${totalCount}회)
+            </div>
         `;
         
-              
         grid.appendChild(statItem);
     });
     
@@ -4352,6 +4452,75 @@ function hideFindForm() {
 }
       // 로그인 관련 이벤트 처리
 document.addEventListener('DOMContentLoaded', function() {
+ // 생년월일 드롭다운 초기화
+function initializeBirthdateDropdowns() {
+    // 아이디/비밀번호 찾기용 드롭다운
+    initializeDropdown('findYear', 'findMonth', 'findDay');
+    
+    // 회원가입용 드롭다운
+    initializeDropdown('signupYear', 'signupMonth', 'signupDay');
+}
+
+function initializeDropdown(yearId, monthId, dayId) {
+    const yearSelect = document.getElementById(yearId);
+    const monthSelect = document.getElementById(monthId);
+    const daySelect = document.getElementById(dayId);
+    
+    if (!yearSelect || !monthSelect || !daySelect) return;
+    
+    // 연도 옵션 추가 (1950년부터 현재년도까지)
+    const currentYear = new Date().getFullYear();
+    for (let year = currentYear; year >= 1950; year--) {
+        const option = document.createElement('option');
+        option.value = year;
+        option.textContent = year;
+        yearSelect.appendChild(option);
+    }
+    
+    // 월 옵션 추가 (1월부터 12월까지)
+    for (let month = 1; month <= 12; month++) {
+        const option = document.createElement('option');
+        option.value = month.toString().padStart(2, '0');
+        option.textContent = month;
+        monthSelect.appendChild(option);
+    }
+    
+    // 일 옵션 추가 함수
+    function updateDayOptions() {
+        daySelect.innerHTML = '<option value="">일</option>';
+        
+        const year = parseInt(yearSelect.value);
+        const month = parseInt(monthSelect.value);
+        
+        if (year && month) {
+            const lastDay = new Date(year, month, 0).getDate();
+            
+            for (let day = 1; day <= lastDay; day++) {
+                const option = document.createElement('option');
+                option.value = day.toString().padStart(2, '0');
+                option.textContent = day;
+                daySelect.appendChild(option);
+            }
+        } else {
+            for (let day = 1; day <= 31; day++) {
+                const option = document.createElement('option');
+                option.value = day.toString().padStart(2, '0');
+                option.textContent = day;
+                daySelect.appendChild(option);
+            }
+        }
+    }
+    
+    // 연도나 월이 변경되면 일 옵션 업데이트
+    yearSelect.addEventListener('change', updateDayOptions);
+    monthSelect.addEventListener('change', updateDayOptions);
+    
+    // 초기 일 옵션 설정
+    updateDayOptions();
+}
+    
+    // 페이지 로드 시 드롭다운 초기화
+    initializeBirthdateDropdowns();
     document.getElementById('authForm').addEventListener('submit', function(e) {
         e.preventDefault();
         
@@ -4378,8 +4547,18 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             // 비동기 함수 제대로 처리
-const birthdate = document.getElementById('birthdate').value;
-            signup(username, password, nickname).then(success => {
+const year = document.getElementById('signupYear').value;
+const month = document.getElementById('signupMonth').value;
+const day = document.getElementById('signupDay').value;
+
+// 생년월일 조합 및 유효성 검사
+if (!year || !month || !day) {
+    alert('생년월일을 모두 선택해주세요.');
+    return;
+}
+
+const birthdate = `${year}-${month}-${day}`;
+signup(username, password, nickname, birthdate).then(success => {
                 if (success) {
                     alert('회원가입 성공!');
                 } else {
@@ -4395,8 +4574,18 @@ const birthdate = document.getElementById('birthdate').value;
     document.getElementById('findFormContent').addEventListener('submit', async function(e) {
         e.preventDefault();
         
-        const name = document.getElementById('findName').value;
-        const birthdate = document.getElementById('findBirthdate').value;
+      const name = document.getElementById('findName').value;
+const year = document.getElementById('findYear').value;
+const month = document.getElementById('findMonth').value;
+const day = document.getElementById('findDay').value;
+
+// 생년월일 조합 및 유효성 검사
+if (!year || !month || !day) {
+    alert('생년월일을 모두 선택해주세요.');
+    return;
+}
+
+const birthdate = `${year}-${month}-${day}`;
         
         // Firebase에서 이름과 생년월일로 사용자 검색
         try {
@@ -4556,7 +4745,7 @@ function updateLearningStats(jamo, type) {
         return;
     }
     
-    // 학습 활동은 항상 정답으로 처리 (클릭/재생 = 학습)
+    // 통계 객체 초기화
     if (!currentUser.stats[totalKey]) {
         currentUser.stats[totalKey] = {};
     }
@@ -4570,11 +4759,47 @@ function updateLearningStats(jamo, type) {
         currentUser.stats[correctKey][jamo] = 0;
     }
     
-    // 학습 활동 1회 추가 (정답으로 처리)
+    // 학습 활동: total만 증가, correct는 점진적으로 증가
     currentUser.stats[totalKey][jamo]++;
-    currentUser.stats[correctKey][jamo]++;
+    
+    // 학습 진도에 따른 점진적 정답률 증가
+    const totalCount = currentUser.stats[totalKey][jamo];
+    const currentCorrect = currentUser.stats[correctKey][jamo];
+    
+    // 학습 횟수에 따른 정답 확률 계산 (50회에서 100% 도달)
+    let successProbability = 0;
+    
+    if (totalCount <= 5) {
+        // 처음 5번: 20% 확률
+        successProbability = 0.2;
+    } else if (totalCount <= 10) {
+        // 6~10번: 40% 확률
+        successProbability = 0.4;
+    } else if (totalCount <= 20) {
+        // 11~20번: 60% 확률
+        successProbability = 0.6;
+    } else if (totalCount <= 30) {
+        // 21~30번: 75% 확률
+        successProbability = 0.75;
+    } else if (totalCount <= 40) {
+        // 31~40번: 88% 확률
+        successProbability = 0.88;
+    } else if (totalCount <= 50) {
+        // 41~50번: 95% 확률
+        successProbability = 0.95;
+    } else {
+        // 50번 이상: 98% 확률 (완전히 100%는 아니게 해서 자연스럽게)
+        successProbability = 0.98;
+    }
+    
+    // 확률에 따라 정답 여부 결정
+    if (Math.random() < successProbability) {
+        currentUser.stats[correctKey][jamo]++;
+    }
     
     // Firebase에 저장
     updateUserStats(currentUser.username, currentUser.stats);
 }
+
+
     </script>
