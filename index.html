@@ -1118,11 +1118,10 @@ function generateStatsGrid(type, items, correctData, totalData) {
         const correctCount = correctData[item] || 0;
         const totalCount = totalData[item] || 0;
         
-        // 정확도 계산 - 데이터가 없으면 0%
-        let accuracy = 0;
-        if (totalCount > 0) {
-            accuracy = Math.round((correctCount / totalCount) * 100);
-        }
+      // 퍼센트 계산 (1회당 2%, 최대 100%)
+const itemType = (type === 'consonants' || type === 'doubleConsonants') ? 'consonant' : 
+                (type === 'vowels' || type === 'doubleVowels') ? 'vowel' : 'final';
+const accuracy = calculatePercentage(item, itemType);
         
         const statItem = document.createElement('div');
         statItem.className = 'stat-item';
@@ -1140,17 +1139,22 @@ function generateStatsGrid(type, items, correctData, totalData) {
             statItem.classList.add('needs-practice');
         }
         
-        // 학습 횟수 표시 추가
+      // 실제 총 학습 횟수 가져오기
+        const totalKey = itemType === 'consonant' ? 'consonantTotal' : 
+                        itemType === 'vowel' ? 'vowelTotal' : 'finalTotal';
+        const actualTotalCount = (currentUser.stats[totalKey] && currentUser.stats[totalKey][item]) || 0;
+        
+        // 학습 횟수 표시
         let statusText = '';
-        if (totalCount === 0) {
+        if (actualTotalCount === 0) {
             statusText = '미학습';
-        } else if (totalCount < 10) {
+        } else if (actualTotalCount < 10) {
             statusText = '초급';
-        } else if (totalCount < 25) {
+        } else if (actualTotalCount < 25) {
             statusText = '중급';
-        } else if (totalCount < 40) {
+        } else if (actualTotalCount < 40) {
             statusText = '고급';
-        } else if (totalCount >= 50) {
+        } else if (actualTotalCount >= 50) {
             statusText = '마스터';
         } else {
             statusText = '상급';
@@ -1162,8 +1166,8 @@ function generateStatsGrid(type, items, correctData, totalData) {
                 <div class="stat-fill" style="width: ${accuracy}%"></div>
             </div>
             <div class="stat-percentage">${accuracy}%</div>
-            <div style="font-size: 10px; color: #666; margin-top: 5px;">
-                ${statusText} (${totalCount}회)
+        <div style="font-size: 10px; color: #666; margin-top: 5px;">
+                ${statusText} (${actualTotalCount}회)
             </div>
         `;
         
@@ -4694,6 +4698,30 @@ window.addEventListener('beforeunload', function() {
         localStorage.removeItem('currentUser');
     }
 });
+// 퍼센트 계산 함수 (1회당 2%, 최대 100%)
+function calculatePercentage(jamo, type) {
+    if (!currentUser || !currentUser.stats) return 0;
+    
+    let totalKey;
+    
+    if (type === 'consonant') {
+        totalKey = 'consonantTotal';
+    } else if (type === 'vowel') {
+        totalKey = 'vowelTotal';
+    } else if (type === 'final') {
+        totalKey = 'finalTotal';
+    } else {
+        return 0;
+    }
+    
+    const totalData = currentUser.stats[totalKey] || {};
+    const totalCount = totalData[jamo] || 0;
+    
+    // 1회당 2%, 최대 100%
+    const percentage = Math.min(totalCount * 2, 100);
+    
+    return percentage;
+}
 // 게임 통계 업데이트 함수 (20문제 맞출 때마다 1회)
 function updateGameStats(word, isCorrect) {
     if (!currentUser || !currentUser.stats) return;
