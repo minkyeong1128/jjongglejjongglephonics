@@ -4850,5 +4850,18 @@ function updateLearningStats(jamo, type) {
     updateUserStats(currentUser.username, currentUser.stats);
 }
 
+// 가장 간단한 비밀번호 토글
+function togglePassword() {
+    const password = document.getElementById('password');
+    const eye = document.querySelector('span[onclick="togglePassword()"]');
+    
+    if (password.type === 'password') {
+        password.type = 'text';
+        eye.style.color = '#4CAF50'; // 초록색
+    } else {
+        password.type = 'password';
+        eye.style.color = '#999'; // 회색
+    }
+}
 
     </script>
