@@ -608,13 +608,13 @@
     <input type="password" id="password" placeholder="비밀번호" required>
     <input type="text" id="nickname" placeholder="이름" style="display: none;">
     <div class="signup-birthdate-container" style="display: none;">
-    <select id="signupYear" required>
+    <select id="signupYear">
         <option value="">연도</option>
     </select>
-    <select id="signupMonth" required>
+    <select id="signupMonth">
         <option value="">월</option>
     </select>
-    <select id="signupDay" required>
+    <select id="signupDay">
         <option value="">일</option>
     </select>
 </div>
@@ -843,9 +843,12 @@ async function updateUserStats(username, stats) {
     }
 }
         // 로그인/회원가입 관련 함수들
-        function showAuthModal() {
-            document.getElementById('authModal').style.display = 'flex';
- // 항상 로그인 탭으로 리셋
+      function showAuthModal() {
+    console.log('모달 열기 시작'); // 디버깅용
+    
+    document.getElementById('authModal').style.display = 'flex';
+    
+    // 항상 로그인 탭으로 리셋
     switchAuthTab('login');
     
     // 폼 내용도 초기화
@@ -854,6 +857,14 @@ async function updateUserStats(username, stats) {
     // 찾기 폼이 열려있다면 숨기기
     document.getElementById('authForm').classList.remove('hidden');
     document.getElementById('findForm').classList.add('hidden');
+    
+    // 드롭다운 초기화 (모달이 완전히 렌더링된 후)
+    setTimeout(() => {
+        console.log('모달 렌더링 후 드롭다운 초기화 시작'); // 디버깅용
+        initializeBirthdateDropdowns();
+    }, 200); // 200ms 대기 후 초기화
+    
+    console.log('모달 열기 완료'); // 디버깅용
 }
 
 
@@ -862,7 +873,9 @@ async function updateUserStats(username, stats) {
             document.getElementById('authForm').reset();
         }
 
-        function switchAuthTab(mode) {
+      function switchAuthTab(mode) {
+    console.log(`탭 전환: ${mode}`); // 디버깅용
+    
     currentAuthMode = mode;
     const loginTab = document.querySelector('.auth-tab:first-child');
     const signupTab = document.querySelector('.auth-tab:last-child');
@@ -886,6 +899,12 @@ async function updateUserStats(username, stats) {
         nicknameField.required = true;
         authLinks.style.display = 'none';
         submitBtn.textContent = '회원가입';
+        
+        // 회원가입 탭으로 전환될 때 드롭다운 다시 초기화
+        setTimeout(() => {
+            console.log('회원가입 탭 전환 후 드롭다운 초기화'); // 디버깅용
+            initializeBirthdateDropdowns();
+        }, 100);
     }
 }
 
@@ -918,7 +937,7 @@ async function login(username, password) {
         return false;
     }
 }
-       async function signup(username, password, nickname) {
+    async function signup(username, password, nickname, birthdate) {
     try {
         // 이미 존재하는 사용자인지 확인
         const existingUser = await getUserData(username);
@@ -929,6 +948,7 @@ async function login(username, password) {
         const newUserData = {
             password: password,
             nickname: nickname,
+            birthdate: birthdate, // birthdate 추가
             stats: {
                 consonantErrors: {},
                 vowelErrors: {},
@@ -1104,7 +1124,7 @@ function generateStatsGrid(type, items, correctData, totalData) {
         const statItem = document.createElement('div');
         statItem.className = 'stat-item';
         
-        // 정확도에 따른 클래스 설정 (더 엄격한 기준)
+       // 정확도에 따른 클래스 설정 (더 엄격한 기준)
         if (totalCount === 0) {
             statItem.classList.add('no-data');
         } else if (accuracy >= 80) {
@@ -1148,6 +1168,9 @@ function generateStatsGrid(type, items, correctData, totalData) {
         grid.appendChild(statItem);
     });
     
+  }
+
+    
     // 연습이 필요한 항목 표시
     if (needsPractice.length > 0) {
         practiceSection.innerHTML = `
@@ -1163,7 +1186,6 @@ function generateStatsGrid(type, items, correctData, totalData) {
             <div class="practice-title">🎉 모든 항목을 잘 하고 있어요!</div>
         `;
     }
-}
 
 function startFocusedPractice(jamo, type) {
     // 해당 자모의 집중 연습 모드 시작
@@ -4415,15 +4437,119 @@ function drawCircleArrowOutside(centerX, centerY, radius) {
     // 통합 음성 재생 함수 사용
     playUnifiedSound(sound, cardElement);
 }
+// ====== 생년월일 드롭다운 관련 함수들 (전역 함수로 정의) ======
+function initializeBirthdateDropdowns() {
+    console.log('생년월일 드롭다운 초기화 시작'); // 디버깅용
+    
+    // 아이디/비밀번호 찾기용 드롭다운
+    initializeDropdown('findYear', 'findMonth', 'findDay');
+    
+    // 회원가입용 드롭다운
+    initializeDropdown('signupYear', 'signupMonth', 'signupDay');
+    
+    console.log('생년월일 드롭다운 초기화 완료'); // 디버깅용
+}
+
+function initializeDropdown(yearId, monthId, dayId) {
+    const yearSelect = document.getElementById(yearId);
+    const monthSelect = document.getElementById(monthId);
+    const daySelect = document.getElementById(dayId);
+    
+    console.log(`드롭다운 초기화 시도: ${yearId}, ${monthId}, ${dayId}`); // 디버깅용
+    
+    if (!yearSelect || !monthSelect || !daySelect) {
+        console.log(`드롭다운 요소를 찾을 수 없음: ${yearId}, ${monthId}, ${dayId}`); // 디버깅용
+        return;
+    }
+    
+    console.log(`드롭다운 요소 찾음: ${yearId}, ${monthId}, ${dayId}`); // 디버깅용
+    
+    // 기존 옵션들 제거 (중복 방지)
+    yearSelect.innerHTML = '<option value="">연도</option>';
+    monthSelect.innerHTML = '<option value="">월</option>';
+    daySelect.innerHTML = '<option value="">일</option>';
+    
+    // 연도 옵션 추가 (1950년부터 현재년도까지)
+    const currentYear = new Date().getFullYear();
+    for (let year = currentYear; year >= 1950; year--) {
+        const option = document.createElement('option');
+        option.value = year;
+        option.textContent = year;
+        yearSelect.appendChild(option);
+    }
+    console.log(`연도 옵션 추가 완료: ${currentYear}년부터 1950년까지`); // 디버깅용
+    
+    // 월 옵션 추가 (1월부터 12월까지)
+    for (let month = 1; month <= 12; month++) {
+        const option = document.createElement('option');
+        option.value = month.toString().padStart(2, '0');
+        option.textContent = month + '월';
+        monthSelect.appendChild(option);
+    }
+    console.log('월 옵션 추가 완료: 1월부터 12월까지'); // 디버깅용
+    
+    // 일 옵션 추가 함수
+    function updateDayOptions() {
+        daySelect.innerHTML = '<option value="">일</option>';
+        
+        const year = parseInt(yearSelect.value);
+        const month = parseInt(monthSelect.value);
+        
+        if (year && month) {
+            const lastDay = new Date(year, month, 0).getDate();
+            
+            for (let day = 1; day <= lastDay; day++) {
+                const option = document.createElement('option');
+                option.value = day.toString().padStart(2, '0');
+                option.textContent = day + '일';
+                daySelect.appendChild(option);
+            }
+            console.log(`일 옵션 업데이트: ${year}년 ${month}월 - ${lastDay}일까지`); // 디버깅용
+        } else {
+            // 연도나 월이 선택되지 않은 경우 기본적으로 31일까지 표시
+            for (let day = 1; day <= 31; day++) {
+                const option = document.createElement('option');
+                option.value = day.toString().padStart(2, '0');
+                option.textContent = day + '일';
+                daySelect.appendChild(option);
+            }
+            console.log('일 옵션 기본값 설정: 1일부터 31일까지'); // 디버깅용
+        }
+    }
+    
+    // 기존 이벤트 리스너 제거 (중복 방지)
+    yearSelect.removeEventListener('change', updateDayOptions);
+    monthSelect.removeEventListener('change', updateDayOptions);
+    
+    // 연도나 월이 변경되면 일 옵션 업데이트
+    yearSelect.addEventListener('change', updateDayOptions);
+    monthSelect.addEventListener('change', updateDayOptions);
+    
+    // 초기 일 옵션 설정
+    updateDayOptions();
+    
+    console.log(`${yearId} 드롭다운 초기화 완료`); // 디버깅용
+}
+
 // 아이디/비밀번호 찾기 관련 함수
 let currentFindMode = 'id';
 
 function showFindForm() {
+    console.log('찾기 폼 표시 시작'); // 디버깅용
+    
     document.getElementById('authForm').classList.add('hidden');
     document.getElementById('findForm').classList.remove('hidden');
     
     // 로그인/회원가입 탭 숨기기
     document.querySelector('.auth-tabs').style.display = 'none';
+    
+    // 찾기 폼이 렌더링된 후 드롭다운 초기화
+    setTimeout(() => {
+        console.log('찾기 폼 렌더링 후 드롭다운 초기화'); // 디버깅용
+        initializeBirthdateDropdowns();
+    }, 100);
+    
+    console.log('찾기 폼 표시 완료'); // 디버깅용
 }
 
 function switchFindTab(mode) {
@@ -4450,77 +4576,14 @@ function hideFindForm() {
     // 로그인/회원가입 탭 다시 보이기
     document.querySelector('.auth-tabs').style.display = 'flex';
 }
-      // 로그인 관련 이벤트 처리
-document.addEventListener('DOMContentLoaded', function() {
- // 생년월일 드롭다운 초기화
-function initializeBirthdateDropdowns() {
-    // 아이디/비밀번호 찾기용 드롭다운
-    initializeDropdown('findYear', 'findMonth', 'findDay');
-    
-    // 회원가입용 드롭다운
-    initializeDropdown('signupYear', 'signupMonth', 'signupDay');
-}
 
-function initializeDropdown(yearId, monthId, dayId) {
-    const yearSelect = document.getElementById(yearId);
-    const monthSelect = document.getElementById(monthId);
-    const daySelect = document.getElementById(dayId);
-    
-    if (!yearSelect || !monthSelect || !daySelect) return;
-    
-    // 연도 옵션 추가 (1950년부터 현재년도까지)
-    const currentYear = new Date().getFullYear();
-    for (let year = currentYear; year >= 1950; year--) {
-        const option = document.createElement('option');
-        option.value = year;
-        option.textContent = year;
-        yearSelect.appendChild(option);
-    }
-    
-    // 월 옵션 추가 (1월부터 12월까지)
-    for (let month = 1; month <= 12; month++) {
-        const option = document.createElement('option');
-        option.value = month.toString().padStart(2, '0');
-        option.textContent = month;
-        monthSelect.appendChild(option);
-    }
-    
-    // 일 옵션 추가 함수
-    function updateDayOptions() {
-        daySelect.innerHTML = '<option value="">일</option>';
-        
-        const year = parseInt(yearSelect.value);
-        const month = parseInt(monthSelect.value);
-        
-        if (year && month) {
-            const lastDay = new Date(year, month, 0).getDate();
-            
-            for (let day = 1; day <= lastDay; day++) {
-                const option = document.createElement('option');
-                option.value = day.toString().padStart(2, '0');
-                option.textContent = day;
-                daySelect.appendChild(option);
-            }
-        } else {
-            for (let day = 1; day <= 31; day++) {
-                const option = document.createElement('option');
-                option.value = day.toString().padStart(2, '0');
-                option.textContent = day;
-                daySelect.appendChild(option);
-            }
-        }
-    }
-    
-    // 연도나 월이 변경되면 일 옵션 업데이트
-    yearSelect.addEventListener('change', updateDayOptions);
-    monthSelect.addEventListener('change', updateDayOptions);
-    
-    // 초기 일 옵션 설정
-    updateDayOptions();
-}
+// 로그인 관련 이벤트 처리
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('페이지 로드 완료'); // 디버깅용
     
     // 페이지 로드 시 드롭다운 초기화
     initializeBirthdateDropdowns();
+    
     document.getElementById('authForm').addEventListener('submit', function(e) {
         e.preventDefault();
         
@@ -4529,7 +4592,7 @@ function initializeDropdown(yearId, monthId, dayId) {
         const nickname = document.getElementById('nickname').value;
 
         if (currentAuthMode === 'login') {
-            // 비동기 함수 제대로 처리
+            // 로그인 처리
             login(username, password).then(success => {
                 if (success) {
                     alert('로그인 성공!');
@@ -4541,24 +4604,26 @@ function initializeDropdown(yearId, monthId, dayId) {
                 alert('로그인 중 오류가 발생했습니다.');
             });
         } else {
+            // 회원가입 처리
             if (!nickname) {
                 alert('이름을 입력해주세요.');
                 return;
             }
             
-            // 비동기 함수 제대로 처리
-const year = document.getElementById('signupYear').value;
-const month = document.getElementById('signupMonth').value;
-const day = document.getElementById('signupDay').value;
+            const year = document.getElementById('signupYear').value;
+            const month = document.getElementById('signupMonth').value;
+            const day = document.getElementById('signupDay').value;
 
-// 생년월일 조합 및 유효성 검사
-if (!year || !month || !day) {
-    alert('생년월일을 모두 선택해주세요.');
-    return;
-}
+            // 생년월일 조합 및 유효성 검사
+            if (!year || !month || !day) {
+                alert('생년월일을 모두 선택해주세요.');
+                return;
+            }
 
-const birthdate = `${year}-${month}-${day}`;
-signup(username, password, nickname, birthdate).then(success => {
+            const birthdate = `${year}-${month}-${day}`;
+            console.log('회원가입 시도:', { username, nickname, birthdate }); // 디버깅용
+            
+            signup(username, password, nickname, birthdate).then(success => {
                 if (success) {
                     alert('회원가입 성공!');
                 } else {
@@ -4570,35 +4635,37 @@ signup(username, password, nickname, birthdate).then(success => {
             });
         }
     });
-// findFormContent 이벤트 리스너 추가
+
+    // 아이디/비밀번호 찾기 폼 이벤트 리스너
     document.getElementById('findFormContent').addEventListener('submit', async function(e) {
         e.preventDefault();
         
-      const name = document.getElementById('findName').value;
-const year = document.getElementById('findYear').value;
-const month = document.getElementById('findMonth').value;
-const day = document.getElementById('findDay').value;
+        const name = document.getElementById('findName').value;
+        const year = document.getElementById('findYear').value;
+        const month = document.getElementById('findMonth').value;
+        const day = document.getElementById('findDay').value;
 
-// 생년월일 조합 및 유효성 검사
-if (!year || !month || !day) {
-    alert('생년월일을 모두 선택해주세요.');
-    return;
-}
+        // 생년월일 조합 및 유효성 검사
+        if (!year || !month || !day) {
+            alert('생년월일을 모두 선택해주세요.');
+            return;
+        }
 
-const birthdate = `${year}-${month}-${day}`;
-        
+        const birthdate = `${year}-${month}-${day}`;
+        console.log('아이디/비밀번호 찾기 시도:', { name, birthdate }); // 디버깅용
+            
         // Firebase에서 이름과 생년월일로 사용자 검색
         try {
             const snapshot = await db.collection('users').get();
             let found = false;
             
-          snapshot.forEach(doc => {
-    const userData = doc.data();
-    if (userData.nickname === name && userData.birthdate === birthdate) {
-        found = true;
-        alert(`찾은 아이디: ${doc.id}\n찾은 비밀번호: ${userData.password}`);
-    }
-});
+            snapshot.forEach(doc => {
+                const userData = doc.data();
+                if (userData.nickname === name && userData.birthdate === birthdate) {
+                    found = true;
+                    alert(`찾은 아이디: ${doc.id}\n찾은 비밀번호: ${userData.password}`);
+                }
+            });
             
             if (!found) {
                 alert('일치하는 정보를 찾을 수 없습니다.');
@@ -4610,30 +4677,27 @@ const birthdate = `${year}-${month}-${day}`;
             alert('검색 중 오류가 발생했습니다.');
         }
     });
-    // ↑↑↑ 여기까지 추가 ↑↑↑
 
     // 페이지 로드시 로그인 상태 확인
     const savedUser = localStorage.getItem('currentUser');
     if (savedUser) {
         const userInfo = JSON.parse(savedUser);
-        // Firebase에서 사용자 데이터 확인 후 자동 로그인
         getUserData(userInfo.username).then(userData => {
             if (userData) {
                 currentUser = {
                     username: userInfo.username,
                     nickname: userData.nickname,
-                   stats: userData.stats || {
-    consonantCorrect: {},
-    vowelCorrect: {},
-    finalCorrect: {},
-    consonantTotal: {},
-    vowelTotal: {},
-    finalTotal: {}
-}
+                    stats: userData.stats || {
+                        consonantCorrect: {},
+                        vowelCorrect: {},
+                        finalCorrect: {},
+                        consonantTotal: {},
+                        vowelTotal: {},
+                        finalTotal: {}
+                    }
                 };
                 updateLoginUI();
             } else {
-                // 사용자 데이터가 없으면 로컬 저장소에서 제거
                 localStorage.removeItem('currentUser');
             }
         });
@@ -4650,75 +4714,34 @@ window.addEventListener('beforeunload', function() {
         localStorage.removeItem('currentUser');
     }
 });
-// 게임 통계 업데이트 함수
+// 게임 통계 업데이트 함수 (20문제 맞출 때마다 1회)
 function updateGameStats(word, isCorrect) {
     if (!currentUser || !currentUser.stats) return;
+    
+    // 게임 카운터 초기화
+    if (!currentUser.stats.gameCounters) {
+        currentUser.stats.gameCounters = {};
+    }
     
     // 단어를 자모로 분해
     for (let char of word) {
         const decomposed = decomposeHangul(char);
-        console.log('분해 결과:', decomposed); // 디버깅용
         
         if (decomposed) {
-            // 초성 업데이트
+            // 초성 처리
             if (decomposed.initial) {
-                if (!currentUser.stats.consonantTotal) {
-                    currentUser.stats.consonantTotal = {};
-                }
-                if (!currentUser.stats.consonantCorrect) {
-                    currentUser.stats.consonantCorrect = {};
-                }
-                if (!currentUser.stats.consonantTotal[decomposed.initial]) {
-                    currentUser.stats.consonantTotal[decomposed.initial] = 0;
-                }
-                if (!currentUser.stats.consonantCorrect[decomposed.initial]) {
-                    currentUser.stats.consonantCorrect[decomposed.initial] = 0;
-                }
-                currentUser.stats.consonantTotal[decomposed.initial]++;
-                if (isCorrect) {
-                    currentUser.stats.consonantCorrect[decomposed.initial]++;
-                }
+                updateGameStatForJamo(decomposed.initial, 'consonant', isCorrect);
             }
             
-            // 중성 업데이트 (medial 속성명 확인)
+            // 중성 처리
             const vowel = decomposed.medial || decomposed.vowel;
             if (vowel) {
-                if (!currentUser.stats.vowelTotal) {
-                    currentUser.stats.vowelTotal = {};
-                }
-                if (!currentUser.stats.vowelCorrect) {
-                    currentUser.stats.vowelCorrect = {};
-                }
-                if (!currentUser.stats.vowelTotal[vowel]) {
-                    currentUser.stats.vowelTotal[vowel] = 0;
-                }
-                if (!currentUser.stats.vowelCorrect[vowel]) {
-                    currentUser.stats.vowelCorrect[vowel] = 0;
-                }
-                currentUser.stats.vowelTotal[vowel]++;
-                if (isCorrect) {
-                    currentUser.stats.vowelCorrect[vowel]++;
-                }
+                updateGameStatForJamo(vowel, 'vowel', isCorrect);
             }
             
-            // 종성 업데이트
+            // 종성 처리
             if (decomposed.final) {
-                if (!currentUser.stats.finalTotal) {
-                    currentUser.stats.finalTotal = {};
-                }
-                if (!currentUser.stats.finalCorrect) {
-                    currentUser.stats.finalCorrect = {};
-                }
-                if (!currentUser.stats.finalTotal[decomposed.final]) {
-                    currentUser.stats.finalTotal[decomposed.final] = 0;
-                }
-                if (!currentUser.stats.finalCorrect[decomposed.final]) {
-                    currentUser.stats.finalCorrect[decomposed.final] = 0;
-                }
-                currentUser.stats.finalTotal[decomposed.final]++;
-                if (isCorrect) {
-                    currentUser.stats.finalCorrect[decomposed.final]++;
-                }
+                updateGameStatForJamo(decomposed.final, 'final', isCorrect);
             }
         }
     }
@@ -4726,7 +4749,52 @@ function updateGameStats(word, isCorrect) {
     // Firebase에 저장
     updateUserStats(currentUser.username, currentUser.stats);
 }
-// 학습 활동 통계 업데이트 함수 (게임이 아닌 학습 활동용)
+
+// 게임용 개별 자모 통계 업데이트 함수 (새로 추가)
+function updateGameStatForJamo(jamo, type, isCorrect) {
+    let correctKey, totalKey, counterKey;
+    
+    if (type === 'consonant') {
+        correctKey = 'consonantCorrect';
+        totalKey = 'consonantTotal';
+        counterKey = 'consonantGameCounter';
+    } else if (type === 'vowel') {
+        correctKey = 'vowelCorrect';
+        totalKey = 'vowelTotal';
+        counterKey = 'vowelGameCounter';
+    } else if (type === 'final') {
+        correctKey = 'finalCorrect';
+        totalKey = 'finalTotal';
+        counterKey = 'finalGameCounter';
+    } else {
+        return;
+    }
+    
+    // 통계 객체 초기화
+    if (!currentUser.stats[totalKey]) currentUser.stats[totalKey] = {};
+    if (!currentUser.stats[correctKey]) currentUser.stats[correctKey] = {};
+    if (!currentUser.stats.gameCounters[counterKey]) currentUser.stats.gameCounters[counterKey] = {};
+    
+    if (!currentUser.stats[totalKey][jamo]) currentUser.stats[totalKey][jamo] = 0;
+    if (!currentUser.stats[correctKey][jamo]) currentUser.stats[correctKey][jamo] = 0;
+    if (!currentUser.stats.gameCounters[counterKey][jamo]) currentUser.stats.gameCounters[counterKey][jamo] = 0;
+    
+    // 정답일 때만 카운터 증가
+    if (isCorrect) {
+        currentUser.stats.gameCounters[counterKey][jamo]++;
+        
+        // 20문제 맞출 때마다 1회 학습으로 기록
+        if (currentUser.stats.gameCounters[counterKey][jamo] >= 20) {
+            currentUser.stats[totalKey][jamo]++;
+            currentUser.stats[correctKey][jamo]++;
+            
+            // 카운터 리셋
+            currentUser.stats.gameCounters[counterKey][jamo] = 0;
+        }
+    }
+}
+
+// 학습 활동 통계 업데이트 함수 (간소화)
 function updateLearningStats(jamo, type) {
     if (!currentUser || !currentUser.stats) return;
     
@@ -4746,50 +4814,34 @@ function updateLearningStats(jamo, type) {
     }
     
     // 통계 객체 초기화
-    if (!currentUser.stats[totalKey]) {
-        currentUser.stats[totalKey] = {};
-    }
-    if (!currentUser.stats[correctKey]) {
-        currentUser.stats[correctKey] = {};
-    }
-    if (!currentUser.stats[totalKey][jamo]) {
-        currentUser.stats[totalKey][jamo] = 0;
-    }
-    if (!currentUser.stats[correctKey][jamo]) {
-        currentUser.stats[correctKey][jamo] = 0;
-    }
+    if (!currentUser.stats[totalKey]) currentUser.stats[totalKey] = {};
+    if (!currentUser.stats[correctKey]) currentUser.stats[correctKey] = {};
+    if (!currentUser.stats[totalKey][jamo]) currentUser.stats[totalKey][jamo] = 0;
+    if (!currentUser.stats[correctKey][jamo]) currentUser.stats[correctKey][jamo] = 0;
     
-    // 학습 활동: total만 증가, correct는 점진적으로 증가
+    // 모달창 닫을 때마다 1회 학습으로 기록
     currentUser.stats[totalKey][jamo]++;
     
     // 학습 진도에 따른 점진적 정답률 증가
     const totalCount = currentUser.stats[totalKey][jamo];
-    const currentCorrect = currentUser.stats[correctKey][jamo];
     
-    // 학습 횟수에 따른 정답 확률 계산 (50회에서 100% 도달)
+    // 학습 횟수에 따른 정답 확률 계산
     let successProbability = 0;
     
     if (totalCount <= 5) {
-        // 처음 5번: 20% 확률
-        successProbability = 0.2;
+        successProbability = 0.2;      // 처음 5번: 20%
     } else if (totalCount <= 10) {
-        // 6~10번: 40% 확률
-        successProbability = 0.4;
+        successProbability = 0.4;      // 6~10번: 40%
     } else if (totalCount <= 20) {
-        // 11~20번: 60% 확률
-        successProbability = 0.6;
+        successProbability = 0.6;      // 11~20번: 60%
     } else if (totalCount <= 30) {
-        // 21~30번: 75% 확률
-        successProbability = 0.75;
+        successProbability = 0.75;     // 21~30번: 75%
     } else if (totalCount <= 40) {
-        // 31~40번: 88% 확률
-        successProbability = 0.88;
+        successProbability = 0.88;     // 31~40번: 88%
     } else if (totalCount <= 50) {
-        // 41~50번: 95% 확률
-        successProbability = 0.95;
+        successProbability = 0.95;     // 41~50번: 95%
     } else {
-        // 50번 이상: 98% 확률 (완전히 100%는 아니게 해서 자연스럽게)
-        successProbability = 0.98;
+        successProbability = 0.98;     // 50번 이상: 98%
     }
     
     // 확률에 따라 정답 여부 결정
