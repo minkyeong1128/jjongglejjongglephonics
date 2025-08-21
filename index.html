@@ -4698,7 +4698,7 @@ window.addEventListener('beforeunload', function() {
         localStorage.removeItem('currentUser');
     }
 });
-// 퍼센트 계산 함수 (1회당 2%, 최대 100%)
+// 퍼센트 계산 함수 (단계별 차등 적용)
 function calculatePercentage(jamo, type) {
     if (!currentUser || !currentUser.stats) return 0;
     
@@ -4717,10 +4717,25 @@ function calculatePercentage(jamo, type) {
     const totalData = currentUser.stats[totalKey] || {};
     const totalCount = totalData[jamo] || 0;
     
-    // 1회당 2%, 최대 100%
-    const percentage = Math.min(totalCount * 2, 100);
+    // 단계별 차등 퍼센트 계산
+    let percentage = 0;
     
-    return percentage;
+    if (totalCount <= 20) {
+        // 처음 20회: 1회당 3% (0~60%)
+        percentage = totalCount * 3;
+    } else if (totalCount <= 50) {
+        // 21-50회: 1회당 2% (60~120% → 60~90%)
+        percentage = 60 + (totalCount - 20) * 2;
+    } else if (totalCount <= 100) {
+        // 51-100회: 1회당 1% (90~140% → 90~100%)
+        percentage = 90 + (totalCount - 50) * 0.2;
+    } else {
+        // 100회 이상: 100% 유지
+        percentage = 100;
+    }
+    
+    // 최대 100%로 제한
+    return Math.min(Math.round(percentage), 100);
 }
 // 게임 통계 업데이트 함수 (20문제 맞출 때마다 1회)
 function updateGameStats(word, isCorrect) {
@@ -4830,33 +4845,7 @@ function updateLearningStats(jamo, type) {
     // 모달창 닫을 때마다 1회 학습으로 기록
     currentUser.stats[totalKey][jamo]++;
     
-    // 학습 진도에 따른 점진적 정답률 증가
-    const totalCount = currentUser.stats[totalKey][jamo];
-    
-    // 학습 횟수에 따른 정답 확률 계산
-    let successProbability = 0;
-    
-    if (totalCount <= 5) {
-        successProbability = 0.2;      // 처음 5번: 20%
-    } else if (totalCount <= 10) {
-        successProbability = 0.4;      // 6~10번: 40%
-    } else if (totalCount <= 20) {
-        successProbability = 0.6;      // 11~20번: 60%
-    } else if (totalCount <= 30) {
-        successProbability = 0.75;     // 21~30번: 75%
-    } else if (totalCount <= 40) {
-        successProbability = 0.88;     // 31~40번: 88%
-    } else if (totalCount <= 50) {
-        successProbability = 0.95;     // 41~50번: 95%
-    } else {
-        successProbability = 0.98;     // 50번 이상: 98%
-    }
-    
-    // 확률에 따라 정답 여부 결정
-    if (Math.random() < successProbability) {
-        currentUser.stats[correctKey][jamo]++;
-    }
-    
+           
     // Firebase에 저장
     updateUserStats(currentUser.username, currentUser.stats);
 }
