@@ -4850,17 +4850,23 @@ function updateLearningStats(jamo, type) {
     updateUserStats(currentUser.username, currentUser.stats);
 }
 
-// 가장 간단한 비밀번호 토글
+// 가장 간단한 모바일 호환 버전
 function togglePassword() {
     const password = document.getElementById('password');
-    const eye = document.querySelector('span[onclick="togglePassword()"]');
     
+    if (!password) return;
+    
+    // 현재 타입 확인 후 변경
     if (password.type === 'password') {
         password.type = 'text';
-        eye.style.color = '#4CAF50'; // 초록색
     } else {
         password.type = 'password';
-        eye.style.color = '#999'; // 회색
+    }
+    
+    // 토글 버튼 색상 변경 (있는 경우에만)
+    const eye = document.querySelector('span[onclick="togglePassword()"]');
+    if (eye) {
+        eye.style.color = password.type === 'text' ? '#4CAF50' : '#999';
     }
 }
 
