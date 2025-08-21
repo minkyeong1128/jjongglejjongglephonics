@@ -1102,14 +1102,17 @@ function generateStatsGrid(type, items, correctData, totalData) {
     const practiceSection = document.getElementById('stats' + type.charAt(0).toUpperCase() + type.slice(1) + 'Practice');
 
     // null 체크 추가
-    if (!grid || !practiceSection) {
+    if (!grid) {
         console.error(`Required elements not found for type: ${type}`);
         return;
     }
     
     grid.innerHTML = '';
     
-    const needsPractice = [];
+    // practiceSection이 있다면 숨기기
+    if (practiceSection) {
+        practiceSection.style.display = 'none';
+    }
     
     items.forEach(item => {
         const correctCount = correctData[item] || 0;
@@ -1135,7 +1138,6 @@ function generateStatsGrid(type, items, correctData, totalData) {
             statItem.classList.add('average');
         } else {
             statItem.classList.add('needs-practice');
-            needsPractice.push(item);
         }
         
         // 학습 횟수 표시 추가
@@ -1167,42 +1169,8 @@ function generateStatsGrid(type, items, correctData, totalData) {
         
         grid.appendChild(statItem);
     });
-    
-  }
-
-    
-    // 연습이 필요한 항목 표시
-    if (needsPractice.length > 0) {
-        practiceSection.innerHTML = `
-            <div class="practice-title">🎯 집중 연습이 필요한 항목</div>
-            <div class="practice-items">
-                ${needsPractice.map(item => 
-                    `<div class="practice-item" onclick="startFocusedPractice('${item}', '${type}')">${item}</div>`
-                ).join('')}
-            </div>
-        `;
-    } else {
-        practiceSection.innerHTML = `
-            <div class="practice-title">🎉 모든 항목을 잘 하고 있어요!</div>
-        `;
-    }
-
-function startFocusedPractice(jamo, type) {
-    // 해당 자모의 집중 연습 모드 시작
-    alert(`"${jamo}" 집중 연습 모드를 시작합니다!`);
-    
-    // 자음·모음 배우기 화면으로 이동하여 해당 자모에 포커스
-    showJamoLearning();
-    
-    // 해당 탭으로 이동
-    if (type === 'consonants' || type === 'doubleConsonants') {
-        showJamoTab('consonants');
-    } else if (type === 'vowels' || type === 'doubleVowels') {
-        showJamoTab('vowels');
-    } else if (type === 'finals') {
-        showJamoTab('finals');
-    }
 }
+
         let audioPlayback = null;
 // 통합 음성 재생 함수 (모든 화면에서 사용)
 function playUnifiedSound(sound, element = null) {
@@ -4586,14 +4554,19 @@ document.addEventListener('DOMContentLoaded', function() {
     
     document.getElementById('authForm').addEventListener('submit', function(e) {
         e.preventDefault();
+        console.log('폼 제출됨, 현재 모드:', currentAuthMode); // 디버깅용
         
         const username = document.getElementById('username').value;
         const password = document.getElementById('password').value;
         const nickname = document.getElementById('nickname').value;
 
+        console.log('입력값 확인:', { username, password, nickname }); // 디버깅용
+
         if (currentAuthMode === 'login') {
+            console.log('로그인 시도'); // 디버깅용
             // 로그인 처리
             login(username, password).then(success => {
+                console.log('로그인 결과:', success); // 디버깅용
                 if (success) {
                     alert('로그인 성공!');
                 } else {
@@ -4603,7 +4576,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.error('로그인 오류:', error);
                 alert('로그인 중 오류가 발생했습니다.');
             });
-        } else {
+        } else if (currentAuthMode === 'signup') {
+            console.log('회원가입 시도'); // 디버깅용
             // 회원가입 처리
             if (!nickname) {
                 alert('이름을 입력해주세요.');
@@ -4613,6 +4587,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const year = document.getElementById('signupYear').value;
             const month = document.getElementById('signupMonth').value;
             const day = document.getElementById('signupDay').value;
+
+            console.log('생년월일 입력값:', { year, month, day }); // 디버깅용
 
             // 생년월일 조합 및 유효성 검사
             if (!year || !month || !day) {
@@ -4624,6 +4600,7 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('회원가입 시도:', { username, nickname, birthdate }); // 디버깅용
             
             signup(username, password, nickname, birthdate).then(success => {
+                console.log('회원가입 결과:', success); // 디버깅용
                 if (success) {
                     alert('회원가입 성공!');
                 } else {
@@ -4633,6 +4610,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.error('회원가입 오류:', error);
                 alert('회원가입 중 오류가 발생했습니다.');
             });
+        } else {
+            console.error('알 수 없는 모드:', currentAuthMode); // 디버깅용
+            alert('알 수 없는 오류가 발생했습니다.');
         }
     });
 
