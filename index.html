@@ -1224,6 +1224,10 @@ function playUnifiedSound(sound, element = null) {
             utterance.rate = 0.2;
             utterance.pitch = 0.8;
             utterance.volume = 1.0;
+ } else if (sound === '요') {
+            utterance.rate = 0.3;
+            utterance.pitch = 1.1;
+            utterance.volume = 1.0;
         } else {
             utterance.rate = 0.8;
             utterance.pitch = 1.2;
@@ -1818,6 +1822,10 @@ function playUnifiedSound(sound, element = null) {
                 utterance.rate = 0.2;
                 utterance.pitch = 0.8;
                 utterance.volume = 1.0;
+ } else if (text === '요') {
+            utterance.rate = 0.3;
+            utterance.pitch = 1.1;
+            utterance.volume = 1.0;
             } else {
                 utterance.rate = this.currentSpeed;
                 utterance.pitch = 1.2;
@@ -2239,6 +2247,10 @@ utterance.lang = 'ko-KR';
         } else if (sound === '의') {
             utterance.rate = 0.2;
             utterance.pitch = 0.8;
+            utterance.volume = 1.0;
+ } else if (sound === '요') {
+            utterance.rate = 0.3;
+            utterance.pitch = 1.1;
             utterance.volume = 1.0;
         } else {
             utterance.rate = 0.5;
