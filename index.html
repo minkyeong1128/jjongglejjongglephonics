@@ -1220,32 +1220,18 @@ function playUnifiedSound(sound, element = null) {
             utterance.rate = 0.35;
             utterance.pitch = 1.2;
             utterance.volume = 1.0;
-       } else if (sound === '의') {
-            // ㅢ: 단어 컨텍스트 사용
-            textToSpeak = '의미';  // "의미"에서 첫 번째 "의"
-            utterance.rate = 0.3;
-            utterance.pitch = 1.0;
+      } else if (sound === '의') {
+            // ㅢ: "으이"를 빠르게 발음
+            textToSpeak = '으이';
+            utterance.rate = 1.8;   // 매우 빠르게
+            utterance.pitch = 1.0;  // 자연스러운 피치
             utterance.volume = 1.0;
-            
-            // 첫 글자만 재생하고 중단
-            utterance.onstart = () => {
-                setTimeout(() => {
-                    window.speechSynthesis.cancel();
-                }, 600); // 0.6초 후 중단
-            };
         } else if (sound === '요') {
-            // ㅛ: 단어 컨텍스트 사용
-            textToSpeak = '요일';  // "요일"에서 첫 번째 "요"
-            utterance.rate = 0.4;
-            utterance.pitch = 1.0;
+            // ㅛ: "이오"를 빠르게 발음
+            textToSpeak = '이오';
+            utterance.rate = 1.8;   // 매우 빠르게
+            utterance.pitch = 1.0;  // 자연스러운 피치
             utterance.volume = 1.0;
-            
-            // 첫 글자만 재생하고 중단
-            utterance.onstart = () => {
-                setTimeout(() => {
-                    window.speechSynthesis.cancel();
-                }, 500); // 0.5초 후 중단
-            };
         } else {
             utterance.rate = 0.8;
             utterance.pitch = 1.2;
@@ -1836,38 +1822,18 @@ function playUnifiedSound(sound, element = null) {
                 utterance.rate = 0.35;
                 utterance.pitch = 1.2;
                 utterance.volume = 1.0;
-             } else if (text === '의') {
-                // ㅢ: 단어 컨텍스트
-                textToSpeak = '의미';
-                utterance.rate = 0.3;
+           } else if (text === '의') {
+                // ㅢ: "으이"를 빠르게
+                textToSpeak = '으이';
+                utterance.rate = 1.8;
                 utterance.pitch = 1.0;
                 utterance.volume = 1.0;
-                
-                utterance.onstart = () => {
-                    setTimeout(() => {
-                        this.speechSynthesis.cancel();
-                        if (element) {
-                            element.classList.remove('playing');
-                        }
-                        setTimeout(resolve, delayMs);
-                    }, 600);
-                };
             } else if (text === '요') {
-                // ㅛ: 단어 컨텍스트
-                textToSpeak = '요일';
-                utterance.rate = 0.4;
+                // ㅛ: "이오"를 빠르게
+                textToSpeak = '이오';
+                utterance.rate = 1.8;
                 utterance.pitch = 1.0;
                 utterance.volume = 1.0;
-                
-                utterance.onstart = () => {
-                    setTimeout(() => {
-                        this.speechSynthesis.cancel();
-                        if (element) {
-                            element.classList.remove('playing');
-                        }
-                        setTimeout(resolve, delayMs);
-                    }, 500);
-                };
             } else {
                 utterance.rate = this.currentSpeed;
                 utterance.pitch = 1.2;
@@ -2286,32 +2252,18 @@ utterance.lang = 'ko-KR';
             utterance.rate = 0.35;
             utterance.pitch = 1.2;
             utterance.volume = 1.0;
-        } else if (sound === '의') {
-            // ㅢ: 단어 컨텍스트 사용
-            textToSpeak = '의미';  // "의미"에서 첫 번째 "의"
-            utterance.rate = 0.3;
-            utterance.pitch = 1.0;
+       } else if (sound === '의') {
+            // ㅢ: "으이"를 빠르게 발음
+            textToSpeak = '으이';
+            utterance.rate = 1.8;   // 매우 빠르게
+            utterance.pitch = 1.0;  // 자연스러운 피치
             utterance.volume = 1.0;
-            
-            // 첫 글자만 재생하고 중단
-            utterance.onstart = () => {
-                setTimeout(() => {
-                    window.speechSynthesis.cancel();
-                }, 600); // 0.6초 후 중단
-            };
         } else if (sound === '요') {
-            // ㅛ: 단어 컨텍스트 사용
-            textToSpeak = '요일';  // "요일"에서 첫 번째 "요"
-            utterance.rate = 0.4;
-            utterance.pitch = 1.0;
+            // ㅛ: "이오"를 빠르게 발음
+            textToSpeak = '이오';
+            utterance.rate = 1.8;   // 매우 빠르게
+            utterance.pitch = 1.0;  // 자연스러운 피치
             utterance.volume = 1.0;
-            
-            // 첫 글자만 재생하고 중단
-            utterance.onstart = () => {
-                setTimeout(() => {
-                    window.speechSynthesis.cancel();
-                }, 500); // 0.5초 후 중단
-            };
         } else {
             utterance.rate = 0.5;
             utterance.pitch = 1.2;
