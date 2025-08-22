@@ -1220,6 +1220,10 @@ function playUnifiedSound(sound, element = null) {
             utterance.rate = 0.35;
             utterance.pitch = 1.2;
             utterance.volume = 1.0;
+        } else if (sound === '의') {
+            utterance.rate = 0.2;
+            utterance.pitch = 0.8;
+            utterance.volume = 1.0;
         } else {
             utterance.rate = 0.8;
             utterance.pitch = 1.2;
@@ -1778,77 +1782,81 @@ function playUnifiedSound(sound, element = null) {
     utterance.lang = 'ko-KR';
     
     // 기존의 utterance.rate = this.currentSpeed; 부분을 다음으로 교체
-    if (text === '그') {
-        utterance.rate = 0.4;
-        utterance.pitch = 0.8;
-    } else if (text === '크') {
-        utterance.rate = 0.4;
-        utterance.pitch = 1.4;
-    } else if (text === '드') {
-        utterance.rate = 0.4;
-        utterance.pitch = 0.8;
-    } else if (text === '트') {
-        utterance.rate = 0.4;
-        utterance.pitch = 1.4;
-    } else if (text === '즈') {
-        utterance.rate = 0.4;
-        utterance.pitch = 0.9;
-    } else if (text === '츠') {
-        utterance.rate = 0.4;
-        utterance.pitch = 1.3;
-    } else if (text === '브') {
-        utterance.rate = 0.4;
-        utterance.pitch = 0.8;
-    } else if (text === '프') {
-        utterance.rate = 0.4;
-        utterance.pitch = 1.5;
-    } else if (text === '윽') {
-        utterance.rate = 0.2;
-        utterance.pitch = 0.4;
-        utterance.volume = 0.9;
-    } else if (text === '읃') {
-        utterance.rate = 0.35;
-        utterance.pitch = 1.2;
-        utterance.volume = 1.0;
-    } else {
-        utterance.rate = this.currentSpeed;
-        utterance.pitch = 1.2;
-    }
-    
-    utterance.volume = 1.0;
-    // 나머지 코드는 그대로 유지
-        
-                                if (element) {
-                                    element.classList.add('playing');
-                                }
-        
-                                let isResolved = false;
-                                const resolveOnce = () => {
-                                    if (!isResolved) {
-                                        isResolved = true;
-                                        if (element) {
-                                            element.classList.remove('playing');
-                                        }
-                                        setTimeout(resolve, delayMs);
-                                    }
-                                };
-        
-                                utterance.onend = resolveOnce;
-                                utterance.onerror = resolveOnce;
-        
-                                const timeoutId = setTimeout(() => {
-                                    this.speechSynthesis.cancel();
-                                    resolveOnce();
-                                }, Math.max(text.length * 200, 2000));
-        
-                                utterance.onstart = () => {
-                                    clearTimeout(timeoutId);
-                                };
-        
-                                this.speechSynthesis.speak(utterance);
-                            }, 50);
-                        });
+   if (text === '그') {
+                utterance.rate = 0.4;
+                utterance.pitch = 0.8;
+            } else if (text === '크') {
+                utterance.rate = 0.4;
+                utterance.pitch = 1.4;
+            } else if (text === '드') {
+                utterance.rate = 0.4;
+                utterance.pitch = 0.8;
+            } else if (text === '트') {
+                utterance.rate = 0.4;
+                utterance.pitch = 1.4;
+            } else if (text === '즈') {
+                utterance.rate = 0.4;
+                utterance.pitch = 0.9;
+            } else if (text === '츠') {
+                utterance.rate = 0.4;
+                utterance.pitch = 1.3;
+            } else if (text === '브') {
+                utterance.rate = 0.4;
+                utterance.pitch = 0.8;
+            } else if (text === '프') {
+                utterance.rate = 0.4;
+                utterance.pitch = 1.5;
+            } else if (text === '윽') {
+                utterance.rate = 0.2;
+                utterance.pitch = 0.4;
+                utterance.volume = 0.9;
+            } else if (text === '읃') {
+                utterance.rate = 0.35;
+                utterance.pitch = 1.2;
+                utterance.volume = 1.0;
+            } else if (text === '의') {
+                utterance.rate = 0.2;
+                utterance.pitch = 0.8;
+                utterance.volume = 1.0;
+            } else {
+                utterance.rate = this.currentSpeed;
+                utterance.pitch = 1.2;
+            }
+            
+            utterance.volume = 1.0;
+            // 나머지 코드는 그대로 유지
+            
+            if (element) {
+                element.classList.add('playing');
+            }
+
+            let isResolved = false;
+            const resolveOnce = () => {
+                if (!isResolved) {
+                    isResolved = true;
+                    if (element) {
+                        element.classList.remove('playing');
                     }
+                    setTimeout(resolve, delayMs);
+                }
+            };
+
+            utterance.onend = resolveOnce;
+            utterance.onerror = resolveOnce;
+
+            const timeoutId = setTimeout(() => {
+                this.speechSynthesis.cancel();
+                resolveOnce();
+            }, Math.max(text.length * 200, 2000));
+
+            utterance.onstart = () => {
+                clearTimeout(timeoutId);
+            };
+
+            this.speechSynthesis.speak(utterance);
+        }, 50);
+    });
+}
         
                     delay(ms) {
                         return new Promise(resolve => setTimeout(resolve, ms));
@@ -2195,74 +2203,77 @@ function playUnifiedSound(sound, element = null) {
              const utterance = new SpeechSynthesisUtterance(uniquePhonics[index]);
 utterance.lang = 'ko-KR';
 
-// 기존 설정을 다음으로 교체
-const sound = uniquePhonics[index];
-if (sound === '그') {
-    utterance.rate = 0.4;
-    utterance.pitch = 0.8;
-} else if (sound === '크') {
-    utterance.rate = 0.4;
-    utterance.pitch = 1.4;
-} else if (sound === '드') {
-    utterance.rate = 0.4;
-    utterance.pitch = 0.8;
-} else if (sound === '트') {
-    utterance.rate = 0.4;
-    utterance.pitch = 1.4;
-} else if (sound === '즈') {
-    utterance.rate = 0.4;
-    utterance.pitch = 0.9;
-} else if (sound === '츠') {
-    utterance.rate = 0.4;
-    utterance.pitch = 1.3;
-} else if (sound === '브') {
-    utterance.rate = 0.4;
-    utterance.pitch = 0.8;
-} else if (sound === '프') {
-    utterance.rate = 0.4;
-    utterance.pitch = 1.5;
-} else if (sound === '윽') {
-    utterance.rate = 0.2;
-    utterance.pitch = 0.4;
-    utterance.volume = 0.9;
-} else if (sound === '읃') {
-    utterance.rate = 0.35;
-    utterance.pitch = 1.2;
-    utterance.volume = 1.0;
-} else {
-    utterance.rate = 0.5;
-    utterance.pitch = 1.2;
-}
-
-utterance.volume = 1.0;
-        
-                utterance.onend = function() {
-                    index++;
-                    if (index < uniquePhonics.length && !isStopped) {
-                        setTimeout(playNext, 400);
-                    }
-                };
-        
-                utterance.onerror = function() {
-                    console.log('음성 재생 오류');
-                    index++;
-                    if (index < uniquePhonics.length && !isStopped) {
-                        setTimeout(playNext, 400);
-                    }
-                };
-        
-                window.speechSynthesis.speak(utterance);
-            }
-        
-            audioPlayback = {
-                stop: function() {
-                    isStopped = true;
-                    window.speechSynthesis.cancel();
-                }
-            };
-        
-            setTimeout(playNext, 100);
+  const sound = uniquePhonics[index];
+        if (sound === '그') {
+            utterance.rate = 0.4;
+            utterance.pitch = 0.8;
+        } else if (sound === '크') {
+            utterance.rate = 0.4;
+            utterance.pitch = 1.4;
+        } else if (sound === '드') {
+            utterance.rate = 0.4;
+            utterance.pitch = 0.8;
+        } else if (sound === '트') {
+            utterance.rate = 0.4;
+            utterance.pitch = 1.4;
+        } else if (sound === '즈') {
+            utterance.rate = 0.4;
+            utterance.pitch = 0.9;
+        } else if (sound === '츠') {
+            utterance.rate = 0.4;
+            utterance.pitch = 1.3;
+        } else if (sound === '브') {
+            utterance.rate = 0.4;
+            utterance.pitch = 0.8;
+        } else if (sound === '프') {
+            utterance.rate = 0.4;
+            utterance.pitch = 1.5;
+        } else if (sound === '윽') {
+            utterance.rate = 0.2;
+            utterance.pitch = 0.4;
+            utterance.volume = 0.9;
+        } else if (sound === '읃') {
+            utterance.rate = 0.35;
+            utterance.pitch = 1.2;
+            utterance.volume = 1.0;
+        } else if (sound === '의') {
+            utterance.rate = 0.2;
+            utterance.pitch = 0.8;
+            utterance.volume = 1.0;
+        } else {
+            utterance.rate = 0.5;
+            utterance.pitch = 1.2;
         }
+
+        utterance.volume = 1.0;
+        
+        utterance.onend = function() {
+            index++;
+            if (index < uniquePhonics.length && !isStopped) {
+                setTimeout(playNext, 400);
+            }
+        };
+
+        utterance.onerror = function() {
+            console.log('음성 재생 오류');
+            index++;
+            if (index < uniquePhonics.length && !isStopped) {
+                setTimeout(playNext, 400);
+            }
+        };
+
+        window.speechSynthesis.speak(utterance);
+    }
+
+    audioPlayback = {
+        stop: function() {
+            isStopped = true;
+            window.speechSynthesis.cancel();
+        }
+    };
+
+    setTimeout(playNext, 100);
+}
         function stopAudioPlayback() {
             if (audioPlayback && audioPlayback.stop) {
                 audioPlayback.stop();
