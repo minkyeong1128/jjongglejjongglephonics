@@ -2072,12 +2072,34 @@ function playUnifiedSound(sound, element = null) {
                     '집': '🏠', '학교': '🏫', '병원': '🏥'
                 };
         
-                // 게임 관련 함수들
-                function loadImageForWord(word) {
-                    const wordImageContainer = document.getElementById('wordImage');
-                    const emoji = wordEmojiMap[word] || '❓';
-                    wordImageContainer.innerHTML = `<div style="font-size: 4em; color: #5a67d8; text-shadow: 2px 2px 4px rgba(0,0,0,0.1);">${emoji}</div>`;
-                }
+            function loadImageForWord(word) {
+    const wordImageContainer = document.getElementById('wordImage');
+    const emoji = wordEmojiMap[word] || '❓';
+    
+    // 기존 내용 제거
+    wordImageContainer.innerHTML = '';
+    
+    // div 요소를 직접 생성
+    const emojiDiv = document.createElement('div');
+    emojiDiv.textContent = emoji; // innerHTML 대신 textContent 사용
+    
+    // 스타일을 직접 적용
+    emojiDiv.style.cssText = `
+        font-size: 4em; 
+        color: #5a67d8; 
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        text-decoration: none !important;
+        text-decoration-line: none !important;
+        -webkit-text-decoration: none !important;
+        text-underline-offset: 0px !important;
+        text-decoration-skip-ink: none !important;
+        font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+        line-height: 1;
+        display: block;
+    `;
+    
+    wordImageContainer.appendChild(emojiDiv);
+}
         
                 function playCorrectSound() {
                     try {
