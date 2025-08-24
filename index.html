@@ -1217,36 +1217,38 @@ function playUnifiedSound(sound, element = null) {
             utterance.pitch = 0.4;
             utterance.volume = 0.9;
     } else if (sound === '읏트') {
-    // 첫 번째: "읏" 소리
+      // 첫 번째: "읏" 소리
     const utterance1 = new SpeechSynthesisUtterance('읏');
     utterance1.lang = 'ko-KR';
     utterance1.rate = 0.4;
     utterance1.pitch = 1.2;
     utterance1.volume = 1.0;
     
-    // 두 번째: "트" 소리 (0.3초 후 짧게)
+    // 두 번째: "트" 소리 (0.3초만 재생)
     utterance1.onend = () => {
+        const utterance2 = new SpeechSynthesisUtterance('트');
+        utterance2.lang = 'ko-KR';
+        utterance2.rate = 2.0;    // 빠르게
+        utterance2.pitch = 1.4;
+        utterance2.volume = 0.6;  // 작게
+        
+        window.speechSynthesis.speak(utterance2);
+        
+        // 0.3초 후에 강제로 중단
         setTimeout(() => {
-            const utterance2 = new SpeechSynthesisUtterance('트');
-            utterance2.lang = 'ko-KR';
-            utterance2.rate = 2.0;    // 최대한 빠르게
-            utterance2.pitch = 1.4;
-            utterance2.volume = 0.6;  // 작게
-            window.speechSynthesis.speak(utterance2);
-        }, 300); // 0.3초 후
+            window.speechSynthesis.cancel();
+        }, 300); // 0.3초만 재생하고 중단
     };
     
     if (element) {
         element.classList.add('playing');
-        // 전체 재생 완료 후 playing 클래스 제거
         setTimeout(() => {
             element.classList.remove('playing');
-        }, 1000); // 충분한 시간 후
+        }, 1000);
     }
     
     window.speechSynthesis.speak(utterance1);
-    return; // 일반적인 speak 호출 방지
-
+    return;
         } else if (sound === '으이') {
             utterance.rate = 1.2;
             utterance.pitch = 0.8;
@@ -1832,36 +1834,38 @@ function playUnifiedSound(sound, element = null) {
                 utterance.pitch = 0.4;
                 utterance.volume = 0.9;
             } else if (text === '읏트') {
-              // 첫 번째: "읏" 소리
+               // 첫 번째: "읏" 소리
     const utterance1 = new SpeechSynthesisUtterance('읏');
     utterance1.lang = 'ko-KR';
     utterance1.rate = 0.4;
     utterance1.pitch = 1.2;
     utterance1.volume = 1.0;
     
-    // 두 번째: "트" 소리 (0.3초 후 짧게)
+    // 두 번째: "트" 소리 (0.3초만 재생)
     utterance1.onend = () => {
+        const utterance2 = new SpeechSynthesisUtterance('트');
+        utterance2.lang = 'ko-KR';
+        utterance2.rate = 2.0;    // 빠르게
+        utterance2.pitch = 1.4;
+        utterance2.volume = 0.6;  // 작게
+        
+        window.speechSynthesis.speak(utterance2);
+        
+        // 0.3초 후에 강제로 중단
         setTimeout(() => {
-            const utterance2 = new SpeechSynthesisUtterance('트');
-            utterance2.lang = 'ko-KR';
-            utterance2.rate = 2.0;    // 최대한 빠르게
-            utterance2.pitch = 1.4;
-            utterance2.volume = 0.6;  // 작게
-            window.speechSynthesis.speak(utterance2);
-        }, 300); // 0.3초 후
+            window.speechSynthesis.cancel();
+        }, 300); // 0.3초만 재생하고 중단
     };
     
     if (element) {
         element.classList.add('playing');
-        // 전체 재생 완료 후 playing 클래스 제거
         setTimeout(() => {
             element.classList.remove('playing');
-        }, 1000); // 충분한 시간 후
+        }, 1000);
     }
     
     window.speechSynthesis.speak(utterance1);
-    return; // 일반적인 speak 호출 방지
-
+    return;
             } else if (text === '으이') {
                 utterance.rate = 1.2;
                 utterance.pitch = 0.8;
@@ -2285,35 +2289,38 @@ utterance.lang = 'ko-KR';
             utterance.pitch = 0.4;
             utterance.volume = 0.9;
      } else if (sound === '읏트') {
-    // 첫 번째: "읏" 소리
+      // 첫 번째: "읏" 소리
     const utterance1 = new SpeechSynthesisUtterance('읏');
     utterance1.lang = 'ko-KR';
     utterance1.rate = 0.4;
     utterance1.pitch = 1.2;
     utterance1.volume = 1.0;
     
-    // 두 번째: "트" 소리 (0.3초 후 짧게)
+    // 두 번째: "트" 소리 (0.3초만 재생)
     utterance1.onend = () => {
+        const utterance2 = new SpeechSynthesisUtterance('트');
+        utterance2.lang = 'ko-KR';
+        utterance2.rate = 2.0;    // 빠르게
+        utterance2.pitch = 1.4;
+        utterance2.volume = 0.6;  // 작게
+        
+        window.speechSynthesis.speak(utterance2);
+        
+        // 0.3초 후에 강제로 중단
         setTimeout(() => {
-            const utterance2 = new SpeechSynthesisUtterance('트');
-            utterance2.lang = 'ko-KR';
-            utterance2.rate = 2.0;    // 최대한 빠르게
-            utterance2.pitch = 1.4;
-            utterance2.volume = 0.6;  // 작게
-            window.speechSynthesis.speak(utterance2);
-        }, 300); // 0.3초 후
+            window.speechSynthesis.cancel();
+        }, 300); // 0.3초만 재생하고 중단
     };
     
     if (element) {
         element.classList.add('playing');
-        // 전체 재생 완료 후 playing 클래스 제거
         setTimeout(() => {
             element.classList.remove('playing');
-        }, 1000); // 충분한 시간 후
+        }, 1000);
     }
     
     window.speechSynthesis.speak(utterance1);
-    return; // 일반적인 speak 호출 방지
+    return;
 
  } else if (sound === '요') {
             utterance.rate = 0.6;
