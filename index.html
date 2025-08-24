@@ -2071,33 +2071,40 @@ function playUnifiedSound(sound, element = null) {
                     '집': '🏠', '학교': '🏫', '병원': '🏥'
                 };
         
-            function loadImageForWord(word) {
+          function loadImageForWord(word) {
     const wordImageContainer = document.getElementById('wordImage');
     const emoji = wordEmojiMap[word] || '❓';
     
-    // 기존 내용 제거
+    // 완전히 초기화
     wordImageContainer.innerHTML = '';
+    wordImageContainer.style.cssText = '';
     
-    // div 요소를 직접 생성
-    const emojiDiv = document.createElement('div');
-    emojiDiv.textContent = emoji; // innerHTML 대신 textContent 사용
+    // span 요소로 생성 (div 대신)
+    const emojiSpan = document.createElement('span');
+    emojiSpan.textContent = emoji; // innerHTML 대신 textContent
     
-    // 스타일을 직접 적용
-    emojiDiv.style.cssText = `
-        font-size: 4em; 
-        color: #5a67d8; 
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+    // 인라인 스타일로 모든 속성 강제 설정
+    emojiSpan.setAttribute('style', `
+        font-size: 4em !important;
+        color: #5a67d8 !important;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.1) !important;
         text-decoration: none !important;
         text-decoration-line: none !important;
+        text-decoration-color: transparent !important;
+        text-decoration-style: none !important;
         -webkit-text-decoration: none !important;
-        text-underline-offset: 0px !important;
-        text-decoration-skip-ink: none !important;
-        font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
-        line-height: 1;
-        display: block;
-    `;
+        -webkit-text-decoration-line: none !important;
+        background: transparent !important;
+        border: none !important;
+        outline: none !important;
+        display: inline-block !important;
+        font-family: "Apple Color Emoji", "Segoe UI Emoji", sans-serif !important;
+        line-height: 1 !important;
+        position: relative !important;
+        z-index: 1 !important;
+    `);
     
-    wordImageContainer.appendChild(emojiDiv);
+    wordImageContainer.appendChild(emojiSpan);
 }
         
                 function playCorrectSound() {
