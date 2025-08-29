@@ -583,6 +583,93 @@
     background: transparent !important;
     box-shadow: none !important;
 }
+
+/* 탈퇴 버튼 스타일 */
+.withdraw-btn {
+    background: none;
+    color: #e74c3c;
+    border: none;
+    padding: 8px 16px;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: opacity 0.3s ease;
+}
+
+.withdraw-btn:hover {
+    opacity: 0.7;
+}
+
+/* 탈퇴 확인 모달 스타일 */
+.withdraw-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 1001;
+    justify-content: center;
+    align-items: center;
+}
+
+.withdraw-modal-content {
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    position: relative;
+}
+
+.withdraw-modal h3 {
+    color: #e74c3c;
+    margin-bottom: 20px;
+    font-size: 18px;
+}
+
+.withdraw-modal p {
+    color: #666;
+    line-height: 1.5;
+    margin-bottom: 30px;
+}
+
+.withdraw-modal-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+
+.withdraw-confirm-btn, .withdraw-cancel-btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.withdraw-confirm-btn {
+    background: #e74c3c;
+    color: white;
+}
+
+.withdraw-confirm-btn:hover {
+    background: #c0392b;
+}
+
+.withdraw-cancel-btn {
+    background: #95a5a6;
+    color: white;
+}
+
+.withdraw-cancel-btn:hover {
+    background: #7f8c8d;
+}
 </style>
     <div class="main-container">
   <!-- 로그인 영역 -->
@@ -593,6 +680,7 @@
             <button class="login-btn" id="loginBtn" onclick="showAuthModal()">로그인(회원가입)</button>
             <button class="stats-btn" id="statsBtn" onclick="showStatsModal()" style="display: none;">📊</button>
             <button class="logout-btn" id="logoutBtn" onclick="logout()" style="display: none;">로그아웃</button>
+<button class="withdraw-btn" id="withdrawBtn" onclick="showWithdrawModal()" style="display: none;">탈퇴</button>
         </div>
 
         <!-- 로그인/회원가입 모달 -->
@@ -791,6 +879,21 @@
                <div class="stats-grid" id="statsFinalsGrid"></div>
                <div class="practice-section" id="statsFinalsPractice"></div>
             </div>
+        </div>
+    </div>
+</div>
+<!-- 탈퇴 확인 모달 (여기에 추가) -->
+<div class="withdraw-modal" id="withdrawModal">
+    <div class="withdraw-modal-content">
+        <h3>⚠️ 회원 탈퇴</h3>
+        <p>
+            정말로 탈퇴하시겠습니까?<br>
+            탈퇴 시 모든 학습 기록과 통계가<br>
+            영구적으로 삭제되며 복구할 수 없습니다.
+        </p>
+        <div class="withdraw-modal-buttons">
+            <button class="withdraw-cancel-btn" onclick="closeWithdrawModal()">취소</button>
+            <button class="withdraw-confirm-btn" onclick="confirmWithdraw()">탈퇴하기</button>
         </div>
     </div>
 </div>
@@ -994,6 +1097,7 @@ sessionStorage.setItem('currentUser', JSON.stringify({
         function updateLoginUI() {
             const loginBtn = document.getElementById('loginBtn');
             const logoutBtn = document.getElementById('logoutBtn');
+ const withdrawBtn = document.getElementById('withdrawBtn');
             const statsBtn = document.getElementById('statsBtn');
             const userInfo = document.getElementById('userInfo');
             const userNickname = document.getElementById('userNickname');
@@ -1001,12 +1105,14 @@ sessionStorage.setItem('currentUser', JSON.stringify({
             if (currentUser) {
                 loginBtn.style.display = 'none';
                 logoutBtn.style.display = 'inline-block';
+withdrawBtn.style.display = 'inline-block';
                 statsBtn.style.display = 'inline-block';
                 userInfo.style.display = 'flex';
                userNickname.textContent = currentUser.nickname;
             } else {
                 loginBtn.style.display = 'inline-block';
                 logoutBtn.style.display = 'none';
+withdrawBtn.style.display = 'none';
                 statsBtn.style.display = 'none';
                 userInfo.style.display = 'none';
             }
@@ -4908,6 +5014,48 @@ function togglePassword() {
     const eye = document.querySelector('span[onclick="togglePassword()"]');
     if (eye) {
         eye.style.color = password.type === 'text' ? '#4CAF50' : '#999';
+    }
+}
+
+// 탈퇴 모달 표시
+function showWithdrawModal() {
+    document.getElementById('withdrawModal').style.display = 'flex';
+}
+
+// 탈퇴 모달 닫기
+function closeWithdrawModal() {
+    document.getElementById('withdrawModal').style.display = 'none';
+}
+
+// 탈퇴 확인 및 처리
+async function confirmWithdraw() {
+    if (!currentUser) {
+        alert('로그인이 필요합니다.');
+        return;
+    }
+    
+    try {
+        // Firebase에서 사용자 데이터 삭제
+        await db.collection('users').doc(currentUser.username).delete();
+        
+        // 현재 사용자 정보 초기화
+        currentUser = null;
+        sessionStorage.removeItem('currentUser');
+        
+        // UI 업데이트
+        updateLoginUI();
+        
+        // 모달 닫기
+        closeWithdrawModal();
+        
+        // 메인 메뉴로 이동
+        showMainMenu();
+        
+        alert('회원 탈퇴가 완료되었습니다. 그동안 이용해 주셔서 감사합니다.');
+        
+    } catch (error) {
+        console.error('탈퇴 처리 중 오류:', error);
+        alert('탈퇴 처리 중 오류가 발생했습니다. 다시 시도해 주세요.');
     }
 }
 
