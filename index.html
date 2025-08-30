@@ -1430,7 +1430,7 @@ if (audioPlayback && audioPlayback.stop) {
     }
 }
         
-               function showSoundGame() {
+             function showSoundGame() {
     // 로그인 체크
     if (!currentUser) {
         alert('로그인이 필요한 서비스입니다. 먼저 로그인해주세요.');
@@ -1444,9 +1444,24 @@ if (audioPlayback && audioPlayback.stop) {
     
     // 로그인 영역 숨기기
     document.querySelector('.login-area').style.display = 'none';
-                    
-    // 게임 초기화
-    initializeGame();
+    
+    // 게임 상태 완전 초기화
+    gameState.currentQuestionIndex = 0;
+    gameState.score = 0;
+    gameState.wrongAnswers = [];
+    gameState.isAnswered = false;
+    gameState.currentQuestion = null;
+    gameState.usedWords = [];
+    gameState.availableWords = [];
+    
+    // UI 초기화
+    document.getElementById('score').textContent = '0';
+    document.getElementById('gameArea').style.display = 'block';
+    document.getElementById('resultScreen').style.display = 'none';
+    
+    // 게임 시작
+    displayQuestion();
+    setTimeout(playAudio, 1000);
 }
         
           function showJamoLearning() {
@@ -2629,14 +2644,32 @@ if (currentUser) {
                     document.getElementById('score').textContent = '0';
                     document.getElementById('gameArea').style.display = 'block';
                     document.getElementById('resultScreen').style.display = 'none';
+
+// 추가: 혹시 숨겨져 있을 수 있는 피드백과 다음 버튼도 초기화
+    document.getElementById('feedback').classList.add('hidden');
+    document.getElementById('nextButton').classList.add('hidden');
         
                     displayQuestion();
                 }
         
-                function initializeGame() {
-                    displayQuestion();
-                    setTimeout(playAudio, 1000);
-                }
+             function initializeGame() {
+    // 게임 상태 완전 초기화
+    gameState.currentQuestionIndex = 0;
+    gameState.score = 0;
+    gameState.wrongAnswers = [];
+    gameState.isAnswered = false;
+    gameState.currentQuestion = null;
+    gameState.usedWords = [];
+    gameState.availableWords = [];
+    
+    // UI 초기화
+    document.getElementById('score').textContent = '0';
+    document.getElementById('gameArea').style.display = 'block';
+    document.getElementById('resultScreen').style.display = 'none';
+    
+    displayQuestion();
+    setTimeout(playAudio, 1000);
+}
         
                 // 앱 시작 시 메인 메뉴 표시
                 window.onload = function() {
