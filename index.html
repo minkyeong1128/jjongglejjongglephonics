@@ -773,7 +773,7 @@
                         </div>
                     </div>
                     <div class="phonics-grid" id="phonicsGrid"></div>
-                    <div class="controls"><button class="control-button" id="playAllButton"> ▶️ 전체 재생</button>
+                    <div class="controls"><button class="control-button" id="playAllButton">▶️ 전체 재생</button>
                             <div class="speed-control"><span>🐌</span> <input class="speed-slider" id="speedSlider" max="2.0" min="0.5" step="0.1" type="range" value="0.6"> <span>🐰</span> <span id="speedDisplay">0.6x</span></div>
                     </div>
                 </div><button class="reset-button" id="resetButton">다시 시작</button>
@@ -3355,55 +3355,56 @@ function showStrokeOrder() {
 }
         
         
-               function drawCharacterWithStrokes() {
-            const strokes = STROKE_ORDER[currentJamo];
-            if (!strokes) return;
+             function drawCharacterWithStrokes() {
+    const strokes = STROKE_ORDER[currentJamo];
+    if (!strokes) return;
+    
+    // ㅇ은 특별 처리 (clipping 없이 직접 그리기)
+    if (currentJamo === 'ㅇ' || currentJamo === 'ㅎ') {
+        for (let i = 0; i <= currentStrokeIndex; i++) {
+            ctx.save();
+            ctx.fillStyle = '#000000';  // 검정색으로 통일
+            ctx.lineWidth = 12;
+            ctx.lineCap = 'round';
             
-            // ㅇ은 특별 처리 (clipping 없이 직접 그리기)
-           if (currentJamo === 'ㅇ' || currentJamo === 'ㅎ') {
-                for (let i = 0; i <= currentStrokeIndex; i++) {
-                    ctx.save();
-                   ctx.fillStyle = '#000000';  // 검정색으로 통일
+            const adjustment = STROKE_ADJUSTMENTS[currentJamo] || DEFAULT_ADJUSTMENT;
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const actualFontHeight = 200 * 1.0;
+            const scaleX = actualFontHeight * adjustment.scaleX;
+            const scaleY = actualFontHeight * adjustment.scaleY;
+            const adjustedCenterX = centerX + adjustment.offsetX;
+            const adjustedCenterY = centerY + adjustment.offsetY;
+            
+            const strokeGroup = strokes[i];
+            for (let stroke of strokeGroup) {
+                if (stroke.type === 'circle') {
+                    const circleX = adjustedCenterX + (stroke.center[0] - 0.5) * scaleX;
+                    const circleY = adjustedCenterY + (stroke.center[1] - 0.5) * scaleY;
+                    const radius = stroke.radius * Math.min(scaleX, scaleY) + 5;
+                    
+                    ctx.beginPath();
+                    // 여기서도 시계방향으로 변경
+                    ctx.arc(circleX, circleY, radius, 0, 2 * Math.PI, false); // false 추가
+                    ctx.stroke();
+                } else if (stroke.type === 'line') {
+                    const startX = adjustedCenterX + (stroke.start[0] - 0.5) * scaleX;
+                    const startY = adjustedCenterY + (stroke.start[1] - 0.5) * scaleY;
+                    const endX = adjustedCenterX + (stroke.end[0] - 0.5) * scaleX;
+                    const endY = adjustedCenterY + (stroke.end[1] - 0.5) * scaleY;
+                    
+                    ctx.strokeStyle = '#000000';
                     ctx.lineWidth = 12;
-                    ctx.lineCap = 'round';
-                    
-                    const adjustment = STROKE_ADJUSTMENTS[currentJamo] || DEFAULT_ADJUSTMENT;
-                    const centerX = canvas.width / 2;
-                    const centerY = canvas.height / 2;
-                    const actualFontHeight = 200 * 1.0;
-                    const scaleX = actualFontHeight * adjustment.scaleX;
-                    const scaleY = actualFontHeight * adjustment.scaleY;
-                    const adjustedCenterX = centerX + adjustment.offsetX;
-                    const adjustedCenterY = centerY + adjustment.offsetY;
-                    
-                    const strokeGroup = strokes[i];
-                   for (let stroke of strokeGroup) {
-            if (stroke.type === 'circle') {
-                const circleX = adjustedCenterX + (stroke.center[0] - 0.5) * scaleX;
-                const circleY = adjustedCenterY + (stroke.center[1] - 0.5) * scaleY;
-                const radius = stroke.radius * Math.min(scaleX, scaleY) + 5;
-                
-                ctx.beginPath();
-                ctx.arc(circleX, circleY, radius, 0, 2 * Math.PI);
-               ctx.stroke();
-            } else if (stroke.type === 'line') {
-                const startX = adjustedCenterX + (stroke.start[0] - 0.5) * scaleX;
-                const startY = adjustedCenterY + (stroke.start[1] - 0.5) * scaleY;
-                const endX = adjustedCenterX + (stroke.end[0] - 0.5) * scaleX;
-                const endY = adjustedCenterY + (stroke.end[1] - 0.5) * scaleY;
-                
-                ctx.strokeStyle = '#000000';
-                ctx.lineWidth = 12;
-                ctx.beginPath();
-                ctx.moveTo(startX, startY);
-                ctx.lineTo(endX, endY);
-                ctx.stroke();
-            }
-        }
-                    ctx.restore();
+                    ctx.beginPath();
+                    ctx.moveTo(startX, startY);
+                    ctx.lineTo(endX, endY);
+                    ctx.stroke();
                 }
-                return;
             }
+            ctx.restore();
+        }
+        return;
+    }
             
             // 다른 글자들은 기존 방식
             for (let i = 0; i <= currentStrokeIndex; i++) {
@@ -3473,8 +3474,8 @@ function showStrokeOrder() {
                     const circleY = adjustedCenterY + (stroke.center[1] - 0.5) * scaleY;
                     const radius = stroke.radius * Math.min(scaleX, scaleY) + 5;
                     
-                    ctx.arc(circleX, circleY, radius, 0, 2 * Math.PI);
-                }
+                ctx.arc(circleX, circleY, radius, 0, 2 * Math.PI, false); // false 추가
+}
                 
                 ctx.stroke(); // 각 획마다 개별적으로 stroke 호출
             }
@@ -3537,45 +3538,55 @@ function showStrokeOrder() {
         
                 }
         
-        function showStrokeNumber(stroke, number) {
-                    if (!ctx) return;
-                    
-                    // 글자 크기에 맞춘 스케일 계산
-                    ctx.save();
-                    ctx.font = '200px "Malgun Gothic", Arial, sans-serif';
-                    const metrics = ctx.measureText(currentJamo);
-                    const actualWidth = metrics.width;
-                    const actualHeight = 200;
-                    ctx.restore();
-                    
-                    const centerX = canvas.width / 2;
-                    const centerY = canvas.height / 2;
-                    const scaleX = actualWidth;
-                    const scaleY = actualHeight;
-                    
-                    let numberX, numberY;
-                    
-                    if (stroke.type === 'circle') {
-                        numberX = centerX + (stroke.center[0] - 0.5) * scaleX;
-                        numberY = centerY + (stroke.center[1] - 0.5) * scaleY - stroke.radius * Math.min(scaleX, scaleY) - 25;
-                    } else {
-                        numberX = centerX + (stroke.start[0] - 0.5) * scaleX - 20;
-                        numberY = centerY + (stroke.start[1] - 0.5) * scaleY - 15;
-                    }
-                    
-                    ctx.save();
-                    ctx.fillStyle = 'rgba(255, 100, 100, 0.9)';
-                    ctx.beginPath();
-                    ctx.arc(numberX, numberY, 18, 0, 2 * Math.PI);
-                    ctx.fill();
-                    
-                    ctx.fillStyle = 'white';
-                    ctx.font = 'bold 18px Arial';
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'middle';
-                    ctx.fillText(number.toString(), numberX, numberY);
-                    ctx.restore();
-                }
+      function showStrokeNumber(stroke, number) {
+    if (!ctx) return;
+    
+    // 글자 크기에 맞춘 스케일 계산
+    ctx.save();
+    ctx.font = '200px "Malgun Gothic", Arial, sans-serif';
+    const metrics = ctx.measureText(currentJamo);
+    const actualWidth = metrics.width;
+    const actualHeight = 200;
+    ctx.restore();
+    
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    const scaleX = actualWidth;
+    const scaleY = actualHeight;
+    
+    let numberX, numberY;
+    
+    if (stroke.type === 'circle') {
+        const adjustment = STROKE_ADJUSTMENTS[currentJamo] || DEFAULT_ADJUSTMENT;
+        const adjustedCenterX = centerX + adjustment.offsetX;
+        const adjustedCenterY = centerY + adjustment.offsetY;
+        
+        // 원의 왼쪽에 번호 표시 (시작점 위치)
+        const circleX = adjustedCenterX + (stroke.center[0] - 0.5) * actualHeight * adjustment.scaleX;
+        const circleY = adjustedCenterY + (stroke.center[1] - 0.5) * actualHeight * adjustment.scaleY;
+        const radius = stroke.radius * Math.min(actualHeight * adjustment.scaleX, actualHeight * adjustment.scaleY) + 5;
+        
+        // 왼쪽 위 방향에 번호 위치 (시계방향 시작점)
+        numberX = circleX + radius * Math.cos(-2*Math.PI/3) - 25; // 왼쪽으로 더 이동
+        numberY = circleY + radius * Math.sin(-2*Math.PI/3) - 15; // 위쪽으로 약간 이동
+    } else {
+        numberX = centerX + (stroke.start[0] - 0.5) * scaleX - 20;
+        numberY = centerY + (stroke.start[1] - 0.5) * scaleY - 15;
+    }
+    
+    ctx.save();
+    ctx.fillStyle = 'rgba(255, 100, 100, 0.9)';
+    ctx.beginPath();
+    ctx.arc(numberX, numberY, 18, 0, 2 * Math.PI);
+    ctx.fill();
+    
+    ctx.fillStyle = 'white';
+    ctx.font = 'bold 18px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(number.toString(), numberX, numberY);
+    ctx.restore();
+}
         
         function stopStrokeAnimation() {
                     if (strokeAnimationInterval) {
@@ -4496,30 +4507,28 @@ function showStrokeOrder() {
             ctx.restore();
         }
         
-// 원형 화살표 그리기 함수 (바깥쪽으로 표시) - 수정된 버전
 function drawCircleArrowOutside(centerX, centerY, radius) {
     ctx.save();
     ctx.strokeStyle = '#FF3742';
     ctx.fillStyle = '#FF3742';
-    ctx.lineWidth = 3; // 다른 화살표들과 동일한 두께
+    ctx.lineWidth = 3;
     
     if (currentJamo === 'ㅇ') {
-        // ㅇ의 경우 - 오른쪽 위 부분에 위치, 더 굴곡진 호
-        const arrowSize = 18; // 15 → 18로 크기 증가
-        const offset = 25; // 30 → 25로 조정하여 더 위로
+        const arrowSize = 18;
+        const offset = 25;
         
-        // 곡선 화살표 그리기 (더 굴곡진 호 - 더 긴 호로 변경)
+        // 왼쪽에서 시작해서 시계방향으로
         ctx.beginPath();
-        ctx.lineWidth = 3; // 다른 화살표들과 같은 두께
-        ctx.arc(centerX, centerY, radius + offset, -Math.PI/3, Math.PI/4); // 더 긴 호 (-60도에서 45도까지)
+        ctx.lineWidth = 3;
+        ctx.arc(centerX, centerY, radius + offset, Math.PI, Math.PI/2, true); // 왼쪽에서 아래쪽으로
         ctx.stroke();
         
-        // 화살표 머리 그리기 (시계방향 회전 표시, 크기 증가)
-        const headX = centerX + (radius + offset) * Math.cos(Math.PI/4);
-        const headY = centerY + (radius + offset) * Math.sin(Math.PI/4);
+        // 화살표 머리를 아래쪽에 위치 (시계방향 끝점)
+        const headX = centerX + (radius + offset) * Math.cos(Math.PI/2);
+        const headY = centerY + (radius + offset) * Math.sin(Math.PI/2);
         
-        // 곡선 끝점에서의 접선 방향 (시계방향)
-        const tangentAngle = Math.PI/4 + Math.PI/2; // 곡선 끝점에서의 접선 방향
+        // 시계방향 접선 방향
+        const tangentAngle = Math.PI/2 - Math.PI/2;
         
         ctx.beginPath();
         ctx.moveTo(headX, headY);
@@ -4531,24 +4540,21 @@ function drawCircleArrowOutside(centerX, centerY, radius) {
         ctx.fill();
         
     } else if (currentJamo === 'ㅎ') {
-        // ㅎ의 경우 - 더 굴곡진 회전 화살표, 크기 조정
-        const arrowSize = 15; // 12 → 15로 화살표 머리 크기 복원
-        const offset = 20; // 25 → 20으로 조정 (더 가깝게)
+        const arrowSize = 15;
+        const offset = 20;
         const adjustedCenterX = centerX + 20;
         const adjustedCenterY = centerY - 20;
         
-        // 시작부분을 더 굴곡지게 조정한 호
+        // 동일하게 왼쪽에서 시작
         ctx.beginPath();
-        ctx.lineWidth = 3; // 다른 화살표들과 같은 두께
-        ctx.arc(adjustedCenterX, adjustedCenterY, radius + offset, -Math.PI/6, Math.PI/4); // 시작점을 더 굴곡지게 (-60도)
+        ctx.lineWidth = 3;
+        ctx.arc(adjustedCenterX, adjustedCenterY, radius + offset, Math.PI, Math.PI/2, true);
         ctx.stroke();
         
-        // 화살표 머리 그리기 (곡선의 접선 방향에 맞게, 크기 조정)
-        const headX = adjustedCenterX + (radius + offset) * Math.cos(Math.PI/4);
-        const headY = adjustedCenterY + (radius + offset) * Math.sin(Math.PI/4);
+        const headX = adjustedCenterX + (radius + offset) * Math.cos(Math.PI/2);
+        const headY = adjustedCenterY + (radius + offset) * Math.sin(Math.PI/2);
         
-        // 곡선 끝점에서의 접선 방향 (시계방향)
-        const tangentAngle = Math.PI/4 + Math.PI/2;
+        const tangentAngle = Math.PI/2 - Math.PI/2;
         
         ctx.beginPath();
         ctx.moveTo(headX, headY);
@@ -4562,7 +4568,6 @@ function drawCircleArrowOutside(centerX, centerY, radius) {
     
     ctx.restore();
 }
-
           function startDrawing(e) {
     // 획순 재생 중이거나 연습 모드가 아닐 때 터치 방지
     if (!isPracticeMode || isShowingStrokes) {
