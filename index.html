@@ -3047,12 +3047,12 @@ if (currentUser) {
                 let isShowingStrokes = false;
 let hasUserDrawn = false;
         
-             function openStrokeModal(jamo, sound, type) {
+           function openStrokeModal(jamo, sound, type) {
     console.log('모달 열기:', jamo, sound, type);
     currentJamo = jamo;
     currentSound = sound;
     currentType = type;
-hasUserDrawn = false;
+    hasUserDrawn = false;
 
     document.getElementById('modalJamoTitle').textContent = jamo;
     document.getElementById('strokeOrderModal').classList.remove('hidden');
@@ -3063,15 +3063,15 @@ hasUserDrawn = false;
     soundReplayBtn.addEventListener('click', handleSoundReplay);
 
     // type이 'consonant'이고 jamo가 'ㅇ'일 때만 스피커 버튼 숨기기 (자음 ㅇ)
-if (jamo === 'ㅇ' && type === 'consonant') {
-    soundReplayBtn.style.display = 'none';
-} else {
-    soundReplayBtn.style.display = 'block';
-    // 받침 ㅇ이나 다른 소리가 있을 때 자동 소리 재생
-    setTimeout(() => {
-        playModalSound(sound);
-    }, 300);
-}
+    if (jamo === 'ㅇ' && type === 'consonant') {
+        soundReplayBtn.style.display = 'none';
+    } else {
+        soundReplayBtn.style.display = 'block';
+        // 받침 ㅇ이나 다른 소리가 있을 때 자동 소리 재생
+        setTimeout(() => {
+            playModalSound(sound);
+        }, 300);
+    }
 
     // 캔버스 초기화
     canvas = document.getElementById('strokeCanvas');
@@ -3087,9 +3087,11 @@ if (jamo === 'ㅇ' && type === 'consonant') {
     
     setupCanvas();
     
-    // 기본으로 연습하기 모드 실행
+    // 획순 재생부터 시작 (practiceMode 호출하지 않음)
     setTimeout(() => {
-        practiceMode();
+        clearCanvas();
+        isPracticeMode = false;  // 획순 재생 모드로 시작
+        drawGuideCharacter();    // 획순 재생 시작
     }, 300);
     
     console.log('모달 설정 완료, currentSound:', currentSound);
@@ -3168,20 +3170,20 @@ if (jamo === 'ㅇ' && type === 'consonant') {
     canvas.style.webkitUserSelect = 'none';
 }
         
-             function clearCanvas() {
-            if (!ctx) return;
-            
-            // 획순 애니메이션 중단
-            stopStrokeAnimation();
-            
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            drawGuideLines();
-            
-            // 연습 모드일 때는 연한 글씨 가이드도 다시 그리기
-            if (isPracticeMode) {
-                drawGuideCharacter();
-            }
-        }
+           function clearCanvas() {
+    if (!ctx) return;
+    
+    // 획순 애니메이션 중단
+    stopStrokeAnimation();
+    
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawGuideLines();
+    
+    // 연습 모드일 때는 연한 글씨 가이드도 다시 그리기
+    if (isPracticeMode) {
+        drawGuideCharacter();
+    }
+}
         
                 function drawGuideLines() {
                     if (!ctx) return;
@@ -3203,13 +3205,13 @@ if (jamo === 'ㅇ' && type === 'consonant') {
                 }
         
                
-                function practiceMode() {
-                    clearCanvas();
-                    isPracticeMode = true;
-                    
-                    // 연한 글자 가이드 그리기
-                    drawGuideCharacter();
-                }
+        function practiceMode() {
+    clearCanvas();
+    isPracticeMode = true;
+    
+    // 연한 글자 가이드 그리기
+    drawGuideCharacter();
+}
         
          // ← 여기에 아래 함수를 추가
                 function createStrokeMask(strokeIndex) {
@@ -3274,74 +3276,77 @@ if (jamo === 'ㅇ' && type === 'consonant') {
                     return maskCanvas;
                 }
         
-        function drawGuideCharacter() {
-            if (!ctx) return;
-            
-            // 연한 글씨 제거 - 바로 획순 애니메이션 시작
-            showStrokeOrder();
-        }
+  function drawGuideCharacter() {
+    if (!ctx) return;
+    
+    // 연한 글씨 제거 - 바로 획순 애니메이션 시작
+    showStrokeOrder();
+}
+
+function showStrokeOrder() {
+    const strokes = STROKE_ORDER[currentJamo];
+    if (!strokes) return;
+    
+    console.log('획순 애니메이션 시작, 총 획수:', strokes.length);
+    
+    currentStrokeIndex = 0;
+    isShowingStrokes = true;
+    isPracticeMode = false;  // 획순 재생 중에는 연습 모드 비활성화
+    showStrokeInfo();
+    
+    strokeAnimationInterval = setInterval(() => {
+        console.log('현재 획순:', currentStrokeIndex + 1, '/', strokes.length);
         
-        function showStrokeOrder() {
-            const strokes = STROKE_ORDER[currentJamo];
-            if (!strokes) return;
-            
-            console.log('획순 애니메이션 시작, 총 획수:', strokes.length);
-            
-            currentStrokeIndex = 0;
-            isShowingStrokes = true;
-            isPracticeMode = false;  // 획순 재생 중에는 연습 모드 비활성화
+        if (currentStrokeIndex < strokes.length - 1) {
+            currentStrokeIndex++;
             showStrokeInfo();
+        } else {
+            console.log('획순 애니메이션 완료, 연습 모드 시작');
+            clearInterval(strokeAnimationInterval);
+            strokeAnimationInterval = null;
+            isShowingStrokes = false;
             
-            strokeAnimationInterval = setInterval(() => {
-                console.log('현재 획순:', currentStrokeIndex + 1, '/', strokes.length);
-                
-                if (currentStrokeIndex < strokes.length - 1) {
-                    currentStrokeIndex++;
-                    showStrokeInfo();
-                } else {
-                    console.log('획순 애니메이션 완료, 연습 모드 시작');
-                    clearInterval(strokeAnimationInterval);
-                    strokeAnimationInterval = null;
-                    isShowingStrokes = false;
-                    
-                    setTimeout(() => {
+            setTimeout(() => {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 drawGuideLines();
-                isPracticeMode = true;  // 이제 브러쉬 사용 가능
-                console.log('연습 모드 시작 - 브러쉬 사용 가능');
+                isPracticeMode = true;  // 이제 브러시 사용 가능
+                console.log('연습 모드 시작 - 브러시 사용 가능, 화살표 제거됨');
             }, 2000);  
         }
-            }, 3000);
-        }
+    }, 3000);
+}
+        
+  function showStrokeInfo() {
+    const strokes = STROKE_ORDER[currentJamo];
+    if (!strokes || currentStrokeIndex >= strokes.length) return;
+    
+    // 한 번만 캔버스 클리어
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawGuideLines();
+    
+    // 모든 렌더링을 한 번에 처리
+    ctx.save();
+    
+    // 현재 획까지 모든 획을 누적해서 그리기
+    for (let i = 0; i <= currentStrokeIndex; i++) {
+        ctx.beginPath();
+        drawStrokePath(strokes[i], i);
+        ctx.stroke();
+    }
+    
+    ctx.restore();
+    
+    // 번호 표시
+    showStrokeNumber(strokes[currentStrokeIndex][0], currentStrokeIndex + 1);
+    
+    // 방향 화살표 표시 - 획순 재생 중에만 표시
+    if (isShowingStrokes) {
+        drawDirectionArrows(strokes[currentStrokeIndex], currentStrokeIndex);
+    }
+}
         
         
-        function showStrokeInfo() {
-            const strokes = STROKE_ORDER[currentJamo];
-            if (!strokes || currentStrokeIndex >= strokes.length) return;
-            
-            // 한 번만 캔버스 클리어
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            drawGuideLines();
-            
-            // 모든 렌더링을 한 번에 처리
-            ctx.save();
-            
-            // 현재 획까지 모든 획을 누적해서 그리기
-            for (let i = 0; i <= currentStrokeIndex; i++) {
-                ctx.beginPath();
-                drawStrokePath(strokes[i], i);
-                ctx.stroke();
-            }
-            
-            ctx.restore();
-            
-            // 번호 표시
-            showStrokeNumber(strokes[currentStrokeIndex][0], currentStrokeIndex + 1);
-        // 방향 화살표 표시
-            drawDirectionArrows(strokes[currentStrokeIndex], currentStrokeIndex);
-        }
-        
-        function drawCharacterWithStrokes() {
+               function drawCharacterWithStrokes() {
             const strokes = STROKE_ORDER[currentJamo];
             if (!strokes) return;
             
@@ -4549,9 +4554,9 @@ function drawCircleArrowOutside(centerX, centerY, radius) {
     ctx.restore();
 }
 
-            function startDrawing(e) {
-    // 아이패드에서 연습 모드가 아닐 때 터치 방지
-    if (!isPracticeMode) {
+          function startDrawing(e) {
+    // 획순 재생 중이거나 연습 모드가 아닐 때 터치 방지
+    if (!isPracticeMode || isShowingStrokes) {
         e.preventDefault();
         return false;
     }
@@ -4562,7 +4567,7 @@ function drawCircleArrowOutside(centerX, centerY, radius) {
     e.preventDefault(); // 아이패드에서 스크롤 방지
     
     isDrawing = true;
-hasUserDrawn = true;
+    hasUserDrawn = true;
     const rect = canvas.getBoundingClientRect();
     
     let x, y;
@@ -4585,8 +4590,8 @@ hasUserDrawn = true;
     return false; // 아이패드에서 추가 이벤트 방지
 }
         
-             function draw(e) {
-    if (!isDrawing || !isPracticeMode) {
+         function draw(e) {
+    if (!isDrawing || !isPracticeMode || isShowingStrokes) {
         if (e.type.startsWith('touch')) {
             e.preventDefault();
         }
