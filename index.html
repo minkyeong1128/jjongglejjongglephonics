@@ -1017,30 +1017,39 @@ async function updateUserStats(username, stats) {
 async function login(username, password) {
     try {
         const userData = await getUserData(username);
-        if (userData && userData.password === password) {
-            currentUser = {
-                username: username,
-                nickname: userData.nickname,
-                stats: userData.stats || {
-                    consonantErrors: {},
-                    vowelErrors: {},
-                    finalErrors: {},
-                    totalAttempts: 0,
-                    correctAttempts: 0
-                }
-            };
-            updateLoginUI();
-            closeAuthModal();
-           // 세션에 현재 사용자 정보 저장 (창 닫으면 자동 삭제)
-sessionStorage.setItem('currentUser', JSON.stringify({
-    username: currentUser.username
-}));
-            return true;
+        
+        // 사용자가 존재하지 않는 경우
+        if (!userData) {
+            return { success: false, message: '가입되지 않은 아이디입니다.' };
         }
-        return false;
+        
+        // 비밀번호가 틀린 경우
+        if (userData.password !== password) {
+            return { success: false, message: '비밀번호가 올바르지 않습니다.' };
+        }
+        
+        // 로그인 성공
+        currentUser = {
+            username: username,
+            nickname: userData.nickname,
+            stats: userData.stats || {
+                consonantErrors: {},
+                vowelErrors: {},
+                finalErrors: {},
+                totalAttempts: 0,
+                correctAttempts: 0
+            }
+        };
+        updateLoginUI();
+        closeAuthModal();
+        // 세션에 현재 사용자 정보 저장 (창 닫으면 자동 삭제)
+        sessionStorage.setItem('currentUser', JSON.stringify({
+            username: currentUser.username
+        }));
+        return { success: true };
     } catch (error) {
         console.error('로그인 오류:', error);
-        return false;
+        return { success: false, message: '로그인 중 오류가 발생했습니다.' };
     }
 }
     async function signup(username, password, nickname, birthdate) {
@@ -4808,15 +4817,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
         console.log('입력값 확인:', { username, password, nickname }); // 디버깅용
 
-        if (currentAuthMode === 'login') {
+     if (currentAuthMode === 'login') {
             console.log('로그인 시도'); // 디버깅용
             // 로그인 처리
-            login(username, password).then(success => {
-                console.log('로그인 결과:', success); // 디버깅용
-                if (success) {
+            login(username, password).then(result => {
+                console.log('로그인 결과:', result); // 디버깅용
+                if (result.success) {
                     alert('로그인 성공!');
                 } else {
-                    alert('아이디 또는 비밀번호가 올바르지 않습니다.');
+                    alert(result.message);
                 }
             }).catch(error => {
                 console.error('로그인 오류:', error);
