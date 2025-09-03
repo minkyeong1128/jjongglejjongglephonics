@@ -3096,12 +3096,23 @@ let hasUserDrawn = false;
     
     setupCanvas();
     
-    // 획순 재생부터 시작 (practiceMode 호출하지 않음)
-    setTimeout(() => {
-        clearCanvas();
-        isPracticeMode = false;  // 획순 재생 모드로 시작
-        drawGuideCharacter();    // 획순 재생 시작
-    }, 300);
+   // 아이패드 호환성을 위한 캔버스 완전 초기화 추가
+setTimeout(() => {
+    if (ctx) {
+        // 캔버스 완전 초기화
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.globalAlpha = 1;
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.setLineDash([]);
+        ctx.shadowColor = 'transparent';
+        ctx.shadowBlur = 0;
+    }
+    
+    clearCanvas();
+    isPracticeMode = false;  // 획순 재생 모드로 시작
+    drawGuideCharacter();    // 획순 재생 시작
+}, 300);
     
     console.log('모달 설정 완료, currentSound:', currentSound);
 }
@@ -3179,47 +3190,85 @@ let hasUserDrawn = false;
     canvas.style.webkitUserSelect = 'none';
 }
         
-           function clearCanvas() {
+      function clearCanvas() {
     if (!ctx) return;
     
     // 획순 애니메이션 중단
     stopStrokeAnimation();
     
+    // 아이패드에서 캔버스 완전 초기화
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    drawGuideLines();
     
-    // 연습 모드일 때는 연한 글씨 가이드도 다시 그리기
+    // 캔버스 상태 완전 리셋
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.strokeStyle = '#000000';
+    ctx.fillStyle = '#000000';
+    ctx.lineWidth = 1;
+    ctx.lineCap = 'butt';
+    ctx.lineJoin = 'miter';
+    ctx.setLineDash([]);
+    ctx.shadowColor = 'transparent';
+    ctx.shadowBlur = 0;
+    
+    // 연습모드일 때만 가이드라인 표시
     if (isPracticeMode) {
-        drawGuideCharacter();
+        drawGuideLines();
+    } else {
+        drawGuideLines();
     }
 }
         
-                function drawGuideLines() {
-                    if (!ctx) return;
-                    
-                    ctx.save();
-                    ctx.strokeStyle = '#e0e0e0';
-                    ctx.lineWidth = 1;
-                    ctx.setLineDash([5, 5]);
-                    
-                    // 중앙 십자선
-                    ctx.beginPath();
-                    ctx.moveTo(canvas.width / 2, 0);
-                    ctx.lineTo(canvas.width / 2, canvas.height);
-                    ctx.moveTo(0, canvas.height / 2);
-                    ctx.lineTo(canvas.width, canvas.height / 2);
-                    ctx.stroke();
-                    
-                    ctx.restore();
-                }
+               function drawGuideLines() {
+    if (!ctx) return;
+    
+    // 아이패드에서 기존 그리기 상태 완전 초기화
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0); // 변형 행렬 초기화
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = 'source-over';
+    
+    // 가이드라인 전용 스타일 설정
+    ctx.strokeStyle = '#e0e0e0';
+    ctx.fillStyle = 'transparent';
+    ctx.lineWidth = 1;
+    ctx.lineCap = 'butt';
+    ctx.lineJoin = 'miter';
+    ctx.setLineDash([5, 5]);
+    ctx.shadowColor = 'transparent';
+    ctx.shadowBlur = 0;
+    
+    // 중앙 십자선 그리기
+    ctx.beginPath();
+    ctx.moveTo(canvas.width / 2, 0);
+    ctx.lineTo(canvas.width / 2, canvas.height);
+    ctx.moveTo(0, canvas.height / 2);
+    ctx.lineTo(canvas.width, canvas.height / 2);
+    ctx.stroke();
+    
+    // 상태 완전 복원
+    ctx.setLineDash([]);
+    ctx.restore();
+}
         
                
-        function practiceMode() {
-    clearCanvas();
+     function practiceMode() {
+    // 아이패드에서 완전한 모드 전환을 위한 강력한 초기화
+    stopStrokeAnimation();
+    isShowingStrokes = false;
+    strokeAnimationInterval = null;
+    
+    // 캔버스 완전 초기화
+    if (ctx) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.restore(); // 이전 저장된 상태 복원
+    }
+    
     isPracticeMode = true;
     
-    // 연한 글자 가이드 그리기
-    drawGuideCharacter();
+    // 연습모드에서는 가이드라인만 표시
+    drawGuideLines();
 }
         
          // ← 여기에 아래 함수를 추가
@@ -4568,68 +4617,83 @@ function drawCircleArrowOutside(centerX, centerY, radius) {
     
     ctx.restore();
 }
-          function startDrawing(e) {
-    // 획순 재생 중이거나 연습 모드가 아닐 때 터치 방지
-    if (!isPracticeMode || isShowingStrokes) {
-        e.preventDefault();
+        function startDrawing(e) {
+    // 아이패드 호환성을 위한 강력한 차단
+    if (!isPracticeMode || isShowingStrokes || strokeAnimationInterval !== null) {
+        if (e && e.preventDefault) e.preventDefault();
+        if (e && e.stopPropagation) e.stopPropagation();
         return false;
     }
     
-    // 사용자가 그리기 시작하면 획순 애니메이션 중단
+    // 사용자가 그리기 시작하면 획순 애니메이션 완전 중단
     stopStrokeAnimation();
     
-    e.preventDefault(); // 아이패드에서 스크롤 방지
+    if (e && e.preventDefault) e.preventDefault();
+    if (e && e.stopPropagation) e.stopPropagation();
     
     isDrawing = true;
     hasUserDrawn = true;
     const rect = canvas.getBoundingClientRect();
     
     let x, y;
-    if (e.type === 'touchstart') {
-        // 터치 이벤트 (아이패드/모바일)
+    if (e.type === 'touchstart' && e.touches && e.touches.length > 0) {
         const touch = e.touches[0];
         x = touch.clientX - rect.left;
         y = touch.clientY - rect.top;
-    } else {
-        // 마우스 이벤트 (데스크탑)
+    } else if (e.clientX !== undefined && e.clientY !== undefined) {
         x = e.clientX - rect.left;
         y = e.clientY - rect.top;
-    }
-    
-    ctx.strokeStyle = '#000000';
-    ctx.lineWidth = 8;
-    ctx.beginPath();
-    ctx.moveTo(x, y);
-    
-    return false; // 아이패드에서 추가 이벤트 방지
-}
-        
-         function draw(e) {
-    if (!isDrawing || !isPracticeMode || isShowingStrokes) {
-        if (e.type.startsWith('touch')) {
-            e.preventDefault();
-        }
+    } else {
         return false;
     }
     
-    e.preventDefault();
+    // 아이패드 호환성을 위한 완전한 스타일 설정
+    ctx.save();
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.strokeStyle = '#000000';
+    ctx.fillStyle = 'transparent';
+    ctx.lineWidth = 8;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.setLineDash([]);
+    
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    
+    return false;
+}
+        
+     function draw(e) {
+    // 아이패드 호환성을 위한 강력한 차단
+    if (!isDrawing || !isPracticeMode || isShowingStrokes || strokeAnimationInterval !== null) {
+        if (e && e.preventDefault) e.preventDefault();
+        if (e && e.stopPropagation) e.stopPropagation();
+        return false;
+    }
+    
+    if (e && e.preventDefault) e.preventDefault();
+    if (e && e.stopPropagation) e.stopPropagation();
     
     const rect = canvas.getBoundingClientRect();
     
     let x, y;
-    if (e.type === 'touchmove') {
-        // 터치 이벤트 (아이패드/모바일)
-        if (e.touches.length > 0) {
-            const touch = e.touches[0];
-            x = touch.clientX - rect.left;
-            y = touch.clientY - rect.top;
-        } else {
-            return false;
-        }
-    } else {
-        // 마우스 이벤트 (데스크탑)
+    if (e.type === 'touchmove' && e.touches && e.touches.length > 0) {
+        const touch = e.touches[0];
+        x = touch.clientX - rect.left;
+        y = touch.clientY - rect.top;
+    } else if (e.clientX !== undefined && e.clientY !== undefined) {
         x = e.clientX - rect.left;
         y = e.clientY - rect.top;
+    } else {
+        return false;
+    }
+    
+    // 아이패드에서 스타일이 변경되지 않도록 강제 설정
+    if (ctx.strokeStyle !== '#000000') {
+        ctx.strokeStyle = '#000000';
+    }
+    if (ctx.lineWidth !== 8) {
+        ctx.lineWidth = 8;
     }
     
     ctx.lineTo(x, y);
@@ -4638,11 +4702,17 @@ function drawCircleArrowOutside(centerX, centerY, radius) {
     return false;
 }
         
-               function stopDrawing(e) {
-    if (e && e.type.startsWith('touch')) {
-        e.preventDefault();
-    }
+           function stopDrawing(e) {
+    if (e && e.preventDefault) e.preventDefault();
+    if (e && e.stopPropagation) e.stopPropagation();
+    
     isDrawing = false;
+    
+    // 아이패드에서 그리기 완료 후 스타일 정리
+    if (ctx) {
+        ctx.restore();
+    }
+    
     return false;
 }
         
