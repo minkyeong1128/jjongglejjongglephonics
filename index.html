@@ -954,8 +954,17 @@ async function updateUserStats(username, stats) {
     
     document.getElementById('authModal').style.display = 'flex';
     
-    // 항상 로그인 탭으로 리셋
-    switchAuthTab('login');
+    // 로그인/회원가입 탭 다시 보이기 (혹시 숨겨졌을 경우 대비)
+    const authTabs = document.querySelector('.auth-tabs');
+    if (authTabs) {
+        authTabs.style.display = 'flex';
+    }
+    
+    // 기본값으로 로그인 탭 설정 (더 안전하게)
+    if (!currentAuthMode) {
+        currentAuthMode = 'login';
+    }
+    switchAuthTab(currentAuthMode);
     
     // 폼 내용도 초기화
     document.getElementById('authForm').reset();
@@ -979,20 +988,35 @@ async function updateUserStats(username, stats) {
             document.getElementById('authForm').reset();
         }
 
-      function switchAuthTab(mode) {
+  function switchAuthTab(mode) {
     console.log(`탭 전환: ${mode}`); // 디버깅용
     
     currentAuthMode = mode;
-    const loginTab = document.querySelector('.auth-tab:first-child');
-    const signupTab = document.querySelector('.auth-tab:last-child');
+    
+    // 더 안전한 요소 선택 방법
+    const authTabs = document.querySelectorAll('.auth-tab');
+    if (authTabs.length < 2) {
+        console.error('auth-tab 요소를 찾을 수 없습니다.');
+        return;
+    }
+    
+    const loginTab = authTabs[0];
+    const signupTab = authTabs[1];
     const nicknameField = document.getElementById('nickname');
     const authLinks = document.getElementById('authLinks');
     const submitBtn = document.getElementById('authSubmitBtn');
+    const birthdateContainer = document.querySelector('.signup-birthdate-container');
+    
+    // 필수 요소들이 모두 존재하는지 확인
+    if (!loginTab || !signupTab || !nicknameField || !authLinks || !submitBtn || !birthdateContainer) {
+        console.error('필요한 DOM 요소를 찾을 수 없습니다.');
+        return;
+    }
     
     if (mode === 'login') {
         loginTab.classList.add('active');
         signupTab.classList.remove('active');
-        document.querySelector('.signup-birthdate-container').style.display = 'none';
+        birthdateContainer.style.display = 'none';
         nicknameField.style.display = 'none';
         nicknameField.required = false;
         authLinks.style.display = 'flex';
@@ -1000,7 +1024,7 @@ async function updateUserStats(username, stats) {
     } else {
         loginTab.classList.remove('active');
         signupTab.classList.add('active');
-        document.querySelector('.signup-birthdate-container').style.display = 'flex';
+        birthdateContainer.style.display = 'flex';
         nicknameField.style.display = 'block';
         nicknameField.required = true;
         authLinks.style.display = 'none';
@@ -1042,8 +1066,8 @@ async function login(username, password) {
         };
         updateLoginUI();
         closeAuthModal();
-        // 세션에 현재 사용자 정보 저장 (창 닫으면 자동 삭제)
-        sessionStorage.setItem('currentUser', JSON.stringify({
+        // 로컬에 현재 사용자 정보 저장 (로그아웃할 때까지 유지)
+        localStorage.setItem('currentUser', JSON.stringify({
             username: currentUser.username
         }));
         return { success: true };
@@ -1084,8 +1108,8 @@ async function login(username, password) {
             
             updateLoginUI();
             closeAuthModal();
-          // 세션에 현재 사용자 정보 저장 (창 닫으면 자동 삭제)
-sessionStorage.setItem('currentUser', JSON.stringify({
+       // 로컬에 현재 사용자 정보 저장 (로그아웃할 때까지 유지)
+localStorage.setItem('currentUser', JSON.stringify({
     username: currentUser.username
 }));
             return true;
@@ -1097,9 +1121,9 @@ sessionStorage.setItem('currentUser', JSON.stringify({
     }
 }
 
-   function logout() {
+ function logout() {
     currentUser = null;
-    sessionStorage.removeItem('currentUser');
+    localStorage.removeItem('currentUser');
     updateLoginUI();
 }
 
@@ -2181,7 +2205,7 @@ if ('speechSynthesis' in window) {
                 const noBatchimWordsWithIcons = [
                     '나비', '여우', '개구리', '두더지', '하마', '메뚜기', '토끼', '코끼리', '사자', '돼지', '고래', '개미', '까마귀',
                     '사과', '바나나', '포도', '토마토', '체리', '우유', '치즈', '과자', '케이크', '고기',
-                    '나무', '해', '구름', '비', '무지개', '바다', '모래', '해파리',
+                    '나무', '해', '비', '무지개', '바다', '모래', '해파리',
                     '모자', '시계', '카메라', '비누', '의자', '수세미', '자', '가위',
                     '버스', '기차', '배', '오토바이',
                     '오리', '거위', '소', '크레파스', '머리', '마트'
@@ -2198,7 +2222,7 @@ if ('speechSynthesis' in window) {
                     '자전거', '택시', '트럭', '자동차', '비행기', '헬리콥터',
                     '빨강', '노랑', '파랑', '초록', '하양',
                     '얼굴', '눈', '코', '입', '귀', '손', '발',
-                    '집', '학교', '병원'
+                    '집', '학교', '병원', '구름',
                 ];
         
                 // 단어별 이모지 매핑
@@ -3056,7 +3080,7 @@ if (currentUser) {
                 let isShowingStrokes = false;
 let hasUserDrawn = false;
         
-           function openStrokeModal(jamo, sound, type) {
+          function openStrokeModal(jamo, sound, type) {
     console.log('모달 열기:', jamo, sound, type);
     currentJamo = jamo;
     currentSound = sound;
@@ -3065,6 +3089,12 @@ let hasUserDrawn = false;
 
     document.getElementById('modalJamoTitle').textContent = jamo;
     document.getElementById('strokeOrderModal').classList.remove('hidden');
+
+    // 모달이 열리자마자 즉시 지우기 버튼 숨기기
+    const clearButton = document.querySelector('.stroke-btn');
+    if (clearButton) {
+        clearButton.style.display = 'none';
+    }
 
     // 소리 재생 버튼에 이벤트 리스너 추가
     const soundReplayBtn = document.getElementById('soundReplayBtn');
@@ -3096,24 +3126,23 @@ let hasUserDrawn = false;
     
     setupCanvas();
     
-   // 아이패드 호환성을 위한 캔버스 완전 초기화 추가
-setTimeout(() => {
-    if (ctx) {
-        // 캔버스 완전 초기화
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.setTransform(1, 0, 0, 1, 0, 0);
-        ctx.globalAlpha = 1;
-        ctx.globalCompositeOperation = 'source-over';
-        ctx.setLineDash([]);
-        ctx.shadowColor = 'transparent';
-        ctx.shadowBlur = 0;
-    }
-    
-    clearCanvas();
-    isPracticeMode = false;  // 획순 재생 모드로 시작
-    drawGuideCharacter();    // 획순 재생 시작
-}, 300);
-    
+    // 아이패드 호환성을 위한 캔버스 완전 초기화 추가
+    setTimeout(() => {
+        if (ctx) {
+            // 캔버스 완전 초기화
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.globalAlpha = 1;
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.setLineDash([]);
+            ctx.shadowColor = 'transparent';
+            ctx.shadowBlur = 0;
+        }
+        
+        clearCanvas();
+        isPracticeMode = false;  // 획순 재생 모드로 시작
+        drawGuideCharacter();    // 획순 재생 시작
+    }, 300);
     console.log('모달 설정 완료, currentSound:', currentSound);
 }
         
@@ -3137,7 +3166,7 @@ setTimeout(() => {
     playUnifiedSound(sound);
 }
         
-            function closeStrokeModal() {
+           function closeStrokeModal() {
     // 사용자가 실제로 그렸을 때만 학습 통계 업데이트
     if (hasUserDrawn && currentUser && currentJamo && currentType) {
         updateLearningStats(currentJamo, currentType);
@@ -3146,13 +3175,19 @@ setTimeout(() => {
     // 획순 애니메이션 중단
     stopStrokeAnimation();
     
+    // 지우기 버튼 다시 표시 (다음 모달 열기를 위해)
+    const clearButton = document.querySelector('.stroke-btn');
+    if (clearButton) {
+        clearButton.style.display = 'block';
+    }
+    
     document.getElementById('strokeOrderModal').classList.add('hidden');
     if (canvas) {
         clearCanvas();
     }
     
     // 변수 초기화
-    hasUserDrawn = false;  // ← 이 줄 추가
+    hasUserDrawn = false;
 }
         
            function setupCanvas() {
@@ -3364,12 +3399,19 @@ function showStrokeOrder() {
             strokeAnimationInterval = null;
             isShowingStrokes = false;
             
-            setTimeout(() => {
+           setTimeout(() => {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 drawGuideLines();
                 isPracticeMode = true;  // 이제 브러시 사용 가능
+                
+                // 연습 모드 시작 시 지우기 버튼 표시
+                const clearButton = document.querySelector('.stroke-btn');
+                if (clearButton) {
+                    clearButton.style.display = 'block';
+                }
+                
                 console.log('연습 모드 시작 - 브러시 사용 가능, 화살표 제거됨');
-            }, 2000);  
+            }, 2000);
         }
     }, 3000);
 }
@@ -4988,8 +5030,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-   // 페이지 로드시 로그인 상태 확인
-const savedUser = sessionStorage.getItem('currentUser');
+    // 페이지 로드시 로그인 상태 확인
+const savedUser = localStorage.getItem('currentUser');
 if (savedUser) {
     const userInfo = JSON.parse(savedUser);
     getUserData(userInfo.username).then(userData => {
@@ -5209,7 +5251,7 @@ async function confirmWithdraw() {
         
         // 현재 사용자 정보 초기화
         currentUser = null;
-        sessionStorage.removeItem('currentUser');
+       localStorage.removeItem('currentUser');
         
         // UI 업데이트
         updateLoginUI();
