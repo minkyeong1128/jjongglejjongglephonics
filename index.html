@@ -915,8 +915,6 @@ const db = firebase.firestore();
 // 사용자 데이터 관리
 let currentUser = null;
 let currentAuthMode = 'login';
-// 뒤로가기 기능을 위한 변수 (여기에 추가)
-let currentScreen = 'main';
 
 // Firestore에서 사용자 데이터 읽기
 async function getUserData(username) {
@@ -1409,8 +1407,6 @@ function playUnifiedSound(sound, element = null) {
         
                 // 화면 전환 함수들
                 function showMainMenu() {
-  currentScreen = 'main';
-    history.pushState({screen: 'main', timestamp: Date.now()}, '', '');
     document.getElementById('mainMenu').classList.remove('hidden');
     document.getElementById('soundAnalysisScreen').classList.add('hidden');
     document.getElementById('gameScreen').classList.add('hidden');
@@ -1453,9 +1449,6 @@ if (audioPlayback && audioPlayback.stop) {
         return;
     }
     
-  currentScreen = 'soundAnalysis';
-    history.pushState({screen: 'soundAnalysis', timestamp: Date.now()}, '', '');
-
     document.getElementById('mainMenu').classList.add('hidden');
     document.getElementById('soundAnalysisScreen').classList.remove('hidden');
     document.getElementById('gameScreen').classList.add('hidden');
@@ -1476,9 +1469,6 @@ if (audioPlayback && audioPlayback.stop) {
         alert('로그인이 필요한 서비스입니다. 먼저 로그인해주세요.');
         return;
     }
-
- currentScreen = 'game';
-    history.pushState({screen: 'game', timestamp: Date.now()}, '', '');
     
     document.getElementById('mainMenu').classList.add('hidden');
     document.getElementById('soundAnalysisScreen').classList.add('hidden');
@@ -1513,9 +1503,6 @@ if (audioPlayback && audioPlayback.stop) {
         alert('로그인이 필요한 서비스입니다. 먼저 로그인해주세요.');
         return;
     }
-
-  currentScreen = 'jamoLearning';
-    history.pushState({screen: 'jamoLearning', timestamp: Date.now()}, '', '');
     
     document.getElementById('mainMenu').classList.add('hidden');
     document.getElementById('soundAnalysisScreen').classList.add('hidden');
@@ -2717,73 +2704,11 @@ if (currentUser) {
     setTimeout(playAudio, 1000);
 }
         
-        // 앱 시작 시 메인 메뉴 표시
-window.onload = function() {
-    showMainMenu();
-    
-    // 안드로이드용 강력한 뒤로가기 설정
-    currentScreen = 'main';
-    
-    // 초기 히스토리 엔트리 여러 개 생성 (안드로이드용)
-    history.pushState({screen: 'main', timestamp: Date.now()}, '', '');
-    history.pushState({screen: 'main', timestamp: Date.now()}, '', '');
-    history.pushState({screen: 'main', timestamp: Date.now()}, '', '');
-    
-    // 뒤로가기 이벤트 처리
-    window.addEventListener('popstate', function(event) {
-        console.log('뒤로가기 감지, 현재 화면:', currentScreen);
+                // 앱 시작 시 메인 메뉴 표시
+                window.onload = function() {
+                    showMainMenu();
+                };
         
-        // 즉시 새 히스토리 엔트리 생성 (종료 방지)
-        history.pushState({screen: currentScreen, timestamp: Date.now()}, '', '');
-        
-        // 모달창 확인 및 닫기
-        const strokeModal = document.getElementById('strokeOrderModal');
-        if (strokeModal && !strokeModal.classList.contains('hidden')) {
-            closeStrokeModal();
-            return;
-        }
-        
-        const statsModal = document.getElementById('statsModal');
-        if (statsModal && !statsModal.classList.contains('hidden')) {
-            closeStatsModal();
-            return;
-        }
-        
-        const authModal = document.getElementById('authModal');
-        if (authModal && authModal.style.display === 'flex') {
-            closeAuthModal();
-            return;
-        }
-        
-        const withdrawModal = document.getElementById('withdrawModal');
-        if (withdrawModal && withdrawModal.style.display === 'flex') {
-            closeWithdrawModal();
-            return;
-        }
-        
-        // 서브 화면에서 메인으로 이동
-        if (currentScreen !== 'main') {
-            showMainMenu();
-            return;
-        }
-        
-        // 메인에서도 추가 히스토리 생성 (종료 방지)
-        history.pushState({screen: 'main', timestamp: Date.now()}, '', '');
-    });
-    
-    // beforeunload 이벤트로 추가 보호
-    window.addEventListener('beforeunload', function(e) {
-        console.log('페이지 종료 시도 감지');
-        if (currentScreen !== 'main') {
-            e.preventDefault();
-            e.returnValue = '';
-            showMainMenu();
-            return false;
-        }
-    });
-};
-    
-           
                // 획순 데이터 정의
         
         // 각 자모별 개별 조정값 (크기, 위치)
