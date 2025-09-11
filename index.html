@@ -915,6 +915,8 @@ const db = firebase.firestore();
 // 사용자 데이터 관리
 let currentUser = null;
 let currentAuthMode = 'login';
+// 뒤로가기 기능을 위한 변수 (여기에 추가)
+let currentScreen = 'main';
 
 // Firestore에서 사용자 데이터 읽기
 async function getUserData(username) {
@@ -1407,6 +1409,7 @@ function playUnifiedSound(sound, element = null) {
         
                 // 화면 전환 함수들
                 function showMainMenu() {
+  currentScreen = 'main';  // 이 줄 추가
     document.getElementById('mainMenu').classList.remove('hidden');
     document.getElementById('soundAnalysisScreen').classList.add('hidden');
     document.getElementById('gameScreen').classList.add('hidden');
@@ -1449,6 +1452,9 @@ if (audioPlayback && audioPlayback.stop) {
         return;
     }
     
+ currentScreen = 'soundAnalysis';  // 이 줄 추가
+    history.pushState({screen: 'soundAnalysis'}, '', '');  // 이 줄도 추가
+
     document.getElementById('mainMenu').classList.add('hidden');
     document.getElementById('soundAnalysisScreen').classList.remove('hidden');
     document.getElementById('gameScreen').classList.add('hidden');
@@ -1469,6 +1475,9 @@ if (audioPlayback && audioPlayback.stop) {
         alert('로그인이 필요한 서비스입니다. 먼저 로그인해주세요.');
         return;
     }
+
+ currentScreen = 'game';  // 이 줄 추가
+    history.pushState({screen: 'game'}, '', '');  // 이 줄도 추가
     
     document.getElementById('mainMenu').classList.add('hidden');
     document.getElementById('soundAnalysisScreen').classList.add('hidden');
@@ -1503,6 +1512,9 @@ if (audioPlayback && audioPlayback.stop) {
         alert('로그인이 필요한 서비스입니다. 먼저 로그인해주세요.');
         return;
     }
+
+ currentScreen = 'jamoLearning';  // 이 줄 추가
+    history.pushState({screen: 'jamoLearning'}, '', '');  // 이 줄도 추가
     
     document.getElementById('mainMenu').classList.add('hidden');
     document.getElementById('soundAnalysisScreen').classList.add('hidden');
@@ -2704,10 +2716,58 @@ if (currentUser) {
     setTimeout(playAudio, 1000);
 }
         
-                // 앱 시작 시 메인 메뉴 표시
-                window.onload = function() {
-                    showMainMenu();
-                };
+             // 앱 시작 시 메인 메뉴 표시
+window.onload = function() {
+    showMainMenu();
+    
+    // 뒤로가기 기능 초기화
+    currentScreen = 'main';
+    history.pushState({screen: 'main'}, '', '');
+    
+    // 뒤로가기 이벤트 처리
+    window.addEventListener('popstate', function(event) {
+        console.log('뒤로가기 감지, 현재 화면:', currentScreen);
+        
+        // 모달창 확인 및 닫기
+        const strokeModal = document.getElementById('strokeOrderModal');
+        if (strokeModal && !strokeModal.classList.contains('hidden')) {
+            closeStrokeModal();
+            history.pushState({screen: currentScreen}, '', '');
+            return;
+        }
+        
+        const statsModal = document.getElementById('statsModal');
+        if (statsModal && !statsModal.classList.contains('hidden')) {
+            closeStatsModal();
+            history.pushState({screen: currentScreen}, '', '');
+            return;
+        }
+        
+        const authModal = document.getElementById('authModal');
+        if (authModal && authModal.style.display === 'flex') {
+            closeAuthModal();
+            history.pushState({screen: currentScreen}, '', '');
+            return;
+        }
+        
+        const withdrawModal = document.getElementById('withdrawModal');
+        if (withdrawModal && withdrawModal.style.display === 'flex') {
+            closeWithdrawModal();
+            history.pushState({screen: currentScreen}, '', '');
+            return;
+        }
+        
+        // 서브 화면에서 메인으로 이동
+        if (currentScreen !== 'main') {
+            showMainMenu();
+            history.pushState({screen: 'main'}, '', '');
+            return;
+        }
+        
+        // 메인에서 뒤로가기 시 종료 방지
+        history.pushState({screen: 'main'}, '', '');
+    });
+};
         
                // 획순 데이터 정의
         
