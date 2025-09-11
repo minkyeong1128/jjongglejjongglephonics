@@ -1409,7 +1409,8 @@ function playUnifiedSound(sound, element = null) {
         
                 // 화면 전환 함수들
                 function showMainMenu() {
-  currentScreen = 'main';  // 이 줄 추가
+  currentScreen = 'main';
+    history.pushState({screen: 'main', timestamp: Date.now()}, '', '');
     document.getElementById('mainMenu').classList.remove('hidden');
     document.getElementById('soundAnalysisScreen').classList.add('hidden');
     document.getElementById('gameScreen').classList.add('hidden');
@@ -1452,8 +1453,8 @@ if (audioPlayback && audioPlayback.stop) {
         return;
     }
     
- currentScreen = 'soundAnalysis';  // 이 줄 추가
-    history.pushState({screen: 'soundAnalysis'}, '', '');  // 이 줄도 추가
+  currentScreen = 'soundAnalysis';
+    history.pushState({screen: 'soundAnalysis', timestamp: Date.now()}, '', '');
 
     document.getElementById('mainMenu').classList.add('hidden');
     document.getElementById('soundAnalysisScreen').classList.remove('hidden');
@@ -1476,8 +1477,8 @@ if (audioPlayback && audioPlayback.stop) {
         return;
     }
 
- currentScreen = 'game';  // 이 줄 추가
-    history.pushState({screen: 'game'}, '', '');  // 이 줄도 추가
+ currentScreen = 'game';
+    history.pushState({screen: 'game', timestamp: Date.now()}, '', '');
     
     document.getElementById('mainMenu').classList.add('hidden');
     document.getElementById('soundAnalysisScreen').classList.add('hidden');
@@ -1513,8 +1514,8 @@ if (audioPlayback && audioPlayback.stop) {
         return;
     }
 
- currentScreen = 'jamoLearning';  // 이 줄 추가
-    history.pushState({screen: 'jamoLearning'}, '', '');  // 이 줄도 추가
+  currentScreen = 'jamoLearning';
+    history.pushState({screen: 'jamoLearning', timestamp: Date.now()}, '', '');
     
     document.getElementById('mainMenu').classList.add('hidden');
     document.getElementById('soundAnalysisScreen').classList.add('hidden');
@@ -2716,59 +2717,73 @@ if (currentUser) {
     setTimeout(playAudio, 1000);
 }
         
-             // 앱 시작 시 메인 메뉴 표시
+        // 앱 시작 시 메인 메뉴 표시
 window.onload = function() {
     showMainMenu();
     
-    // 뒤로가기 기능 초기화
+    // 안드로이드용 강력한 뒤로가기 설정
     currentScreen = 'main';
-    history.pushState({screen: 'main'}, '', '');
+    
+    // 초기 히스토리 엔트리 여러 개 생성 (안드로이드용)
+    history.pushState({screen: 'main', timestamp: Date.now()}, '', '');
+    history.pushState({screen: 'main', timestamp: Date.now()}, '', '');
+    history.pushState({screen: 'main', timestamp: Date.now()}, '', '');
     
     // 뒤로가기 이벤트 처리
     window.addEventListener('popstate', function(event) {
         console.log('뒤로가기 감지, 현재 화면:', currentScreen);
         
+        // 즉시 새 히스토리 엔트리 생성 (종료 방지)
+        history.pushState({screen: currentScreen, timestamp: Date.now()}, '', '');
+        
         // 모달창 확인 및 닫기
         const strokeModal = document.getElementById('strokeOrderModal');
         if (strokeModal && !strokeModal.classList.contains('hidden')) {
             closeStrokeModal();
-            history.pushState({screen: currentScreen}, '', '');
             return;
         }
         
         const statsModal = document.getElementById('statsModal');
         if (statsModal && !statsModal.classList.contains('hidden')) {
             closeStatsModal();
-            history.pushState({screen: currentScreen}, '', '');
             return;
         }
         
         const authModal = document.getElementById('authModal');
         if (authModal && authModal.style.display === 'flex') {
             closeAuthModal();
-            history.pushState({screen: currentScreen}, '', '');
             return;
         }
         
         const withdrawModal = document.getElementById('withdrawModal');
         if (withdrawModal && withdrawModal.style.display === 'flex') {
             closeWithdrawModal();
-            history.pushState({screen: currentScreen}, '', '');
             return;
         }
         
         // 서브 화면에서 메인으로 이동
         if (currentScreen !== 'main') {
             showMainMenu();
-            history.pushState({screen: 'main'}, '', '');
             return;
         }
         
-        // 메인에서 뒤로가기 시 종료 방지
-        history.pushState({screen: 'main'}, '', '');
+        // 메인에서도 추가 히스토리 생성 (종료 방지)
+        history.pushState({screen: 'main', timestamp: Date.now()}, '', '');
+    });
+    
+    // beforeunload 이벤트로 추가 보호
+    window.addEventListener('beforeunload', function(e) {
+        console.log('페이지 종료 시도 감지');
+        if (currentScreen !== 'main') {
+            e.preventDefault();
+            e.returnValue = '';
+            showMainMenu();
+            return false;
+        }
     });
 };
-        
+    
+           
                // 획순 데이터 정의
         
         // 각 자모별 개별 조정값 (크기, 위치)
