@@ -2202,106 +2202,277 @@ if ('speechSynthesis' in window) {
         }
         
                 // 단어 데이터
-                const noBatchimWordsWithIcons = [
-                    '나비', '여우', '개구리', '두더지', '하마', '메뚜기', '토끼', '코끼리', '사자', '돼지', '고래', '개미', 
-                    '사과', '바나나', '포도', '토마토', '체리', '우유', '치즈', '과자', '케이크', '고기',
-                    '나무', '해', '비', '무지개', '바다', '귀', '모래', '해파리',
-                    '모자', '시계', '카메라', '비누', '의자', '수세미', '자', '가위', '까마귀',
-                    '버스', '기차', '배', '오토바이', 
-                    '오리', '거위', '소', '크레파스', '머리', '마트'
-                ];
+              const noBatchimWordsWithIcons = [
+    '나비', '여우', '개구리', '두더지', '하마', '메뚜기', '토끼', '코끼리', '사자', '돼지', '고래', '개미',
+    '사과', '바나나', '포도', '토마토', '체리', '우유', '치즈', '케이크', '고기', '거미',
+    '나무', '해', '비', '무지개', '귀', '코', '해파리', '해바라기', '허수아비', '고구마',
+    '모자', '시계', '카메라', '비누', '의자', '자', '가위', '피자', '조개',
+    '버스', '기차', '배', '오토바이', '도토리', '가지', '배추', '부채', '기타', '피아노',
+    '오리', '거위', '소', '크레파스', '파프리카', '튜브', '키위', '지구', '보라'
+];
+
+const batchimWordsWithIcons = [
+    '강아지', '고양이', '호랑이', '물고기', '상어', '문어', '돌고래', '부엉이',
+    '닭', '말', '양', '기린', '원숭이', '팬더', '곰', '사슴', '도넛', '로봇',
+    '다람쥐', '고슴도치', '박쥐', '펭귄', '캥거루', '참새', '브로콜리', '무당벌레', '꿀벌',
+    '딸기', '사탕', '밥', '달걀', '빵', '떡', '아이스크림', '초콜릿','콩', '감', '당근', '밤',
+    '바람','번개', '산', '전구', '풍선', '리본', '왕관', '버섯', '레몬',
+    '신발', '거울', '가방', '책', '연필', '공책', '복숭아', '햄버거', '햄스터',
+    '펜', '안경', '양말', '장갑', '우산', '새싹', '눈사람',
+    '자전거', '트럭', '자동차', '비행기', '헬리콥터', '구급차', '잠자리', '경찰차',
+    '빨강', '노랑', '파랑', '초록', '주황', '옥수수', '수박', '오징어', '애벌레',
+    '얼굴', '눈', '입', '손', '발', '반지', '울타리', '거북이', '선인장',
+    '집', '학교', '병원', '구름', '성', '별', '오렌지', '귀걸이', '앵무새'
+];
         
-                const batchimWordsWithIcons = [
-                    '강아지', '고양이', '호랑이', '물고기', '상어', '문어', '비둘기', '독수리', '부엉이', 
-                    '닭', '말', '양', '염소', '기린', '원숭이', '팬더', '곰', '늑대', '사슴', 
-                    '다람쥐', '고슴도치', '박쥐', '펭귄', '캥거루', '참새',
-                    '딸기', '사탕', '밥', '국', '달걀', '빵', '떡', '아이스크림', '초콜릿','콩', '감자', '당근',
-                    '바람', '천둥', '번개', '눈', '산', '강', '꽃', '잎',
-                    '신발', '열쇠', '거울', '가방', '책', '연필', '공책', 
-                    '펜', '컴퓨터', '핸드폰', '안경', '양말', '장갑','전화', '우산', '새싹', '침대',
-                    '자전거', '택시', '트럭', '자동차', '비행기', '헬리콥터',
-                    '빨강', '노랑', '파랑', '초록', '하양',
-                    '얼굴', '눈', '코', '입', '손', '발',
-                    '집', '학교', '병원', '구름',
-                ];
+     
+const wordImageMap = {
+    // 받침 없는 단어들
+    '나비': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/butterfly.png.png',
+    '여우': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/fox.png.png',
+    '개구리': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/frog.png.png',
+    '두더지': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/mole.png.png',
+    '하마': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/hippo.png.png',
+    '메뚜기': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/grasshopper.png.png',
+    '토끼': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/rabbit.png.png',
+    '코끼리': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/elephant.png.png',
+    '사자': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/lion.png.png',
+    '돼지': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/pig.png.png',
+    '고래': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/whale.png.png',
+    '개미': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/ant.png.png',
+    '사과': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/apple.png.png',
+    '바나나': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/banana.png.png',
+    '포도': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/grape.png.png',
+    '토마토': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/tomato.png.png',
+    '체리': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/cherry.png.png',
+    '우유': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/milk.png.png',
+    '치즈': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/cheese.png.png',
+    '케이크': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/cake.png.png',
+    '고기': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/meat.png.png',
+    '거미': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/spider.png.png',
+    '나무': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/tree.png.png',
+    '해': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/sun.png.png',
+    '비': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/rain.png.png',
+    '무지개': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/rainbow.png.png',
+    '귀': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/ear.png.png',
+    '코': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/nose.png.png',
+    '해파리': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/jellyfish.png.png',
+    '해바라기': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/sunflower.png.png',
+    '허수아비': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/scarecrow.png.png',
+    '고구마': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/sweet_potato.png.png',
+    '모자': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/hat.png.png',
+    '시계': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/clock.png.png',
+    '카메라': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/camera.png.png',
+    '비누': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/soap.png.png',
+    '의자': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/chair.png.png',
+    '자': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/ruler.png.png',
+    '가위': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/scissors.png.png',
+    '피자': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/pizza.png.png',
+    '조개': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/shell.png.png',
+    '버스': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/bus.png.png',
+    '기차': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/train.png.png',
+    '배': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/ship.png.png',
+    '오토바이': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/motorcycle.png.png',
+    '도토리': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/acorn.png.png',
+    '가지': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/eggplant.png.png',
+    '배추': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/cabbage.png.png',
+    '부채': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/fan.png.png',
+    '기타': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/guitar.png.png',
+    '피아노': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/piano.png.png',
+    '오리': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/duck.png.png',
+    '거위': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/goose.png.png',
+    '소': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/cow.png.png',
+    '크레파스': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/crayon.png.png',
+    '파프리카': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/paprika.png.png',
+    '튜브': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/tube.png.png',
+    '키위': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/kiwi.png.png',
+    '지구': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/earth.png.png',
+    '보라': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/purple.png.png',
+    
+    // 받침 있는 단어들
+    '강아지': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/puppy.png.png',
+    '고양이': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/cat.png.png',
+    '호랑이': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/tiger.png.png',
+    '물고기': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/fish.png.png',
+    '상어': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/shark.png.png',
+    '문어': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/octopus.png.png',
+    '돌고래': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/dolphin.png.png',
+    '부엉이': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/owl.png.png',
+    '닭': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/chicken.png.png',
+    '말': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/horse.png.png',
+    '양': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/sheep.png.png',
+    '기린': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/giraffe.png.png',
+    '원숭이': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/monkey.png.png',
+    '팬더': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/panda.png.png',
+    '곰': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/bear.png.png',
+    '사슴': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/deer.png.png',
+    '도넛': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/donut.png.png',
+    '로봇': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/robot.png.png',
+    '다람쥐': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/squirrel.png.png',
+    '고슴도치': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/hedgehog.png.png',
+    '박쥐': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/bat.png.png',
+    '펭귄': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/penguin.png.png',
+    '캥거루': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/kangaroo.png.png',
+    '참새': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/sparrow.png.png',
+    '브로콜리': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/broccoli.png.png',
+    '무당벌레': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/ladybug.png.png',
+    '꿀벌': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/bee.png.png',
+    '딸기': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/strawberry.png.png',
+    '사탕': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/candy.png.png',
+    '밥': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/rice.png.png',
+    '달걀': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/egg.png.png',
+    '빵': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/bread.png.png',
+    '떡': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/rice_cake.png.png',
+    '아이스크림': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/ice_cream.png.png',
+    '초콜릿': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/chocolate.png.png',
+    '콩': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/bean.png.png',
+    '감': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/persimmon.png.png',
+    '당근': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/carrot.png.png',
+    '밤': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/chestnut.png.png',
+    '바람': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/wind.png.png',
+    '번개': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/lightning.png.png',
+    '산': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/mountain.png.png',
+    '전구': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/light_bulb.png.png',
+    '풍선': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/balloon.png.png',
+    '리본': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/ribbon.png.png',
+    '왕관': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/crown.png.png',
+    '버섯': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/mushroom.png.png',
+    '레몬': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/lemon.png.png',
+    '신발': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/shoes.png.png',
+    '거울': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/mirror.png.png',
+    '가방': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/bag.png.png',
+    '책': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/book.png.png',
+    '연필': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/pencil.png.png',
+    '공책': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/notebook.png.png',
+    '복숭아': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/peach.png.png',
+    '햄버거': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/hamburger.png.png',
+    '햄스터': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/hamster.png.png',
+    '펜': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/pen.png.png',
+    '안경': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/glasses.png.png',
+    '양말': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/socks.png.png',
+    '장갑': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/gloves.png.png',
+    '우산': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/umbrella.png.png',
+    '새싹': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/sprout.png.png',
+    '눈사람': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/snowman.png.png',
+    '자전거': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/bicycle.png.png',
+    '트럭': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/truck.png.png',
+    '자동차': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/car.png.png',
+    '비행기': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/airplane.png.png',
+    '헬리콥터': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/helicopter.png.png',
+    '구급차': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/ambulance.png.png',
+    '잠자리': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/dragonfly.png.png',
+    '경찰차': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/police_car.png.png',
+    '빨강': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/red.png.png',
+    '노랑': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/yellow.png.png',
+    '파랑': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/blue.png.png',
+    '초록': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/green.png.png',
+    '주황': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/orange_color.png.png',
+    '옥수수': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/corn.png.png',
+    '수박': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/watermelon.png.png',
+    '오징어': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/squid.png.png',
+    '애벌레': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/caterpillar.png.png',
+    '얼굴': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/face.png.png',
+    '눈': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/eye.png.png',
+    '입': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/mouth.png.png',
+    '손': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/hand.png.png',
+    '발': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/foot.png.png',
+    '반지': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/ring.png.png',
+    '울타리': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/fence.png.png',
+    '거북이': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/turtle.png.png',
+    '선인장': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/cactus.png.png',
+    '집': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/house.png.png',
+    '학교': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/school.png.png',
+    '병원': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/hospital.png.png',
+    '구름': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/cloud.png.png',
+    '성': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/castle.png.png',
+    '별': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/star.png.png',
+    '오렌지': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/orange_fruit.png.png',
+    '귀걸이': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/earrings.png.png',
+    '앵무새': 'https://raw.githubusercontent.com/minkyeong1128/phonics-images/main/images/parrot.png.png'
+};
         
-                // 단어별 이모지 매핑
-                const wordEmojiMap = {
-                    '나비': '🦋', '여우': '🦊', '개구리': '🐸', '두더지': '🦫', 
-                    '하마': '🦛', '메뚜기': '🦗', '토끼': '🐰', '코끼리': '🐘', 
-                    '사자': '🦁', '돼지': '🐷', '고래': '🐋', 
-                    '개미': '🐜', '소': '🐄', '까마귀': '🐦‍⬛', 
-                    '사과': '🍎', '바나나': '🍌', '포도': '🍇', '토마토': '🍅',
-                    '체리': '🍒', '우유': '🥛', '치즈': '🧀',
-                    '과자': '🍪', '케이크': '🎂', '고기': '🥩',
-                    '나무': '🌳', '해': '☀️', '구름': '☁️', '비': '🌧️',
-                    '무지개': '🌈', '바다': '🌊', '모래': '🏖️', '해파리': '🪼', 
-                    '모자': '👒', '시계': '⏰', '카메라': '📷', '비누': '🧼',
-                    '의자': '🪑', '수세미': '🧽', '자': '📏', '가위': '✂️',
-                    '버스': '🚌', '기차': '🚂', '배': '🚢', '오토바이': '🏍️',
-                    '오리': '🦆', '거위': '🦢', '크레파스': '🖍️', '머리': '💇', '마트': '🏪', 
-                    '강아지': '🐶', '고양이': '🐱', '호랑이': '🐅', '물고기': '🐟', 
-                    '상어': '🦈', '문어': '🐙', '비둘기': '🕊️', '독수리': '🦅',
-                    '부엉이': '🦉', '참새': '🐦', '닭': '🐓', 
-                    '말': '🐴', '양': '🐑', '염소': '🐐', '기린': '🦒', 
-                    '원숭이': '🐒', '팬더': '🐼', '곰': '🐻', '늑대': '🐺', 
-                    '사슴': '🦌', '다람쥐': '🐿️', '고슴도치': '🦔', '박쥐': '🦇', 
-                    '펭귄': '🐧', '캥거루': '🦘',
-                    '딸기': '🍓', '사탕': '🍬', '밥': '🍚', '국': '🍲', 
-                    '달걀': '🥚', '빵': '🍞', 
-                    '떡': '🍡', '아이스크림': '🍦', '초콜릿': '🍫', 
-                    '콩': '🫘', '쌀': '🌾', '감자': '🥔', '당근': '🥕',
-                    '바람': '💨', '천둥': '⛈️', '번개': '⚡', 
-                    '눈': '❄️', '산': '⛰️', '강': '🏞️', 
-                    '꽃': '🌸', '잎': '🍃', 
-                    '신발': '👟', '열쇠': '🔑', '거울': '🪞',
-                    '가방': '🎒', '책': '📚', 
-                    '연필': '✏️', '공책': '📓', '펜': '🖊️', 
-                    '컴퓨터': '💻', '핸드폰': '📱', '안경': '👓', 
-                    '양말': '🧦', '장갑': '🧤','전화': '☎️', 
-                    '우산': '☂️', '새싹': '🌱', '침대': '🛏️',
-                    '자전거': '🚲', '택시': '🚕', '트럭': '🚚', '자동차': '🚗', 
-                    '비행기': '✈️', '헬리콥터': '🚁',
-                    '빨강': '🔴', '노랑': '🟡', '파랑': '🔵', '초록': '🟢', '하양': '⚪',
-                    '얼굴': '😊', '눈': '👁️', '코': '👃', '입': '👄', 
-                    '귀': '👂', '손': '✋', '발': '🦶', 
-                    '집': '🏠', '학교': '🏫', '병원': '🏥'
-                };
-        
-          function loadImageForWord(word) {
+         function loadImageForWord(word) {
     const wordImageContainer = document.getElementById('wordImage');
-    const emoji = wordEmojiMap[word] || '❓';
+    const imageUrl = wordImageMap[word];
     
     // 완전히 초기화
     wordImageContainer.innerHTML = '';
     wordImageContainer.style.cssText = '';
     
-    // span 요소로 생성 (div 대신)
-    const emojiSpan = document.createElement('span');
-    emojiSpan.textContent = emoji; // innerHTML 대신 textContent
-    
-    // 인라인 스타일로 모든 속성 강제 설정
-    emojiSpan.setAttribute('style', `
-        font-size: 4em !important;
-        color: #5a67d8 !important;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.1) !important;
-        text-decoration: none !important;
-        text-decoration-line: none !important;
-        text-decoration-color: transparent !important;
-        text-decoration-style: none !important;
-        -webkit-text-decoration: none !important;
-        -webkit-text-decoration-line: none !important;
-        background: transparent !important;
-        border: none !important;
-        outline: none !important;
-        display: inline-block !important;
-        font-family: "Apple Color Emoji", "Segoe UI Emoji", sans-serif !important;
-        line-height: 1 !important;
-        position: relative !important;
-        z-index: 1 !important;
-    `);
-    
-    wordImageContainer.appendChild(emojiSpan);
+    if (imageUrl) {
+        // 실제 이미지 로드
+        const img = document.createElement('img');
+        
+        // 로딩 표시 먼저 보여주기
+        const loadingDiv = document.createElement('div');
+        loadingDiv.textContent = '로딩중...';
+        loadingDiv.style.cssText = `
+            font-size: 18px !important;
+            color: #666 !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            height: 100% !important;
+        `;
+        wordImageContainer.appendChild(loadingDiv);
+        
+        // 이미지 로드 성공 시
+        img.onload = function() {
+            wordImageContainer.innerHTML = ''; // 로딩 메시지 제거
+            wordImageContainer.appendChild(img);
+        };
+        
+        // 이미지 로드 실패 시 기본 이모지 표시
+        img.onerror = function() {
+            console.warn(`이미지 로드 실패: ${word} - ${imageUrl}`);
+            wordImageContainer.innerHTML = '';
+            
+            const fallbackDiv = document.createElement('div');
+            fallbackDiv.textContent = '🖼️';
+            fallbackDiv.style.cssText = `
+                font-size: 4em !important;
+                color: #5a67d8 !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                height: 100% !important;
+                text-decoration: none !important;
+            `;
+            wordImageContainer.appendChild(fallbackDiv);
+        };
+        
+        // 이미지 속성 설정
+        img.setAttribute('style', `
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: contain !important;
+            border-radius: 12px !important;
+            background: transparent !important;
+            text-decoration: none !important;
+            border: none !important;
+            outline: none !important;
+            display: block !important;
+        `);
+        
+        img.src = imageUrl;
+        img.alt = word;
+        
+    } else {
+        // 이미지 URL이 없을 때 기본 표시
+        console.warn(`이미지 URL을 찾을 수 없음: ${word}`);
+        const fallbackDiv = document.createElement('div');
+        fallbackDiv.textContent = '❓';
+        fallbackDiv.style.cssText = `
+            font-size: 4em !important;
+            color: #5a67d8 !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            height: 100% !important;
+            text-decoration: none !important;
+        `;
+        wordImageContainer.appendChild(fallbackDiv);
+    }
 }
         
                 function playCorrectSound() {
