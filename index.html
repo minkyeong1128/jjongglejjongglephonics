@@ -9,115 +9,110 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 
 <script>
-  // Android TTS Bridge 연결 및 Web Speech API 대체
-  (function() {
-      console.log('TTS Bridge 초기화 중...');
+ // Android TTS Bridge 연결 및 Web Speech API 대체
+(function() {
+    console.log('TTS Bridge 초기화 중...');
 
-      const isAndroidTTSAvailable = () => {
-          return typeof window.AndroidTTS !== 'undefined';
-      };
+    var isAndroidTTSAvailable = function() {
+        var result = typeof window.AndroidTTS !== 'undefined';
+        console.log('Android TTS 확인:', result);
+        return result;
+    };
 
-      if (isAndroidTTSAvailable() || !('speechSynthesis' in window)) {
-          console.log('Android TTS 또는 Web Speech API 미지원 - Bridge 모드 활성화');
+    var needsBridge = isAndroidTTSAvailable() || !('speechSynthesis' in window);
+    console.log('Bridge 모드 필요:', needsBridge);
 
-          if (!window.SpeechSynthesisUtterance || isAndroidTTSAvailable()) {
-              window.SpeechSynthesisUtterance = function(text) {
-                  this.text = text || '';
-                  this.lang = 'ko-KR';
-                  this.rate = 1.0;
-                  this.pitch = 1.0;
-                  this.volume = 1.0;
-                  this.onstart = null;
-                  this.onend = null;
-                  this.onerror = null;
-              };
-          }
+    if (needsBridge) {
+        console.log('TTS Bridge 모드 활성화 시작');
 
-          window.speechSynthesis = {
-              speaking: false,
-              pending: false,
-              paused: false,
+        // SpeechSynthesisUtterance 생성
+        window.SpeechSynthesisUtterance = function(text) {
+            this.text = text || '';
+            this.lang = 'ko-KR';
+            this.rate = 1.0;
+            this.pitch = 1.0;
+            this.volume = 1.0;
+            this.onstart = null;
+            this.onend = null;
+            this.onerror = null;
+            console.log('Utterance 생성:', text);
+        };
 
-              speak: function(utterance) {
-                  console.log('TTS Bridge speak():', utterance.text);
+        // speechSynthesis 객체 생성
+        window.speechSynthesis = {
+            speaking: false,
+            pending: false,
+            paused: false,
 
-                  if (isAndroidTTSAvailable()) {
-                      try {
-                          this.speaking = true;
+            speak: function(utterance) {
+                console.log('🔊 TTS speak 호출:', utterance.text);
 
-                          if (utterance.onstart) {
-                              setTimeout(utterance.onstart, 50);
-                          }
+                if (isAndroidTTSAvailable()) {
+                    console.log('Android TTS로 재생 시도');
+                    try {
+                        this.speaking = true;
+                        
+                        if (utterance.onstart) {
+                            utterance.onstart();
+                        }
 
-                          window.AndroidTTS.speak(
-                              utterance.text,
-                              utterance.rate || 1.0,
-                              utterance.pitch || 1.0
-                          );
+                        window.AndroidTTS.speak(
+                            utterance.text,
+                            utterance.rate || 1.0,
+                            utterance.pitch || 1.0
+                        );
 
-                          setTimeout(() => {
-                              this.speaking = false;
-                              if (utterance.onend) {
-                                  utterance.onend();
-                              }
-                          }, Math.max(utterance.text.length * 100, 500));
+                        var self = this;
+                        var duration = utterance.text.length * 300;
+                        console.log('재생 예상 시간:', duration);
 
-                      } catch (error) {
-                          console.error('Android TTS Error:', error);
-                          this.speaking = false;
-                          if (utterance.onerror) {
-                              utterance.onerror(error);
-                          }
-                      }
-                  } else {
-                      console.warn('TTS 사용 불가 - 음성 재생 불가');
-                      if (utterance.onerror) {
-                          utterance.onerror(new Error('TTS not available'));
-                      }
-                  }
-              },
+                        setTimeout(function() {
+                            console.log('✅ 재생 완료');
+                            self.speaking = false;
+                            if (utterance.onend) {
+                                utterance.onend();
+                            }
+                        }, duration);
 
-              cancel: function() {
-                  console.log('TTS cancel()');
-                  if (isAndroidTTSAvailable()) {
-                      window.AndroidTTS.stop();
-                  }
-                  this.speaking = false;
-                  this.pending = false;
-              },
+                    } catch (error) {
+                        console.error('❌ TTS 오류:', error);
+                        this.speaking = false;
+                    }
+                } else {
+                    console.warn('⚠️ Android TTS 없음');
+                }
+            },
 
-              pause: function() {
-                  if (isAndroidTTSAvailable()) {
-                      window.AndroidTTS.pause();
-                  }
-                  this.paused = true;
-              },
+            cancel: function() {
+                console.log('🛑 TTS cancel');
+                if (isAndroidTTSAvailable()) {
+                    window.AndroidTTS.stop();
+                }
+                this.speaking = false;
+            },
 
-              getVoices: function() {
-                  return [{
-                      name: 'Korean',
-                      lang: 'ko-KR',
-                      default: true
-                  }];
-              }
-          };
+            pause: function() {
+                this.paused = true;
+            },
 
-          console.log('TTS Bridge 설정 완료');
-      }
+            resume: function() {
+                this.paused = false;
+            },
 
-      window.addEventListener('DOMContentLoaded', function() {
-          if (isAndroidTTSAvailable()) {
-              console.log('Android TTS 사용 가능');
+            getVoices: function() {
+                return [{
+                    name: 'Korean',
+                    lang: 'ko-KR',
+                    default: true
+                }];
+            }
+        };
 
-              setTimeout(() => {
-                  if (window.AndroidTTS && window.AndroidTTS.isAvailable()) {
-                      console.log('TTS 테스트 실행');
-                      window.AndroidTTS.test();
-                  }
-              }, 1000);
-          }
-      });
-  })();
+        console.log('✅ TTS Bridge 설정 완료!');
+    } else {
+        console.log('기존 Web Speech API 사용');
+    }
+})();
 </script>
 
     <style>
