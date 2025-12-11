@@ -9,122 +9,95 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 
 <script>
-// Android TTS Bridge 연결 및 Web Speech API 대체 (개선 버전)
+// Android TTS Bridge 연결 및 Web Speech API 대체
 (function() {
-    console.log('=== TTS Bridge 초기화 시작 ===');
+    console.log('TTS Bridge 초기화 중...');
 
-    var isAndroidTTSAvailable = function() {
-        var result = typeof window.AndroidTTS !== 'undefined';
-        console.log('Android TTS 사용 가능:', result);
-        return result;
+    // Android TTS Bridge 사용 가능 여부 확인
+    const isAndroidTTSAvailable = () => {
+        return typeof window.AndroidTTS !== 'undefined';
     };
 
-    var needsBridge = isAndroidTTSAvailable() || !('speechSynthesis' in window);
-    console.log('Bridge 모드 필요:', needsBridge);
+    // Web Speech API 호환 래퍼 생성
+    if (isAndroidTTSAvailable() || !('speechSynthesis' in window)) {
+        console.log('Android TTS 또는 Web Speech API 미지원 - Bridge 모드 활성화');
 
-    if (needsBridge) {
-        console.log('=== TTS Bridge 모드 활성화 ===');
+        // SpeechSynthesisUtterance 호환 클래스
+        if (!window.SpeechSynthesisUtterance || isAndroidTTSAvailable()) {
+            window.SpeechSynthesisUtterance = function(text) {
+                this.text = text || '';
+                this.lang = 'ko-KR';
+                this.rate = 1.0;
+                this.pitch = 1.0;
+                this.volume = 1.0;
+                this.onstart = null;
+                this.onend = null;
+                this.onerror = null;
+            };
+        }
 
-        // SpeechSynthesisUtterance 생성
-        window.SpeechSynthesisUtterance = function(text) {
-            this.text = text || '';
-            this.lang = 'ko-KR';
-            this.rate = 1.0;
-            this.pitch = 1.0;
-            this.volume = 1.0;
-            this.onstart = null;
-            this.onend = null;
-            this.onerror = null;
-            console.log('Utterance 생성:', text);
-        };
-
-        // speechSynthesis 객체 생성
+        // speechSynthesis 호환 객체 생성/교체
         window.speechSynthesis = {
             speaking: false,
             pending: false,
             paused: false,
 
             speak: function(utterance) {
-                console.log('🔊 TTS speak 호출:', utterance.text);
+                console.log('TTS Bridge speak():', utterance.text);
 
                 if (isAndroidTTSAvailable()) {
-                    console.log('✅ Android TTS로 재생 시도');
+                    // Android TTS 사용
                     try {
                         this.speaking = true;
-                        
-                        // onstart 콜백 즉시 실행
+
                         if (utterance.onstart) {
-                            setTimeout(utterance.onstart, 10);
+                            setTimeout(utterance.onstart, 50);
                         }
 
-                        // Android TTS 호출
                         window.AndroidTTS.speak(
                             utterance.text,
                             utterance.rate || 1.0,
                             utterance.pitch || 1.0
                         );
 
-                        var self = this;
-                        var duration = Math.max(utterance.text.length * 200, 500);
-                        console.log('예상 재생 시간:', duration + 'ms');
-
                         // 재생 완료 시뮬레이션
-                        setTimeout(function() {
-                            console.log('✅ TTS 재생 완료');
-                            self.speaking = false;
+                        setTimeout(() => {
+                            this.speaking = false;
                             if (utterance.onend) {
                                 utterance.onend();
                             }
-                        }, duration);
+                        }, Math.max(utterance.text.length * 100, 500));
 
                     } catch (error) {
-                        console.error('❌ Android TTS 오류:', error);
+                        console.error('Android TTS Error:', error);
                         this.speaking = false;
                         if (utterance.onerror) {
                             utterance.onerror(error);
                         }
                     }
                 } else {
-                    console.warn('⚠️ Android TTS 사용 불가');
-                    // 웹 환경에서는 기본 TTS 사용 시도
-                    if (window.speechSynthesis && window.speechSynthesis.speak) {
-                        try {
-                            window.speechSynthesis.speak(utterance);
-                        } catch (e) {
-                            console.error('Web TTS 오류:', e);
-                        }
+                    // 대체 방법 없음 - 에러 처리
+                    console.warn('TTS 사용 불가 - 음성 재생 불가');
+                    if (utterance.onerror) {
+                        utterance.onerror(new Error('TTS not available'));
                     }
                 }
             },
 
             cancel: function() {
-                console.log('🛑 TTS cancel');
+                console.log('TTS cancel()');
                 if (isAndroidTTSAvailable()) {
-                    try {
-                        window.AndroidTTS.stop();
-                    } catch (e) {
-                        console.error('Stop 오류:', e);
-                    }
+                    window.AndroidTTS.stop();
                 }
                 this.speaking = false;
                 this.pending = false;
             },
 
             pause: function() {
-                console.log('⏸️ TTS pause');
                 if (isAndroidTTSAvailable()) {
-                    try {
-                        window.AndroidTTS.pause();
-                    } catch (e) {
-                        console.error('Pause 오류:', e);
-                    }
+                    window.AndroidTTS.pause();
                 }
                 this.paused = true;
-            },
-
-            resume: function() {
-                console.log('▶️ TTS resume');
-                this.paused = false;
             },
 
             getVoices: function() {
@@ -136,26 +109,19 @@
             }
         };
 
-        console.log('✅ TTS Bridge 설정 완료!');
-    } else {
-        console.log('ℹ️ 기존 Web Speech API 사용');
+        console.log('TTS Bridge 설정 완료');
     }
 
-    // 초기화 완료 이벤트
+    // TTS 준비 완료 이벤트
     window.addEventListener('DOMContentLoaded', function() {
-        console.log('=== DOM 로드 완료 ===');
         if (isAndroidTTSAvailable()) {
-            console.log('✅ Android TTS 최종 확인');
-            setTimeout(function() {
-                if (window.AndroidTTS && typeof window.AndroidTTS.isAvailable === 'function') {
-                    try {
-                        if (window.AndroidTTS.isAvailable()) {
-                            console.log('🎵 TTS 테스트 실행');
-                            window.AndroidTTS.test();
-                        }
-                    } catch (e) {
-                        console.error('테스트 실행 오류:', e);
-                    }
+            console.log('Android TTS 사용 가능');
+
+            // 테스트 음성
+            setTimeout(() => {
+                if (window.AndroidTTS && window.AndroidTTS.isAvailable()) {
+                    console.log('TTS 테스트 실행');
+                    window.AndroidTTS.test();
                 }
             }, 1000);
         }
@@ -1524,17 +1490,17 @@ const accuracy = calculatePercentage(item, itemType);
 }
 
         let audioPlayback = null;
-// 통합 음성 재생 함수 (모든 화면에서 사용) - Android WebView 최적화
-function playUnifiedSound(sound, element = null) {
+// 통합 음성 재생 함수 (완전히 재작성)
+function playUnifiedSound(sound, element) {
     console.log('🎵 통합 음성 재생 시작:', sound);
     
     // 기존 재생 중단
-    if (window.speechSynthesis.speaking) {
+    if (window.speechSynthesis && window.speechSynthesis.speaking) {
         console.log('⏹️ 기존 재생 중단');
         window.speechSynthesis.cancel();
     }
 
-    // 짧은 대기 후 재생 (Android 안정성)
+    // 짧은 대기 후 재생
     setTimeout(function() {
         try {
             var utterance = new SpeechSynthesisUtterance(sound);
@@ -1588,12 +1554,14 @@ function playUnifiedSound(sound, element = null) {
             
             utterance.volume = 1.0;
 
-            // element가 있으면 playing 클래스 추가
+            // element가 있으면 playing 클래스 처리
             if (element) {
                 element.classList.add('playing');
                 
                 var cleanup = function() {
-                    element.classList.remove('playing');
+                    if (element && element.classList) {
+                        element.classList.remove('playing');
+                    }
                 };
                 
                 utterance.onend = cleanup;
@@ -1609,6 +1577,11 @@ function playUnifiedSound(sound, element = null) {
             
         } catch (error) {
             console.error('❌ playUnifiedSound 오류:', error);
+            
+            // 오류 발생 시에도 element 클래스 정리
+            if (element && element.classList) {
+                element.classList.remove('playing');
+            }
         }
     }, 100);
 }
