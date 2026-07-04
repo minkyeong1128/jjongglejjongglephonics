@@ -2215,6 +2215,7 @@ if ('speechSynthesis' in window) {
                 }
                 var audio = audioCache[text];
                 audio.currentTime = 0;
+                 audio.playbackRate = self.currentSpeed; 
 
                 if (element) {
                     element.classList.add('playing');
