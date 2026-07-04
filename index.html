@@ -2853,14 +2853,15 @@ const wordImageMap = {
     var index = 0;
     var isStopped = false;
 
-    function playNext() {
-        if (index >= uniquePhonics.length || isStopped) {
-            console.log('재생 완료 또는 중단');
-            return;
-        }
+   function playNext() {
+    if (index >= uniquePhonics.length || isStopped) {
+        console.log('재생 완료 또는 중단');
+        return;
+    }
 
-        var sound = uniquePhonics[index];
-        console.log('재생 중:', index + 1, '/', uniquePhonics.length, '-', sound);
+    var sound = uniquePhonics[index];
+    console.log('재생 중:', index + 1, '/', uniquePhonics.length, '-', sound);
+    console.log('🔍 soundFileMap 매칭 여부:', sound, '→', soundFileMap[sound] || '매칭 안 됨!!');
 
         // 녹음 파일이 있으면 녹음 파일로 재생
         if (soundFileMap[sound]) {
