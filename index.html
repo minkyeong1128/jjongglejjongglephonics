@@ -2830,26 +2830,26 @@ const wordImageMap = {
                     restartGame();
                 }
         
-            function playAudio() {
+           function playAudio() {
     if (!gameState.currentQuestion) return;
 
     console.log('🎮 게임 오디오 재생 시작');
-    
+
     // 기존 재생 중단
     stopAudioPlayback();
 
     var phonics = wordToPhonics(gameState.currentQuestion.word);
     console.log('재생할 파닉스:', phonics);
-    
+
     var uniquePhonics = [];
     for (var i = 0; i < phonics.length; i++) {
-        if (i === 0 || phonics[i] !== phonics[i-1]) {
+        if (i === 0 || phonics[i] !== phonics[i - 1]) {
             uniquePhonics.push(phonics[i]);
         }
     }
-    
+
     console.log('중복 제거 후:', uniquePhonics);
-    
+
     var index = 0;
     var isStopped = false;
 
@@ -2861,59 +2861,50 @@ const wordImageMap = {
 
         var sound = uniquePhonics[index];
         console.log('재생 중:', index + 1, '/', uniquePhonics.length, '-', sound);
-        
-        var utterance = new SpeechSynthesisUtterance(sound);
-        utterance.lang = 'ko-KR';
 
-        // 발음별 설정 (playUnifiedSound와 동일)
-        if (sound === '그') {
-            utterance.rate = 0.4;
-            utterance.pitch = 0.8;
-        } else if (sound === '크') {
-            utterance.rate = 0.4;
-            utterance.pitch = 1.4;
-        } else if (sound === '드') {
-            utterance.rate = 0.4;
-            utterance.pitch = 0.8;
-        } else if (sound === '트') {
-            utterance.rate = 0.4;
-            utterance.pitch = 1.4;
-        } else if (sound === '즈') {
-            utterance.rate = 0.4;
-            utterance.pitch = 0.9;
-        } else if (sound === '츠') {
-            utterance.rate = 0.4;
-            utterance.pitch = 1.3;
-        } else if (sound === '브') {
-            utterance.rate = 0.4;
-            utterance.pitch = 0.8;
-        } else if (sound === '프') {
-            utterance.rate = 0.4;
-            utterance.pitch = 1.5;
-        } else if (sound === '윽') {
-            utterance.rate = 0.2;
-            utterance.pitch = 0.4;
-            utterance.volume = 0.9;
-        } else if (sound === '읃') {
-            utterance.rate = 0.35;
-            utterance.pitch = 1.2;
-            utterance.volume = 1.0;
-        } else if (sound === '으이') {
-            utterance.rate = 1.2;
-            utterance.pitch = 0.8;
-            utterance.volume = 1.0;
-        } else if (sound === '요') {
-            utterance.rate = 0.6;
-            utterance.pitch = 1.4;
-            utterance.volume = 1.0;
-        } else {
-            utterance.rate = 0.5;
-            utterance.pitch = 1.2;
+        // 녹음 파일이 있으면 녹음 파일로 재생
+        if (soundFileMap[sound]) {
+            if (!audioCache[sound]) {
+                audioCache[sound] = new Audio(soundFileMap[sound]);
+            }
+            var audio = audioCache[sound];
+            audio.currentTime = 0;
+
+            audio.onended = function () {
+                console.log('✅ 재생 완료:', sound);
+                index++;
+                if (index < uniquePhonics.length && !isStopped) {
+                    setTimeout(playNext, 400);
+                }
+            };
+
+            audio.onerror = function (e) {
+                console.error('❌ 재생 오류:', sound, e);
+                index++;
+                if (index < uniquePhonics.length && !isStopped) {
+                    setTimeout(playNext, 400);
+                }
+            };
+
+            audio.play().catch(function (err) {
+                console.error('❌ 재생 실패:', sound, err);
+                index++;
+                if (index < uniquePhonics.length && !isStopped) {
+                    setTimeout(playNext, 400);
+                }
+            });
+
+            return;
         }
 
+        // 녹음 파일이 없으면 기존 TTS 방식 사용
+        var utterance = new SpeechSynthesisUtterance(sound);
+        utterance.lang = 'ko-KR';
+        utterance.rate = 0.5;
+        utterance.pitch = 1.2;
         utterance.volume = 1.0;
-        
-        utterance.onend = function() {
+
+        utterance.onend = function () {
             console.log('✅ 재생 완료:', sound);
             index++;
             if (index < uniquePhonics.length && !isStopped) {
@@ -2921,7 +2912,7 @@ const wordImageMap = {
             }
         };
 
-        utterance.onerror = function(e) {
+        utterance.onerror = function (e) {
             console.error('❌ 재생 오류:', sound, e);
             index++;
             if (index < uniquePhonics.length && !isStopped) {
@@ -2933,10 +2924,17 @@ const wordImageMap = {
     }
 
     audioPlayback = {
-        stop: function() {
+        stop: function () {
             console.log('🛑 오디오 재생 중단');
             isStopped = true;
             window.speechSynthesis.cancel();
+            // 재생 중인 오디오 파일도 중단
+            Object.values(audioCache).forEach(function (a) {
+                if (!a.paused) {
+                    a.pause();
+                    a.currentTime = 0;
+                }
+            });
         }
     };
 
