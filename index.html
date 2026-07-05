@@ -900,7 +900,7 @@
                     </div>
                     <div class="phonics-grid" id="phonicsGrid"></div>
                     <div class="controls"><button class="control-button" id="playAllButton">▶️ 전체 재생</button>
-                            <div class="speed-control"><span>🐌</span> <input class="speed-slider" id="speedSlider" max="2.0" min="0.5" step="0.1" type="range" value="0.6"> <span>🐰</span> <span id="speedDisplay">0.6x</span></div>
+                            <div class="speed-control"><span id="slowBtn" style="cursor:pointer;user-select:none;">🐌</span> <input class="speed-slider" id="speedSlider" max="2.0" min="0.5" step="0.1" type="range" value="1.0"> <span id="fastBtn" style="cursor:pointer;user-select:none;">🐰</span> <span id="speedDisplay">1.0x</span></div>
                     </div>
                 </div><button class="reset-button" id="resetButton">다시 시작</button>
             </div>
@@ -1756,7 +1756,7 @@ if (audioPlayback && audioPlayback.stop) {
                     constructor() {
                         this.recognition = null;
                         this.speechSynthesis = window.speechSynthesis;
-                        this.currentSpeed = 0.6;
+                        this.currentSpeed = 1.0;
                         this.isPlaying = false;
                         this.currentData = null;
                         this.syllableGroups = [];
@@ -1858,13 +1858,16 @@ if ('speechSynthesis' in window) {
                         this.resetButton = document.getElementById('resetButton');
                     }
         
-                    initializeEventListeners() {
-                        this.micButton.addEventListener('click', () => this.toggleRecording());
-                        this.playAllButton.addEventListener('click', () => this.playAll());
-                        this.speedSlider.addEventListener('input', (e) => this.updateSpeed(e.target.value));
-                        this.resetButton.addEventListener('click', () => this.resetApp());
-                    }
-        
+                   initializeEventListeners() {
+    this.micButton.addEventListener('click', () => this.toggleRecording());
+    this.playAllButton.addEventListener('click', () => this.playAll());
+    this.speedSlider.addEventListener('input', (e) => this.updateSpeed(e.target.value));
+    this.resetButton.addEventListener('click', () => this.resetApp());
+
+    // 🐌 / 🐰 터치로 속도 조절
+    document.getElementById('slowBtn').addEventListener('click', () => this.adjustSpeed(-0.1));
+    document.getElementById('fastBtn').addEventListener('click', () => this.adjustSpeed(0.1));
+}
                     initializeSpeechRecognition() {
                         const SpeechRecognition = window.SpeechRecognition || 
                                                 window.webkitSpeechRecognition || 
@@ -2294,10 +2297,22 @@ if ('speechSynthesis' in window) {
                         return new Promise(resolve => setTimeout(resolve, ms));
                     }
         
-                    updateSpeed(value) {
-                        this.currentSpeed = parseFloat(value);
-                        this.speedDisplay.textContent = `${value}x`;
-                    }
+                   updateSpeed(value) {
+    this.currentSpeed = parseFloat(value);
+    this.speedDisplay.textContent = `${this.currentSpeed.toFixed(1)}x`;
+}
+
+adjustSpeed(delta) {
+    const min = parseFloat(this.speedSlider.min);   // 0.5
+    const max = parseFloat(this.speedSlider.max);   // 2.0
+    let newSpeed = parseFloat((this.currentSpeed + delta).toFixed(1));
+
+    // 범위를 벗어나지 않도록 제한
+    newSpeed = Math.max(min, Math.min(max, newSpeed));
+
+    this.speedSlider.value = newSpeed;   // 슬라이더 위치도 같이 이동
+    this.updateSpeed(newSpeed);          // 실제 속도값 + 화면 표시 업데이트
+}
         
                     resetApp() {
                         this.isPlaying = false;
